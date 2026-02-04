@@ -1,0 +1,267 @@
+import Phaser from 'phaser'
+import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS, DEPTH, TEXT_STYLES } from '../config'
+import {
+  getDialogTree,
+  getStartNode,
+  getDialogNode,
+  isEndNode,
+  type DialogNode,
+  type DialogTree,
+  type DialogChoice,
+} from '../systems/DialogSystem'
+import { getGameState, setGameState, updatePlayer } from '../systems/GameStateManager'
+import { fullHeal } from '../systems/CharacterSystem'
+
+interface DialogSceneData {
+  readonly dialogTreeId: string
+  readonly npcName: string
+  readonly npcType: string
+}
+
+const TYPEWRITER_DELAY = 30
+
+export class DialogScene extends Phaser.Scene {
+  private dialogTree!: DialogTree
+  private currentNode!: DialogNode
+  private npcName!: string
+  private npcType!: string
+  private dialogBox!: Phaser.GameObjects.Container
+  private speakerText!: Phaser.GameObjects.Text
+  private messageText!: Phaser.GameObjects.Text
+  private choiceButtons: Phaser.GameObjects.Container[] = []
+  private isTyping: boolean = false
+  private fullText: string = ''
+  private typewriterTimer: Phaser.Time.TimerEvent | null = null
+
+  constructor() {
+    super({ key: SCENE_KEYS.DIALOG })
+  }
+
+  create(data: DialogSceneData): void {
+    this.npcName = data.npcName
+    this.npcType = data.npcType
+
+    const tree = getDialogTree(data.dialogTreeId)
+    if (!tree) {
+      this.closeDialog()
+      return
+    }
+
+    this.dialogTree = tree
+    const startNode = getStartNode(tree)
+    if (!startNode) {
+      this.closeDialog()
+      return
+    }
+
+    this.currentNode = startNode
+
+    // Semi-transparent background
+    const bg = this.add.graphics()
+    bg.fillStyle(0x000000, 0.5)
+    bg.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
+    bg.setDepth(DEPTH.OVERLAY)
+
+    this.createDialogBox()
+    this.showNode(this.currentNode)
+
+    // Click/Space to advance
+    this.input.on('pointerdown', () => this.handleAdvance())
+    this.input.keyboard?.on('keydown-SPACE', () => this.handleAdvance())
+    this.input.keyboard?.on('keydown-E', () => this.handleAdvance())
+  }
+
+  private createDialogBox(): void {
+    const boxWidth = 700
+    const boxHeight = 180
+    const boxX = (GAME_WIDTH - boxWidth) / 2
+    const boxY = GAME_HEIGHT - boxHeight - 40
+
+    this.dialogBox = this.add.container(boxX, boxY)
+    this.dialogBox.setDepth(DEPTH.OVERLAY + 1)
+
+    // Background
+    const bg = this.add.graphics()
+    bg.fillStyle(COLORS.PANEL_BG, 0.95)
+    bg.fillRoundedRect(0, 0, boxWidth, boxHeight, 12)
+    bg.lineStyle(2, COLORS.PRIMARY)
+    bg.strokeRoundedRect(0, 0, boxWidth, boxHeight, 12)
+    this.dialogBox.add(bg)
+
+    // Speaker name
+    this.speakerText = this.add.text(20, 12, '', {
+      ...TEXT_STYLES.BODY,
+      fontSize: '16px',
+      color: '#ffd54f',
+      fontStyle: 'bold',
+    })
+    this.dialogBox.add(this.speakerText)
+
+    // Message text
+    this.messageText = this.add.text(20, 38, '', {
+      ...TEXT_STYLES.BODY,
+      fontSize: '16px',
+      wordWrap: { width: boxWidth - 40 },
+      lineSpacing: 4,
+    })
+    this.dialogBox.add(this.messageText)
+  }
+
+  private showNode(node: DialogNode): void {
+    this.currentNode = node
+    this.speakerText.setText(node.speaker)
+    this.clearChoices()
+
+    // Typewriter effect
+    this.fullText = node.text
+    this.messageText.setText('')
+    this.isTyping = true
+
+    let charIndex = 0
+    this.typewriterTimer = this.time.addEvent({
+      delay: TYPEWRITER_DELAY,
+      callback: () => {
+        charIndex++
+        this.messageText.setText(this.fullText.substring(0, charIndex))
+        if (charIndex >= this.fullText.length) {
+          this.isTyping = false
+          this.typewriterTimer?.remove()
+          this.typewriterTimer = null
+          this.showChoicesOrContinue()
+        }
+      },
+      repeat: this.fullText.length - 1,
+    })
+  }
+
+  private handleAdvance(): void {
+    if (this.isTyping) {
+      // Skip typewriter - show full text immediately
+      this.typewriterTimer?.remove()
+      this.typewriterTimer = null
+      this.isTyping = false
+      this.messageText.setText(this.fullText)
+      this.showChoicesOrContinue()
+      return
+    }
+
+    // If no choices and is end node, close dialog
+    if (isEndNode(this.currentNode) && this.choiceButtons.length === 0) {
+      this.closeDialog()
+    }
+  }
+
+  private showChoicesOrContinue(): void {
+    if (this.currentNode.choices.length === 0 || isEndNode(this.currentNode)) {
+      // Show "click to continue" hint
+      const hint = this.add.text(680, 160, 'Click to continue...', {
+        ...TEXT_STYLES.SMALL,
+        fontSize: '12px',
+        color: '#b0bec5',
+      })
+      hint.setOrigin(1, 1)
+      this.dialogBox.add(hint)
+      return
+    }
+
+    this.showChoices(this.currentNode.choices)
+  }
+
+  private showChoices(choices: ReadonlyArray<DialogChoice>): void {
+    this.clearChoices()
+
+    choices.forEach((choice, index) => {
+      const btnWidth = 320
+      const btnHeight = 36
+      const col = index % 2
+      const row = Math.floor(index / 2)
+      const btnX = 20 + col * (btnWidth + 20)
+      const btnY = 100 + row * (btnHeight + 8)
+
+      const container = this.add.container(btnX, btnY)
+
+      const bg = this.add.graphics()
+      bg.fillStyle(COLORS.SECONDARY, 0.4)
+      bg.fillRoundedRect(0, 0, btnWidth, btnHeight, 8)
+      container.add(bg)
+
+      const text = this.add.text(btnWidth / 2, btnHeight / 2, choice.text, {
+        ...TEXT_STYLES.BODY,
+        fontSize: '14px',
+      })
+      text.setOrigin(0.5)
+      container.add(text)
+
+      const hitArea = this.add.rectangle(btnWidth / 2, btnHeight / 2, btnWidth, btnHeight)
+      hitArea.setInteractive({ useHandCursor: true })
+      hitArea.on('pointerover', () => {
+        bg.clear()
+        bg.fillStyle(COLORS.SECONDARY, 0.7)
+        bg.fillRoundedRect(0, 0, btnWidth, btnHeight, 8)
+      })
+      hitArea.on('pointerout', () => {
+        bg.clear()
+        bg.fillStyle(COLORS.SECONDARY, 0.4)
+        bg.fillRoundedRect(0, 0, btnWidth, btnHeight, 8)
+      })
+      hitArea.on('pointerdown', () => this.handleChoice(choice))
+      container.add(hitArea)
+
+      this.dialogBox.add(container)
+      this.choiceButtons.push(container)
+    })
+  }
+
+  private handleChoice(choice: DialogChoice): void {
+    // Execute action if present
+    if (choice.action) {
+      this.executeAction(choice.action, choice.actionData)
+    }
+
+    // Navigate to next node or close
+    if (choice.nextNodeId) {
+      const nextNode = getDialogNode(this.dialogTree, choice.nextNodeId)
+      if (nextNode) {
+        this.showNode(nextNode)
+        return
+      }
+    }
+
+    this.closeDialog()
+  }
+
+  private executeAction(action: string, data?: string): void {
+    switch (action) {
+      case 'open_shop':
+        this.closeDialog()
+        this.scene.launch(SCENE_KEYS.SHOP, { shopId: 'village-shop', mode: data ?? 'buy' })
+        return
+      case 'heal_party': {
+        const state = getGameState(this)
+        const healed = fullHeal(state.player)
+        setGameState(this, updatePlayer(state, healed))
+        break
+      }
+    }
+  }
+
+  private clearChoices(): void {
+    for (const btn of this.choiceButtons) {
+      btn.destroy()
+    }
+    this.choiceButtons = []
+  }
+
+  private closeDialog(): void {
+    this.clearChoices()
+    this.typewriterTimer?.remove()
+
+    // Resume the world scene
+    const worldScene = this.scene.get(SCENE_KEYS.WORLD)
+    if (worldScene) {
+      this.scene.resume(SCENE_KEYS.WORLD)
+    }
+
+    this.scene.stop()
+  }
+}

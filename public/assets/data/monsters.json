@@ -1,0 +1,708 @@
+[
+  {
+    "speciesId": "flamepup",
+    "name": "Flamepup",
+    "description": "A playful puppy with a flickering flame on its tail. It loves to chase sparks and warm up its friends on chilly nights.",
+    "element": "fire",
+    "rarity": "common",
+    "baseStats": {
+      "maxHp": 88,
+      "currentHp": 88,
+      "maxMp": 25,
+      "currentMp": 25,
+      "attack": 16,
+      "defense": 12,
+      "magicAttack": 14,
+      "magicDefense": 13,
+      "speed": 15,
+      "luck": 12
+    },
+    "statGrowth": {
+      "hp": 7,
+      "mp": 3,
+      "attack": 2,
+      "defense": 1,
+      "magicAttack": 2,
+      "magicDefense": 1,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "ember", "learnAtLevel": 3 },
+      { "abilityId": "fireball", "learnAtLevel": 8 },
+      { "abilityId": "inferno", "learnAtLevel": 18 }
+    ],
+    "captureBaseDifficulty": 0.25,
+    "spriteKey": "flamepup",
+    "evolutionChain": null,
+    "breedingGroup": "beast",
+    "breedingTraits": ["fireproof", "fierce"]
+  },
+  {
+    "speciesId": "blazefox",
+    "name": "Blazefox",
+    "description": "A cunning fox wreathed in shimmering flames. Its nine fiery tails leave trails of embers wherever it dashes.",
+    "element": "fire",
+    "rarity": "uncommon",
+    "baseStats": {
+      "maxHp": 105,
+      "currentHp": 105,
+      "maxMp": 35,
+      "currentMp": 35,
+      "attack": 18,
+      "defense": 14,
+      "magicAttack": 20,
+      "magicDefense": 16,
+      "speed": 22,
+      "luck": 15
+    },
+    "statGrowth": {
+      "hp": 8,
+      "mp": 4,
+      "attack": 2,
+      "defense": 2,
+      "magicAttack": 3,
+      "magicDefense": 2,
+      "speed": 3
+    },
+    "abilities": [
+      { "abilityId": "scratch", "learnAtLevel": 1 },
+      { "abilityId": "ember", "learnAtLevel": 2 },
+      { "abilityId": "fireball", "learnAtLevel": 7 },
+      { "abilityId": "flame-burst", "learnAtLevel": 14 }
+    ],
+    "captureBaseDifficulty": 0.45,
+    "spriteKey": "blazefox",
+    "evolutionChain": null,
+    "breedingGroup": "beast",
+    "breedingTraits": ["nimble", "fireproof"]
+  },
+  {
+    "speciesId": "volcanix",
+    "name": "Volcanix",
+    "description": "A fearsome young dragon born in volcanic craters. Molten rock flows through its veins, and its roar can melt stone.",
+    "element": "fire",
+    "rarity": "rare",
+    "baseStats": {
+      "maxHp": 150,
+      "currentHp": 150,
+      "maxMp": 50,
+      "currentMp": 50,
+      "attack": 24,
+      "defense": 22,
+      "magicAttack": 26,
+      "magicDefense": 20,
+      "speed": 18,
+      "luck": 14
+    },
+    "statGrowth": {
+      "hp": 11,
+      "mp": 5,
+      "attack": 3,
+      "defense": 3,
+      "magicAttack": 3,
+      "magicDefense": 2,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "bite", "learnAtLevel": 1 },
+      { "abilityId": "ember", "learnAtLevel": 3 },
+      { "abilityId": "fireball", "learnAtLevel": 6 },
+      { "abilityId": "inferno", "learnAtLevel": 12 },
+      { "abilityId": "flame-burst", "learnAtLevel": 18 }
+    ],
+    "captureBaseDifficulty": 0.65,
+    "spriteKey": "volcanix",
+    "evolutionChain": null,
+    "breedingGroup": "dragon",
+    "breedingTraits": ["fireproof", "tough"]
+  },
+  {
+    "speciesId": "bubblefin",
+    "name": "Bubblefin",
+    "description": "A cheerful fish that blows colorful bubbles as it swims. Its fins shimmer like rainbows in sunlight.",
+    "element": "water",
+    "rarity": "common",
+    "baseStats": {
+      "maxHp": 92,
+      "currentHp": 92,
+      "maxMp": 28,
+      "currentMp": 28,
+      "attack": 12,
+      "defense": 14,
+      "magicAttack": 16,
+      "magicDefense": 15,
+      "speed": 14,
+      "luck": 13
+    },
+    "statGrowth": {
+      "hp": 7,
+      "mp": 3,
+      "attack": 1,
+      "defense": 2,
+      "magicAttack": 2,
+      "magicDefense": 2,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "water-splash", "learnAtLevel": 3 },
+      { "abilityId": "ice-shard", "learnAtLevel": 9 },
+      { "abilityId": "tidal-wave", "learnAtLevel": 16 }
+    ],
+    "captureBaseDifficulty": 0.22,
+    "spriteKey": "bubblefin",
+    "evolutionChain": null,
+    "breedingGroup": "aquatic",
+    "breedingTraits": ["waterproof", "gentle"]
+  },
+  {
+    "speciesId": "tidecrab",
+    "name": "Tidecrab",
+    "description": "A sturdy crab with pincers that can shape water into waves. It patrols shorelines and loves collecting shiny shells.",
+    "element": "water",
+    "rarity": "uncommon",
+    "baseStats": {
+      "maxHp": 120,
+      "currentHp": 120,
+      "maxMp": 32,
+      "currentMp": 32,
+      "attack": 20,
+      "defense": 22,
+      "magicAttack": 16,
+      "magicDefense": 18,
+      "speed": 14,
+      "luck": 13
+    },
+    "statGrowth": {
+      "hp": 9,
+      "mp": 3,
+      "attack": 2,
+      "defense": 3,
+      "magicAttack": 2,
+      "magicDefense": 2,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "scratch", "learnAtLevel": 1 },
+      { "abilityId": "water-splash", "learnAtLevel": 2 },
+      { "abilityId": "slow-fog", "learnAtLevel": 7 },
+      { "abilityId": "blizzard", "learnAtLevel": 15 }
+    ],
+    "captureBaseDifficulty": 0.42,
+    "spriteKey": "tidecrab",
+    "evolutionChain": null,
+    "breedingGroup": "aquatic",
+    "breedingTraits": ["thick-skin", "waterproof"]
+  },
+  {
+    "speciesId": "serpentide",
+    "name": "Serpentide",
+    "description": "A majestic sea dragon that commands the ocean currents. Ancient sailors considered spotting one a sign of good fortune.",
+    "element": "water",
+    "rarity": "rare",
+    "baseStats": {
+      "maxHp": 145,
+      "currentHp": 145,
+      "maxMp": 52,
+      "currentMp": 52,
+      "attack": 20,
+      "defense": 20,
+      "magicAttack": 26,
+      "magicDefense": 24,
+      "speed": 22,
+      "luck": 16
+    },
+    "statGrowth": {
+      "hp": 10,
+      "mp": 5,
+      "attack": 2,
+      "defense": 2,
+      "magicAttack": 3,
+      "magicDefense": 3,
+      "speed": 3
+    },
+    "abilities": [
+      { "abilityId": "bite", "learnAtLevel": 1 },
+      { "abilityId": "water-splash", "learnAtLevel": 3 },
+      { "abilityId": "ice-shard", "learnAtLevel": 6 },
+      { "abilityId": "blizzard", "learnAtLevel": 12 },
+      { "abilityId": "tidal-wave", "learnAtLevel": 18 }
+    ],
+    "captureBaseDifficulty": 0.68,
+    "spriteKey": "serpentide",
+    "evolutionChain": null,
+    "breedingGroup": "dragon",
+    "breedingTraits": ["waterproof", "keen-eye"]
+  },
+  {
+    "speciesId": "pebblit",
+    "name": "Pebblit",
+    "description": "A tiny rock creature that rolls around like a living boulder. It giggles when it bumps into things.",
+    "element": "earth",
+    "rarity": "common",
+    "baseStats": {
+      "maxHp": 95,
+      "currentHp": 95,
+      "maxMp": 22,
+      "currentMp": 22,
+      "attack": 14,
+      "defense": 18,
+      "magicAttack": 12,
+      "magicDefense": 14,
+      "speed": 12,
+      "luck": 11
+    },
+    "statGrowth": {
+      "hp": 8,
+      "mp": 2,
+      "attack": 2,
+      "defense": 2,
+      "magicAttack": 1,
+      "magicDefense": 2,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "rock-throw", "learnAtLevel": 3 },
+      { "abilityId": "vine-whip", "learnAtLevel": 8 },
+      { "abilityId": "earthquake", "learnAtLevel": 17 }
+    ],
+    "captureBaseDifficulty": 0.2,
+    "spriteKey": "pebblit",
+    "evolutionChain": null,
+    "breedingGroup": "elemental",
+    "breedingTraits": ["thick-skin", "tough"]
+  },
+  {
+    "speciesId": "thornback",
+    "name": "Thornback",
+    "description": "A bristly beast covered in thorny vines. Despite its prickly appearance, it is fiercely loyal to its companions.",
+    "element": "earth",
+    "rarity": "uncommon",
+    "baseStats": {
+      "maxHp": 115,
+      "currentHp": 115,
+      "maxMp": 30,
+      "currentMp": 30,
+      "attack": 20,
+      "defense": 20,
+      "magicAttack": 14,
+      "magicDefense": 16,
+      "speed": 16,
+      "luck": 14
+    },
+    "statGrowth": {
+      "hp": 9,
+      "mp": 3,
+      "attack": 3,
+      "defense": 2,
+      "magicAttack": 1,
+      "magicDefense": 2,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "scratch", "learnAtLevel": 1 },
+      { "abilityId": "vine-whip", "learnAtLevel": 2 },
+      { "abilityId": "poison-sting", "learnAtLevel": 6 },
+      { "abilityId": "boulder-crush", "learnAtLevel": 14 }
+    ],
+    "captureBaseDifficulty": 0.44,
+    "spriteKey": "thornback",
+    "evolutionChain": null,
+    "breedingGroup": "beast",
+    "breedingTraits": ["fierce", "thick-skin"]
+  },
+  {
+    "speciesId": "crystalgolem",
+    "name": "Crystalgolem",
+    "description": "An ancient guardian made of living crystal. Sunlight refracts through its body, creating dazzling prismatic displays.",
+    "element": "earth",
+    "rarity": "rare",
+    "baseStats": {
+      "maxHp": 160,
+      "currentHp": 160,
+      "maxMp": 42,
+      "currentMp": 42,
+      "attack": 22,
+      "defense": 26,
+      "magicAttack": 20,
+      "magicDefense": 24,
+      "speed": 14,
+      "luck": 12
+    },
+    "statGrowth": {
+      "hp": 12,
+      "mp": 4,
+      "attack": 2,
+      "defense": 3,
+      "magicAttack": 2,
+      "magicDefense": 3,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "slam", "learnAtLevel": 1 },
+      { "abilityId": "rock-throw", "learnAtLevel": 3 },
+      { "abilityId": "shield-wall", "learnAtLevel": 6 },
+      { "abilityId": "earthquake", "learnAtLevel": 12 },
+      { "abilityId": "boulder-crush", "learnAtLevel": 18 }
+    ],
+    "captureBaseDifficulty": 0.7,
+    "spriteKey": "crystalgolem",
+    "evolutionChain": null,
+    "breedingGroup": "elemental",
+    "breedingTraits": ["tough", "thick-skin"]
+  },
+  {
+    "speciesId": "breezling",
+    "name": "Breezling",
+    "description": "A tiny bird made of swirling wind. It zips through the sky leaving little spirals of leaves in its wake.",
+    "element": "wind",
+    "rarity": "common",
+    "baseStats": {
+      "maxHp": 80,
+      "currentHp": 80,
+      "maxMp": 26,
+      "currentMp": 26,
+      "attack": 13,
+      "defense": 12,
+      "magicAttack": 15,
+      "magicDefense": 13,
+      "speed": 18,
+      "luck": 14
+    },
+    "statGrowth": {
+      "hp": 6,
+      "mp": 3,
+      "attack": 1,
+      "defense": 1,
+      "magicAttack": 2,
+      "magicDefense": 1,
+      "speed": 3
+    },
+    "abilities": [
+      { "abilityId": "scratch", "learnAtLevel": 1 },
+      { "abilityId": "gust", "learnAtLevel": 3 },
+      { "abilityId": "quick-step", "learnAtLevel": 8 },
+      { "abilityId": "tornado", "learnAtLevel": 16 }
+    ],
+    "captureBaseDifficulty": 0.28,
+    "spriteKey": "breezling",
+    "evolutionChain": null,
+    "breedingGroup": "avian",
+    "breedingTraits": ["nimble", "quick-learner"]
+  },
+  {
+    "speciesId": "stormowl",
+    "name": "Stormowl",
+    "description": "A wise owl that soars through thunderstorms for fun. Crackling electricity dances across its feathers during flight.",
+    "element": "wind",
+    "rarity": "uncommon",
+    "baseStats": {
+      "maxHp": 108,
+      "currentHp": 108,
+      "maxMp": 38,
+      "currentMp": 38,
+      "attack": 16,
+      "defense": 15,
+      "magicAttack": 22,
+      "magicDefense": 20,
+      "speed": 18,
+      "luck": 16
+    },
+    "statGrowth": {
+      "hp": 8,
+      "mp": 4,
+      "attack": 2,
+      "defense": 1,
+      "magicAttack": 3,
+      "magicDefense": 2,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "scratch", "learnAtLevel": 1 },
+      { "abilityId": "gust", "learnAtLevel": 2 },
+      { "abilityId": "wind-blade", "learnAtLevel": 7 },
+      { "abilityId": "hurricane", "learnAtLevel": 15 }
+    ],
+    "captureBaseDifficulty": 0.48,
+    "spriteKey": "stormowl",
+    "evolutionChain": null,
+    "breedingGroup": "avian",
+    "breedingTraits": ["keen-eye", "nimble"]
+  },
+  {
+    "speciesId": "tempestdrake",
+    "name": "Tempestdrake",
+    "description": "A sky dragon that rides the fiercest storms. Its wingbeats can summon gales, and its song calms the wildest winds.",
+    "element": "wind",
+    "rarity": "rare",
+    "baseStats": {
+      "maxHp": 140,
+      "currentHp": 140,
+      "maxMp": 55,
+      "currentMp": 55,
+      "attack": 22,
+      "defense": 18,
+      "magicAttack": 26,
+      "magicDefense": 22,
+      "speed": 24,
+      "luck": 15
+    },
+    "statGrowth": {
+      "hp": 10,
+      "mp": 5,
+      "attack": 2,
+      "defense": 2,
+      "magicAttack": 3,
+      "magicDefense": 2,
+      "speed": 3
+    },
+    "abilities": [
+      { "abilityId": "bite", "learnAtLevel": 1 },
+      { "abilityId": "gust", "learnAtLevel": 3 },
+      { "abilityId": "wind-blade", "learnAtLevel": 6 },
+      { "abilityId": "lullaby", "learnAtLevel": 10 },
+      { "abilityId": "hurricane", "learnAtLevel": 18 }
+    ],
+    "captureBaseDifficulty": 0.66,
+    "spriteKey": "tempestdrake",
+    "evolutionChain": null,
+    "breedingGroup": "dragon",
+    "breedingTraits": ["nimble", "fierce"]
+  },
+  {
+    "speciesId": "glowmoth",
+    "name": "Glowmoth",
+    "description": "A gentle moth with wings that glow like stained glass. It sprinkles healing dust wherever it flutters.",
+    "element": "light",
+    "rarity": "common",
+    "baseStats": {
+      "maxHp": 82,
+      "currentHp": 82,
+      "maxMp": 30,
+      "currentMp": 30,
+      "attack": 12,
+      "defense": 13,
+      "magicAttack": 16,
+      "magicDefense": 16,
+      "speed": 14,
+      "luck": 15
+    },
+    "statGrowth": {
+      "hp": 6,
+      "mp": 3,
+      "attack": 1,
+      "defense": 1,
+      "magicAttack": 2,
+      "magicDefense": 2,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "light-beam", "learnAtLevel": 3 },
+      { "abilityId": "heal", "learnAtLevel": 6 },
+      { "abilityId": "radiance", "learnAtLevel": 16 }
+    ],
+    "captureBaseDifficulty": 0.24,
+    "spriteKey": "glowmoth",
+    "evolutionChain": null,
+    "breedingGroup": "avian",
+    "breedingTraits": ["gentle", "lucky"]
+  },
+  {
+    "speciesId": "sunstag",
+    "name": "Sunstag",
+    "description": "A noble stag with antlers that radiate warm golden light. It is said to appear at dawn to bless the forest with vitality.",
+    "element": "light",
+    "rarity": "uncommon",
+    "baseStats": {
+      "maxHp": 125,
+      "currentHp": 125,
+      "maxMp": 40,
+      "currentMp": 40,
+      "attack": 16,
+      "defense": 18,
+      "magicAttack": 20,
+      "magicDefense": 22,
+      "speed": 16,
+      "luck": 18
+    },
+    "statGrowth": {
+      "hp": 9,
+      "mp": 4,
+      "attack": 2,
+      "defense": 2,
+      "magicAttack": 2,
+      "magicDefense": 3,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "light-beam", "learnAtLevel": 2 },
+      { "abilityId": "regen", "learnAtLevel": 7 },
+      { "abilityId": "group-heal", "learnAtLevel": 14 }
+    ],
+    "captureBaseDifficulty": 0.5,
+    "spriteKey": "sunstag",
+    "evolutionChain": null,
+    "breedingGroup": "beast",
+    "breedingTraits": ["gentle", "keen-eye"]
+  },
+  {
+    "speciesId": "shadowpup",
+    "name": "Shadowpup",
+    "description": "A mischievous puppy that melts into shadows when startled. Its glowing purple eyes are the only clue it is hiding nearby.",
+    "element": "dark",
+    "rarity": "common",
+    "baseStats": {
+      "maxHp": 85,
+      "currentHp": 85,
+      "maxMp": 24,
+      "currentMp": 24,
+      "attack": 16,
+      "defense": 13,
+      "magicAttack": 14,
+      "magicDefense": 12,
+      "speed": 16,
+      "luck": 13
+    },
+    "statGrowth": {
+      "hp": 7,
+      "mp": 2,
+      "attack": 2,
+      "defense": 1,
+      "magicAttack": 2,
+      "magicDefense": 1,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "bite", "learnAtLevel": 1 },
+      { "abilityId": "shadow-strike", "learnAtLevel": 3 },
+      { "abilityId": "war-cry", "learnAtLevel": 8 },
+      { "abilityId": "dark-pulse", "learnAtLevel": 16 }
+    ],
+    "captureBaseDifficulty": 0.26,
+    "spriteKey": "shadowpup",
+    "evolutionChain": null,
+    "breedingGroup": "beast",
+    "breedingTraits": ["fierce", "nimble"]
+  },
+  {
+    "speciesId": "nightstalker",
+    "name": "Nightstalker",
+    "description": "A sleek panther-like creature that prowls under moonlight. Its dark fur absorbs light, making it nearly invisible at night.",
+    "element": "dark",
+    "rarity": "uncommon",
+    "baseStats": {
+      "maxHp": 110,
+      "currentHp": 110,
+      "maxMp": 34,
+      "currentMp": 34,
+      "attack": 22,
+      "defense": 16,
+      "magicAttack": 18,
+      "magicDefense": 15,
+      "speed": 20,
+      "luck": 16
+    },
+    "statGrowth": {
+      "hp": 8,
+      "mp": 3,
+      "attack": 3,
+      "defense": 2,
+      "magicAttack": 2,
+      "magicDefense": 1,
+      "speed": 3
+    },
+    "abilities": [
+      { "abilityId": "scratch", "learnAtLevel": 1 },
+      { "abilityId": "shadow-strike", "learnAtLevel": 2 },
+      { "abilityId": "lullaby", "learnAtLevel": 6 },
+      { "abilityId": "dark-pulse", "learnAtLevel": 14 }
+    ],
+    "captureBaseDifficulty": 0.46,
+    "spriteKey": "nightstalker",
+    "evolutionChain": null,
+    "breedingGroup": "beast",
+    "breedingTraits": ["nimble", "keen-eye"]
+  },
+  {
+    "speciesId": "mossbun",
+    "name": "Mossbun",
+    "description": "An adorable bunny with soft moss growing on its ears and back. It nibbles on clover and heals scrapes with a gentle nuzzle.",
+    "element": "neutral",
+    "rarity": "common",
+    "baseStats": {
+      "maxHp": 90,
+      "currentHp": 90,
+      "maxMp": 28,
+      "currentMp": 28,
+      "attack": 13,
+      "defense": 14,
+      "magicAttack": 14,
+      "magicDefense": 15,
+      "speed": 15,
+      "luck": 16
+    },
+    "statGrowth": {
+      "hp": 7,
+      "mp": 3,
+      "attack": 1,
+      "defense": 2,
+      "magicAttack": 2,
+      "magicDefense": 2,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "scratch", "learnAtLevel": 3 },
+      { "abilityId": "heal", "learnAtLevel": 6 },
+      { "abilityId": "slam", "learnAtLevel": 10 }
+    ],
+    "captureBaseDifficulty": 0.2,
+    "spriteKey": "mossbun",
+    "evolutionChain": null,
+    "breedingGroup": "beast",
+    "breedingTraits": ["gentle", "lucky"]
+  },
+  {
+    "speciesId": "ironshell",
+    "name": "Ironshell",
+    "description": "A sturdy creature encased in a shell of living iron. It curls into a ball to deflect attacks and can boost its allies' defenses.",
+    "element": "neutral",
+    "rarity": "uncommon",
+    "baseStats": {
+      "maxHp": 130,
+      "currentHp": 130,
+      "maxMp": 30,
+      "currentMp": 30,
+      "attack": 18,
+      "defense": 22,
+      "magicAttack": 14,
+      "magicDefense": 20,
+      "speed": 12,
+      "luck": 12
+    },
+    "statGrowth": {
+      "hp": 10,
+      "mp": 3,
+      "attack": 2,
+      "defense": 3,
+      "magicAttack": 1,
+      "magicDefense": 3,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "shield-wall", "learnAtLevel": 3 },
+      { "abilityId": "defense-boost", "learnAtLevel": 6 },
+      { "abilityId": "power-strike", "learnAtLevel": 12 }
+    ],
+    "captureBaseDifficulty": 0.4,
+    "spriteKey": "ironshell",
+    "evolutionChain": null,
+    "breedingGroup": "elemental",
+    "breedingTraits": ["tough", "thick-skin"]
+  }
+]

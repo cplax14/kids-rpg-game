@@ -1,0 +1,93 @@
+import type {
+  BattleRewards,
+  MonsterInstance,
+  BreedingResult,
+  PlayerCharacter,
+  GameSettings,
+} from '../models/types'
+
+export const GAME_EVENTS = {
+  // Battle
+  BATTLE_START: 'battle:start',
+  BATTLE_END: 'battle:end',
+  BATTLE_TURN_START: 'battle:turn_start',
+  BATTLE_TURN_END: 'battle:turn_end',
+  BATTLE_VICTORY: 'battle:victory',
+  BATTLE_DEFEAT: 'battle:defeat',
+  BATTLE_FLEE: 'battle:flee',
+
+  // Monster
+  MONSTER_CAPTURED: 'monster:captured',
+  MONSTER_DEFEATED: 'monster:defeated',
+  MONSTER_LEVEL_UP: 'monster:level_up',
+  MONSTER_ABILITY_LEARNED: 'monster:ability_learned',
+
+  // Player
+  PLAYER_LEVEL_UP: 'player:level_up',
+  PLAYER_DAMAGE: 'player:damage',
+  PLAYER_HEAL: 'player:heal',
+
+  // Inventory
+  ITEM_ADDED: 'inventory:item_added',
+  ITEM_REMOVED: 'inventory:item_removed',
+  ITEM_USED: 'inventory:item_used',
+  EQUIPMENT_CHANGED: 'inventory:equipment_changed',
+  GOLD_CHANGED: 'inventory:gold_changed',
+
+  // Squad
+  SQUAD_CHANGED: 'squad:changed',
+  SQUAD_MONSTER_ADDED: 'squad:monster_added',
+  SQUAD_MONSTER_REMOVED: 'squad:monster_removed',
+
+  // Breeding
+  BREEDING_STARTED: 'breeding:started',
+  BREEDING_COMPLETE: 'breeding:complete',
+
+  // World
+  AREA_TRANSITION: 'world:area_transition',
+  NPC_INTERACT: 'world:npc_interact',
+  OBJECT_INTERACT: 'world:object_interact',
+
+  // Dialog
+  DIALOG_START: 'dialog:start',
+  DIALOG_END: 'dialog:end',
+
+  // Save
+  SAVE_GAME: 'save:game',
+  LOAD_GAME: 'save:load',
+
+  // UI
+  NOTIFICATION: 'ui:notification',
+  MENU_OPEN: 'ui:menu_open',
+  MENU_CLOSE: 'ui:menu_close',
+
+  // Audio
+  MUSIC_PLAY: 'audio:music_play',
+  SFX_PLAY: 'audio:sfx_play',
+} as const
+
+export type GameEventName = (typeof GAME_EVENTS)[keyof typeof GAME_EVENTS]
+
+export interface GameEventPayloads {
+  [GAME_EVENTS.BATTLE_START]: { areaId: string; enemySpeciesIds: ReadonlyArray<string> }
+  [GAME_EVENTS.BATTLE_END]: { result: 'victory' | 'defeat' | 'fled' }
+  [GAME_EVENTS.BATTLE_VICTORY]: { rewards: BattleRewards }
+  [GAME_EVENTS.BATTLE_DEFEAT]: undefined
+  [GAME_EVENTS.BATTLE_FLEE]: undefined
+  [GAME_EVENTS.MONSTER_CAPTURED]: { monster: MonsterInstance }
+  [GAME_EVENTS.MONSTER_DEFEATED]: { speciesId: string; experience: number }
+  [GAME_EVENTS.PLAYER_LEVEL_UP]: { player: PlayerCharacter; newLevel: number }
+  [GAME_EVENTS.MONSTER_LEVEL_UP]: { monster: MonsterInstance; newLevel: number }
+  [GAME_EVENTS.ITEM_ADDED]: { itemId: string; quantity: number }
+  [GAME_EVENTS.ITEM_USED]: { itemId: string }
+  [GAME_EVENTS.GOLD_CHANGED]: { amount: number; newTotal: number }
+  [GAME_EVENTS.BREEDING_COMPLETE]: { result: BreedingResult }
+  [GAME_EVENTS.AREA_TRANSITION]: { fromAreaId: string; toAreaId: string }
+  [GAME_EVENTS.NOTIFICATION]: { message: string; type: 'info' | 'success' | 'warning' }
+  [GAME_EVENTS.MUSIC_PLAY]: { key: string }
+  [GAME_EVENTS.SFX_PLAY]: { key: string }
+  [GAME_EVENTS.SAVE_GAME]: { slot: number }
+  [GAME_EVENTS.LOAD_GAME]: { slot: number }
+  [GAME_EVENTS.MENU_OPEN]: { menuId: string }
+  [GAME_EVENTS.MENU_CLOSE]: { menuId: string }
+}

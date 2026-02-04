@@ -1,0 +1,820 @@
+[
+  {
+    "equipmentId": "wooden-sword",
+    "name": "Wooden Sword",
+    "description": "A simple practice sword carved from sturdy oak. Every hero starts somewhere!",
+    "slot": "weapon",
+    "statModifiers": {
+      "attack": 5
+    },
+    "levelRequirement": 1,
+    "iconKey": "icon-wooden-sword",
+    "buyPrice": 100,
+    "sellPrice": 50,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "wooden-staff",
+    "name": "Wooden Staff",
+    "description": "A gnarled branch polished into a beginner's magical focus.",
+    "slot": "weapon",
+    "statModifiers": {
+      "magicAttack": 5
+    },
+    "levelRequirement": 1,
+    "iconKey": "icon-wooden-staff",
+    "buyPrice": 120,
+    "sellPrice": 60,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "wooden-bow",
+    "name": "Wooden Bow",
+    "description": "A lightweight bow made from flexible willow. Quick to draw and easy to aim.",
+    "slot": "weapon",
+    "statModifiers": {
+      "attack": 3,
+      "speed": 2
+    },
+    "levelRequirement": 1,
+    "iconKey": "icon-wooden-bow",
+    "buyPrice": 150,
+    "sellPrice": 75,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "iron-sword",
+    "name": "Iron Sword",
+    "description": "A solid blade forged from iron. Reliable and sharp enough for real battles.",
+    "slot": "weapon",
+    "statModifiers": {
+      "attack": 12
+    },
+    "levelRequirement": 5,
+    "iconKey": "icon-iron-sword",
+    "buyPrice": 400,
+    "sellPrice": 200,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "iron-staff",
+    "name": "Iron Staff",
+    "description": "An iron-tipped staff that channels magical energy with greater precision.",
+    "slot": "weapon",
+    "statModifiers": {
+      "magicAttack": 12
+    },
+    "levelRequirement": 5,
+    "iconKey": "icon-iron-staff",
+    "buyPrice": 450,
+    "sellPrice": 225,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "iron-bow",
+    "name": "Iron Bow",
+    "description": "A reinforced bow with iron limbs. Fires arrows with impressive speed.",
+    "slot": "weapon",
+    "statModifiers": {
+      "attack": 8,
+      "speed": 5
+    },
+    "levelRequirement": 5,
+    "iconKey": "icon-iron-bow",
+    "buyPrice": 500,
+    "sellPrice": 250,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "steel-sword",
+    "name": "Steel Sword",
+    "description": "A finely tempered steel blade that gleams in the light. A warrior's trusted companion.",
+    "slot": "weapon",
+    "statModifiers": {
+      "attack": 22
+    },
+    "levelRequirement": 10,
+    "iconKey": "icon-steel-sword",
+    "buyPrice": 1000,
+    "sellPrice": 500,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "steel-staff",
+    "name": "Steel Staff",
+    "description": "A steel-core staff inlaid with small crystals that amplify magical power.",
+    "slot": "weapon",
+    "statModifiers": {
+      "magicAttack": 22
+    },
+    "levelRequirement": 10,
+    "iconKey": "icon-steel-staff",
+    "buyPrice": 1100,
+    "sellPrice": 550,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "steel-bow",
+    "name": "Steel Bow",
+    "description": "A precision-crafted bow with steel reinforcements. Arrows fly true and fast.",
+    "slot": "weapon",
+    "statModifiers": {
+      "attack": 15,
+      "speed": 10
+    },
+    "levelRequirement": 10,
+    "iconKey": "icon-steel-bow",
+    "buyPrice": 1200,
+    "sellPrice": 600,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "mythril-sword",
+    "name": "Mythril Sword",
+    "description": "A shimmering blade forged from rare mythril ore. Light as a feather, sharp as a razor.",
+    "slot": "weapon",
+    "statModifiers": {
+      "attack": 35
+    },
+    "levelRequirement": 15,
+    "iconKey": "icon-mythril-sword",
+    "buyPrice": 2800,
+    "sellPrice": 1400,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "mythril-staff",
+    "name": "Mythril Staff",
+    "description": "A staff woven with mythril threads that hum with arcane resonance.",
+    "slot": "weapon",
+    "statModifiers": {
+      "magicAttack": 35
+    },
+    "levelRequirement": 15,
+    "iconKey": "icon-mythril-staff",
+    "buyPrice": 3000,
+    "sellPrice": 1500,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "mythril-bow",
+    "name": "Mythril Bow",
+    "description": "An elegant bow crafted from mythril alloy. Its arrows sing through the air.",
+    "slot": "weapon",
+    "statModifiers": {
+      "attack": 25,
+      "speed": 15
+    },
+    "levelRequirement": 15,
+    "iconKey": "icon-mythril-bow",
+    "buyPrice": 3200,
+    "sellPrice": 1600,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "blazeblade",
+    "name": "Blazeblade",
+    "description": "A legendary sword wreathed in eternal flames. Its strikes burn with unstoppable fury.",
+    "slot": "weapon",
+    "statModifiers": {
+      "attack": 50,
+      "speed": 5
+    },
+    "levelRequirement": 20,
+    "iconKey": "icon-blazeblade",
+    "buyPrice": 7500,
+    "sellPrice": 3750,
+    "specialEffect": "Has a chance to inflict burn on enemies"
+  },
+  {
+    "equipmentId": "arcane-rod",
+    "name": "Arcane Rod",
+    "description": "A legendary staff pulsing with pure arcane energy. Expands the wielder's magical reserves.",
+    "slot": "weapon",
+    "statModifiers": {
+      "magicAttack": 50,
+      "maxMp": 20
+    },
+    "levelRequirement": 20,
+    "iconKey": "icon-arcane-rod",
+    "buyPrice": 8000,
+    "sellPrice": 4000,
+    "specialEffect": "Spells cost 10% less MP"
+  },
+  {
+    "equipmentId": "windcaller-bow",
+    "name": "Windcaller Bow",
+    "description": "A legendary bow blessed by the wind spirits. Arrows strike before foes can react.",
+    "slot": "weapon",
+    "statModifiers": {
+      "attack": 35,
+      "speed": 25
+    },
+    "levelRequirement": 20,
+    "iconKey": "icon-windcaller-bow",
+    "buyPrice": 7000,
+    "sellPrice": 3500,
+    "specialEffect": "Grants a chance to strike twice per turn"
+  },
+  {
+    "equipmentId": "leather-vest",
+    "name": "Leather Vest",
+    "description": "A simple vest made from tanned hide. Offers basic protection for new adventurers.",
+    "slot": "armor",
+    "statModifiers": {
+      "defense": 5
+    },
+    "levelRequirement": 1,
+    "iconKey": "icon-leather-vest",
+    "buyPrice": 120,
+    "sellPrice": 60,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "padded-tunic",
+    "name": "Padded Tunic",
+    "description": "A quilted cloth tunic that absorbs blows. Comfortable and lightly protective.",
+    "slot": "armor",
+    "statModifiers": {
+      "defense": 4,
+      "maxHp": 5
+    },
+    "levelRequirement": 1,
+    "iconKey": "icon-padded-tunic",
+    "buyPrice": 150,
+    "sellPrice": 75,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "apprentice-robe",
+    "name": "Apprentice Robe",
+    "description": "A flowing robe woven with minor protective enchantments. Favored by young mages.",
+    "slot": "armor",
+    "statModifiers": {
+      "defense": 3,
+      "magicDefense": 4
+    },
+    "levelRequirement": 1,
+    "iconKey": "icon-apprentice-robe",
+    "buyPrice": 140,
+    "sellPrice": 70,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "iron-chainmail",
+    "name": "Iron Chainmail",
+    "description": "Interlocking iron rings form a flexible yet tough layer of protection.",
+    "slot": "armor",
+    "statModifiers": {
+      "defense": 12
+    },
+    "levelRequirement": 5,
+    "iconKey": "icon-iron-chainmail",
+    "buyPrice": 450,
+    "sellPrice": 225,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "iron-breastplate",
+    "name": "Iron Breastplate",
+    "description": "A sturdy iron plate that shields the torso. Heavy but dependable.",
+    "slot": "armor",
+    "statModifiers": {
+      "defense": 14,
+      "maxHp": 10
+    },
+    "levelRequirement": 5,
+    "iconKey": "icon-iron-breastplate",
+    "buyPrice": 550,
+    "sellPrice": 275,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "mage-robe",
+    "name": "Mage Robe",
+    "description": "A reinforced robe threaded with iron filigree. Balances physical and magical defense.",
+    "slot": "armor",
+    "statModifiers": {
+      "defense": 8,
+      "magicDefense": 10
+    },
+    "levelRequirement": 5,
+    "iconKey": "icon-mage-robe",
+    "buyPrice": 500,
+    "sellPrice": 250,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "steel-plate-armor",
+    "name": "Steel Plate Armor",
+    "description": "Full steel plate armor that covers vital areas. A knight's standard equipment.",
+    "slot": "armor",
+    "statModifiers": {
+      "defense": 22
+    },
+    "levelRequirement": 10,
+    "iconKey": "icon-steel-plate-armor",
+    "buyPrice": 1200,
+    "sellPrice": 600,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "steel-brigandine",
+    "name": "Steel Brigandine",
+    "description": "Steel plates riveted between layers of leather. Tough protection with added vitality.",
+    "slot": "armor",
+    "statModifiers": {
+      "defense": 20,
+      "maxHp": 20
+    },
+    "levelRequirement": 10,
+    "iconKey": "icon-steel-brigandine",
+    "buyPrice": 1300,
+    "sellPrice": 650,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "enchanted-robe",
+    "name": "Enchanted Robe",
+    "description": "A masterfully enchanted robe that shimmers with protective wards against magic.",
+    "slot": "armor",
+    "statModifiers": {
+      "defense": 14,
+      "magicDefense": 18
+    },
+    "levelRequirement": 10,
+    "iconKey": "icon-enchanted-robe",
+    "buyPrice": 1400,
+    "sellPrice": 700,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "mythril-mail",
+    "name": "Mythril Mail",
+    "description": "Armor woven from mythril chains. Nearly weightless yet incredibly strong.",
+    "slot": "armor",
+    "statModifiers": {
+      "defense": 35
+    },
+    "levelRequirement": 15,
+    "iconKey": "icon-mythril-mail",
+    "buyPrice": 3000,
+    "sellPrice": 1500,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "mythril-fortress-plate",
+    "name": "Mythril Fortress Plate",
+    "description": "Heavy mythril plate armor that makes the wearer feel invincible. Boosts vitality.",
+    "slot": "armor",
+    "statModifiers": {
+      "defense": 32,
+      "maxHp": 30
+    },
+    "levelRequirement": 15,
+    "iconKey": "icon-mythril-fortress-plate",
+    "buyPrice": 3200,
+    "sellPrice": 1600,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "mythril-arcane-vestments",
+    "name": "Mythril Arcane Vestments",
+    "description": "Robes interlaced with mythril thread that resonate with magical energy.",
+    "slot": "armor",
+    "statModifiers": {
+      "defense": 22,
+      "magicDefense": 28
+    },
+    "levelRequirement": 15,
+    "iconKey": "icon-mythril-arcane-vestments",
+    "buyPrice": 3500,
+    "sellPrice": 1750,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "dragonscale-armor",
+    "name": "Dragonscale Armor",
+    "description": "Legendary armor crafted from the scales of an ancient dragon. Nearly indestructible.",
+    "slot": "armor",
+    "statModifiers": {
+      "defense": 50,
+      "maxHp": 25
+    },
+    "levelRequirement": 20,
+    "iconKey": "icon-dragonscale-armor",
+    "buyPrice": 7500,
+    "sellPrice": 3750,
+    "specialEffect": "Reduces fire damage taken by 25%"
+  },
+  {
+    "equipmentId": "celestial-robe",
+    "name": "Celestial Robe",
+    "description": "A legendary robe woven from starlight. Offers supreme magical protection.",
+    "slot": "armor",
+    "statModifiers": {
+      "defense": 30,
+      "magicDefense": 45,
+      "maxMp": 15
+    },
+    "levelRequirement": 20,
+    "iconKey": "icon-celestial-robe",
+    "buyPrice": 8000,
+    "sellPrice": 4000,
+    "specialEffect": "Regenerate 5% MP at the start of each turn"
+  },
+  {
+    "equipmentId": "guardian-plate",
+    "name": "Guardian Plate",
+    "description": "Legendary armor forged by master smiths. Protects the wearer and nearby allies.",
+    "slot": "armor",
+    "statModifiers": {
+      "defense": 48,
+      "maxHp": 40
+    },
+    "levelRequirement": 20,
+    "iconKey": "icon-guardian-plate",
+    "buyPrice": 7800,
+    "sellPrice": 3900,
+    "specialEffect": "Reduces damage taken by nearby allies by 10%"
+  },
+  {
+    "equipmentId": "cloth-cap",
+    "name": "Cloth Cap",
+    "description": "A simple cloth cap that provides minimal head protection. Better than nothing!",
+    "slot": "helmet",
+    "statModifiers": {
+      "defense": 3
+    },
+    "levelRequirement": 1,
+    "iconKey": "icon-cloth-cap",
+    "buyPrice": 80,
+    "sellPrice": 40,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "leather-headband",
+    "name": "Leather Headband",
+    "description": "A sturdy leather headband that keeps sweat out of your eyes and absorbs minor hits.",
+    "slot": "helmet",
+    "statModifiers": {
+      "defense": 2,
+      "maxHp": 5
+    },
+    "levelRequirement": 1,
+    "iconKey": "icon-leather-headband",
+    "buyPrice": 100,
+    "sellPrice": 50,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "lucky-bandana",
+    "name": "Lucky Bandana",
+    "description": "A colorful bandana said to bring good fortune to whoever wears it.",
+    "slot": "helmet",
+    "statModifiers": {
+      "defense": 2,
+      "luck": 3
+    },
+    "levelRequirement": 1,
+    "iconKey": "icon-lucky-bandana",
+    "buyPrice": 120,
+    "sellPrice": 60,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "iron-helm",
+    "name": "Iron Helm",
+    "description": "A solid iron helmet that guards against blows to the head.",
+    "slot": "helmet",
+    "statModifiers": {
+      "defense": 7
+    },
+    "levelRequirement": 5,
+    "iconKey": "icon-iron-helm",
+    "buyPrice": 350,
+    "sellPrice": 175,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "iron-great-helm",
+    "name": "Iron Great Helm",
+    "description": "A fully enclosed iron helmet that offers serious protection at the cost of visibility.",
+    "slot": "helmet",
+    "statModifiers": {
+      "defense": 8,
+      "maxHp": 8
+    },
+    "levelRequirement": 5,
+    "iconKey": "icon-iron-great-helm",
+    "buyPrice": 420,
+    "sellPrice": 210,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "wizards-hat",
+    "name": "Wizard's Hat",
+    "description": "A pointed hat adorned with arcane symbols. Shields the mind from magical attacks.",
+    "slot": "helmet",
+    "statModifiers": {
+      "defense": 4,
+      "magicDefense": 8
+    },
+    "levelRequirement": 5,
+    "iconKey": "icon-wizards-hat",
+    "buyPrice": 400,
+    "sellPrice": 200,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "steel-helm",
+    "name": "Steel Helm",
+    "description": "A well-crafted steel helmet with cheek guards. Standard issue for veteran soldiers.",
+    "slot": "helmet",
+    "statModifiers": {
+      "defense": 14
+    },
+    "levelRequirement": 10,
+    "iconKey": "icon-steel-helm",
+    "buyPrice": 900,
+    "sellPrice": 450,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "steel-war-helm",
+    "name": "Steel War Helm",
+    "description": "A reinforced war helmet designed for prolonged combat. Bolsters the wearer's stamina.",
+    "slot": "helmet",
+    "statModifiers": {
+      "defense": 12,
+      "maxHp": 15
+    },
+    "levelRequirement": 10,
+    "iconKey": "icon-steel-war-helm",
+    "buyPrice": 1000,
+    "sellPrice": 500,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "circlet-of-insight",
+    "name": "Circlet of Insight",
+    "description": "A delicate steel circlet that sharpens the mind and wards off dark magic.",
+    "slot": "helmet",
+    "statModifiers": {
+      "defense": 8,
+      "magicDefense": 14,
+      "luck": 3
+    },
+    "levelRequirement": 10,
+    "iconKey": "icon-circlet-of-insight",
+    "buyPrice": 1100,
+    "sellPrice": 550,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "mythril-helm",
+    "name": "Mythril Helm",
+    "description": "A gleaming mythril helmet. Lighter than iron yet far more resilient.",
+    "slot": "helmet",
+    "statModifiers": {
+      "defense": 22
+    },
+    "levelRequirement": 15,
+    "iconKey": "icon-mythril-helm",
+    "buyPrice": 2500,
+    "sellPrice": 1250,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "mythril-crown",
+    "name": "Mythril Crown",
+    "description": "A regal mythril crown that enhances life force and protects against all harm.",
+    "slot": "helmet",
+    "statModifiers": {
+      "defense": 18,
+      "maxHp": 25,
+      "magicDefense": 10
+    },
+    "levelRequirement": 15,
+    "iconKey": "icon-mythril-crown",
+    "buyPrice": 2800,
+    "sellPrice": 1400,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "mythril-tiara",
+    "name": "Mythril Tiara",
+    "description": "A beautiful mythril tiara that resonates with protective magic. Brings good fortune.",
+    "slot": "helmet",
+    "statModifiers": {
+      "defense": 16,
+      "magicDefense": 15,
+      "luck": 8
+    },
+    "levelRequirement": 15,
+    "iconKey": "icon-mythril-tiara",
+    "buyPrice": 3000,
+    "sellPrice": 1500,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "helm-of-the-phoenix",
+    "name": "Helm of the Phoenix",
+    "description": "A legendary helm forged in phoenix fire. Radiates warmth and vitality.",
+    "slot": "helmet",
+    "statModifiers": {
+      "defense": 35,
+      "maxHp": 30
+    },
+    "levelRequirement": 20,
+    "iconKey": "icon-helm-of-the-phoenix",
+    "buyPrice": 6000,
+    "sellPrice": 3000,
+    "specialEffect": "Revive once per battle with 25% HP"
+  },
+  {
+    "equipmentId": "crown-of-stars",
+    "name": "Crown of Stars",
+    "description": "A legendary crown that glows with the light of distant stars. Shields against all magic.",
+    "slot": "helmet",
+    "statModifiers": {
+      "defense": 25,
+      "magicDefense": 30,
+      "luck": 10
+    },
+    "levelRequirement": 20,
+    "iconKey": "icon-crown-of-stars",
+    "buyPrice": 6500,
+    "sellPrice": 3250,
+    "specialEffect": "Increases critical hit chance by 15%"
+  },
+  {
+    "equipmentId": "champions-helm",
+    "name": "Champion's Helm",
+    "description": "A legendary helm worn by the greatest warriors in history. Inspires courage in all who see it.",
+    "slot": "helmet",
+    "statModifiers": {
+      "defense": 32,
+      "maxHp": 20,
+      "magicDefense": 18
+    },
+    "levelRequirement": 20,
+    "iconKey": "icon-champions-helm",
+    "buyPrice": 7000,
+    "sellPrice": 3500,
+    "specialEffect": "Boosts party morale, increasing all allies' attack by 5%"
+  },
+  {
+    "equipmentId": "copper-ring",
+    "name": "Copper Ring",
+    "description": "A simple copper ring that brings a tiny bit of luck to the wearer.",
+    "slot": "accessory",
+    "statModifiers": {
+      "luck": 3
+    },
+    "levelRequirement": 1,
+    "iconKey": "icon-copper-ring",
+    "buyPrice": 100,
+    "sellPrice": 50,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "travellers-charm",
+    "name": "Traveller's Charm",
+    "description": "A small charm given to young adventurers for protection on the road.",
+    "slot": "accessory",
+    "statModifiers": {
+      "maxHp": 10,
+      "speed": 2
+    },
+    "levelRequirement": 1,
+    "iconKey": "icon-travellers-charm",
+    "buyPrice": 150,
+    "sellPrice": 75,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "iron-ring",
+    "name": "Iron Ring",
+    "description": "A sturdy iron band that toughens the wearer's constitution.",
+    "slot": "accessory",
+    "statModifiers": {
+      "maxHp": 15,
+      "defense": 3
+    },
+    "levelRequirement": 5,
+    "iconKey": "icon-iron-ring",
+    "buyPrice": 400,
+    "sellPrice": 200,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "swift-anklet",
+    "name": "Swift Anklet",
+    "description": "A light anklet enchanted with wind magic. Makes the wearer quicker on their feet.",
+    "slot": "accessory",
+    "statModifiers": {
+      "speed": 8,
+      "luck": 3
+    },
+    "levelRequirement": 5,
+    "iconKey": "icon-swift-anklet",
+    "buyPrice": 500,
+    "sellPrice": 250,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "amulet-of-vitality",
+    "name": "Amulet of Vitality",
+    "description": "A green gemstone amulet that pulses with life energy. Strengthens the body.",
+    "slot": "accessory",
+    "statModifiers": {
+      "maxHp": 30,
+      "defense": 5
+    },
+    "levelRequirement": 10,
+    "iconKey": "icon-amulet-of-vitality",
+    "buyPrice": 1200,
+    "sellPrice": 600,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "mana-crystal-pendant",
+    "name": "Mana Crystal Pendant",
+    "description": "A pendant containing a pure mana crystal. Expands the wearer's magical capacity.",
+    "slot": "accessory",
+    "statModifiers": {
+      "maxMp": 20,
+      "magicDefense": 8
+    },
+    "levelRequirement": 10,
+    "iconKey": "icon-mana-crystal-pendant",
+    "buyPrice": 1300,
+    "sellPrice": 650,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "mythril-charm",
+    "name": "Mythril Charm",
+    "description": "A finely crafted mythril charm that enhances all aspects of the wearer's abilities.",
+    "slot": "accessory",
+    "statModifiers": {
+      "maxHp": 20,
+      "maxMp": 15,
+      "speed": 5
+    },
+    "levelRequirement": 15,
+    "iconKey": "icon-mythril-charm",
+    "buyPrice": 2800,
+    "sellPrice": 1400,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "ring-of-fortitude",
+    "name": "Ring of Fortitude",
+    "description": "A mythril ring inscribed with ancient runes of endurance and resilience.",
+    "slot": "accessory",
+    "statModifiers": {
+      "maxHp": 35,
+      "defense": 8,
+      "magicDefense": 8
+    },
+    "levelRequirement": 15,
+    "iconKey": "icon-ring-of-fortitude",
+    "buyPrice": 3200,
+    "sellPrice": 1600,
+    "specialEffect": null
+  },
+  {
+    "equipmentId": "amulet-of-the-cosmos",
+    "name": "Amulet of the Cosmos",
+    "description": "A legendary amulet containing a fragment of a fallen star. Radiates boundless energy.",
+    "slot": "accessory",
+    "statModifiers": {
+      "maxHp": 30,
+      "maxMp": 25,
+      "luck": 15
+    },
+    "levelRequirement": 20,
+    "iconKey": "icon-amulet-of-the-cosmos",
+    "buyPrice": 7000,
+    "sellPrice": 3500,
+    "specialEffect": "Gain bonus experience from defeated enemies"
+  },
+  {
+    "equipmentId": "ring-of-eternity",
+    "name": "Ring of Eternity",
+    "description": "A legendary ring said to have been worn by an immortal hero. Grants unmatched resilience.",
+    "slot": "accessory",
+    "statModifiers": {
+      "maxHp": 50,
+      "speed": 10,
+      "luck": 10
+    },
+    "levelRequirement": 20,
+    "iconKey": "icon-ring-of-eternity",
+    "buyPrice": 8000,
+    "sellPrice": 4000,
+    "specialEffect": "Recover 3% HP at the start of each turn"
+  }
+]

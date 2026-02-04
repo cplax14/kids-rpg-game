@@ -1,0 +1,111 @@
+[
+  {
+    "treeId": "shopkeeper-greeting",
+    "startNodeId": "greeting",
+    "nodes": [
+      {
+        "nodeId": "greeting",
+        "speaker": "Shopkeeper",
+        "text": "Welcome to my shop! I have all sorts of supplies for adventurers. What can I do for you?",
+        "choices": [
+          { "text": "Buy items", "nextNodeId": null, "action": "open_shop", "actionData": "buy" },
+          { "text": "Sell items", "nextNodeId": null, "action": "open_shop", "actionData": "sell" },
+          { "text": "Just looking", "nextNodeId": "browse" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "browse",
+        "speaker": "Shopkeeper",
+        "text": "Take your time! Feel free to look around. I'll be here if you need anything.",
+        "choices": [],
+        "isEnd": true
+      }
+    ]
+  },
+  {
+    "treeId": "healer-greeting",
+    "startNodeId": "greeting",
+    "nodes": [
+      {
+        "nodeId": "greeting",
+        "speaker": "Healer",
+        "text": "Hello there, young adventurer! You look like you've been through a tough battle. Would you like me to heal your party?",
+        "choices": [
+          { "text": "Yes, please!", "nextNodeId": "healing", "action": "heal_party" },
+          { "text": "No thanks", "nextNodeId": "farewell" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "healing",
+        "speaker": "Healer",
+        "text": "There you go! All patched up and ready for adventure. Stay safe out there!",
+        "choices": [],
+        "isEnd": true
+      },
+      {
+        "nodeId": "farewell",
+        "speaker": "Healer",
+        "text": "Alright! Come back anytime you need healing. I'm always here to help.",
+        "choices": [],
+        "isEnd": true
+      }
+    ]
+  },
+  {
+    "treeId": "guide-tips",
+    "startNodeId": "greeting",
+    "nodes": [
+      {
+        "nodeId": "greeting",
+        "speaker": "Village Guide",
+        "text": "Hey there! Welcome to Sunlit Village. Need any tips for your adventure?",
+        "choices": [
+          { "text": "How do I fight?", "nextNodeId": "combat-tip" },
+          { "text": "Where can I find monsters?", "nextNodeId": "monster-tip" },
+          { "text": "What about equipment?", "nextNodeId": "equip-tip" },
+          { "text": "I'm good, thanks!", "nextNodeId": "farewell" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "combat-tip",
+        "speaker": "Village Guide",
+        "text": "When you encounter a monster, you can Attack, use Abilities that cost MP, use Items from your inventory, or try to Flee. Some abilities are super effective against certain elements!",
+        "choices": [
+          { "text": "Tell me more", "nextNodeId": "greeting" },
+          { "text": "Thanks!", "nextNodeId": "farewell" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "monster-tip",
+        "speaker": "Village Guide",
+        "text": "Walk into the tall grass outside the village center. Wild monsters appear as you explore! The further from the village, the tougher they get.",
+        "choices": [
+          { "text": "Tell me more", "nextNodeId": "greeting" },
+          { "text": "Thanks!", "nextNodeId": "farewell" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "equip-tip",
+        "speaker": "Village Guide",
+        "text": "Press ESC to open your menu. You can manage your inventory and equip weapons, armor, helmets, and accessories. Better equipment means stronger stats!",
+        "choices": [
+          { "text": "Tell me more", "nextNodeId": "greeting" },
+          { "text": "Thanks!", "nextNodeId": "farewell" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "farewell",
+        "speaker": "Village Guide",
+        "text": "Good luck out there, adventurer! Come back if you ever need more tips.",
+        "choices": [],
+        "isEnd": true
+      }
+    ]
+  }
+]
