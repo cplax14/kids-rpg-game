@@ -36,4 +36,7 @@ const config: Phaser.Types.Core.GameConfig = {
 
 const game = new Phaser.Game(config)
 
+// Expose game to window for debugging
+;(window as unknown as { game: Phaser.Game }).game = game
+
 export default game

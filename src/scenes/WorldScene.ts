@@ -73,6 +73,7 @@ import {
 import { generateMap, getCollisionTiles } from '../utils/mapGenerator'
 import { initAudioSystem, playMusic, crossfadeMusic, playSfx, stopMusic, MUSIC_KEYS, SFX_KEYS } from '../systems/AudioSystem'
 import { loadTutorialData, checkAndShowTutorial } from '../systems/TutorialSystem'
+import { initDebug } from '../utils/debug'
 import { autoSave } from '../systems/SaveSystem'
 import {
   loadQuestData,
@@ -180,6 +181,9 @@ export class WorldScene extends Phaser.Scene {
     this.setupCamera()
     this.setupInput()
     this.showAreaName(this.currentArea?.name ?? 'Unknown Area')
+
+    // Initialize debug mode for development testing
+    initDebug(this, getGameState, setGameState)
 
     // Create quest tracker HUD
     this.questTrackerHUD = new QuestTrackerHUD(this)
