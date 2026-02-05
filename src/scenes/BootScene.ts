@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { SCENE_KEYS, COLORS, GAME_WIDTH, GAME_HEIGHT } from '../config'
+import { loadSettings, applyAudioSettings } from '../systems/SettingsManager'
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -11,6 +12,10 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
+    // Initialize settings from storage
+    const settings = loadSettings()
+    applyAudioSettings(settings)
+
     this.scene.start(SCENE_KEYS.PRELOADER)
   }
 

@@ -12,14 +12,21 @@ const NPC_COLORS: Readonly<Record<NpcType, number>> = {
 
 const INTERACTION_RADIUS = 2 * TILE_SIZE
 
+export type QuestIndicatorType = 'available' | 'ready' | 'in_progress' | 'none'
+
 export class NPC {
+  private readonly scene: Phaser.Scene
   private readonly sprite: Phaser.GameObjects.Rectangle
   private readonly nameLabel: Phaser.GameObjects.Text
   private readonly promptText: Phaser.GameObjects.Text
   private readonly interactionZone: Phaser.GameObjects.Zone
   private readonly definition: NpcDefinition
+  private questIndicator: Phaser.GameObjects.Text | null = null
+  private questIndicatorTween: Phaser.Tweens.Tween | null = null
+  private currentIndicatorType: QuestIndicatorType = 'none'
 
   constructor(scene: Phaser.Scene, x: number, y: number, definition: NpcDefinition) {
+    this.scene = scene
     this.definition = definition
 
     const color = NPC_COLORS[definition.type]
@@ -90,7 +97,79 @@ export class NPC {
     return { x: this.sprite.x, y: this.sprite.y }
   }
 
+  setQuestIndicator(type: QuestIndicatorType): void {
+    // No change needed
+    if (type === this.currentIndicatorType) return
+
+    // Clean up existing indicator
+    if (this.questIndicatorTween) {
+      this.questIndicatorTween.stop()
+      this.questIndicatorTween = null
+    }
+    if (this.questIndicator) {
+      this.questIndicator.destroy()
+      this.questIndicator = null
+    }
+
+    this.currentIndicatorType = type
+
+    if (type === 'none') return
+
+    const x = this.sprite.x
+    const y = this.sprite.y - 40
+
+    // Create indicator text
+    const symbol = type === 'available' ? '!' : '?'
+    const color = type === 'in_progress' ? '#888888' : '#ffd54f'
+
+    this.questIndicator = this.scene.add.text(x, y, symbol, {
+      ...TEXT_STYLES.HEADING,
+      fontSize: '20px',
+      color,
+      stroke: '#000000',
+      strokeThickness: 3,
+    })
+    this.questIndicator.setOrigin(0.5)
+    this.questIndicator.setDepth(DEPTH.ABOVE_PLAYER + 1)
+
+    // Create animation based on type
+    if (type === 'available') {
+      // Bouncing animation for available quests
+      this.questIndicatorTween = this.scene.tweens.add({
+        targets: this.questIndicator,
+        y: y - 6,
+        duration: 400,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      })
+    } else if (type === 'ready') {
+      // Pulsing animation for ready to turn in
+      this.questIndicatorTween = this.scene.tweens.add({
+        targets: this.questIndicator,
+        scale: 1.3,
+        duration: 500,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      })
+    }
+    // in_progress has no animation (static gray ?)
+  }
+
+  getQuestIndicatorType(): QuestIndicatorType {
+    return this.currentIndicatorType
+  }
+
   destroy(): void {
+    if (this.questIndicatorTween) {
+      this.questIndicatorTween.stop()
+      this.questIndicatorTween = null
+    }
+    if (this.questIndicator) {
+      this.questIndicator.destroy()
+      this.questIndicator = null
+    }
     this.sprite.destroy()
     this.nameLabel.destroy()
     this.promptText.destroy()

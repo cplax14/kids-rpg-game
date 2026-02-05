@@ -1,0 +1,260 @@
+[
+  {
+    "questId": "slime-slayer",
+    "name": "Slime Slayer",
+    "description": "The village elder needs help clearing out the slimes that have been causing trouble in the nearby forest. Defeat 5 slimes to prove your worth as a monster tamer!",
+    "giverNpcId": "guide",
+    "turnInNpcId": "guide",
+    "recommendedLevel": 1,
+    "objectives": [
+      {
+        "objectiveId": "defeat-slimes",
+        "type": "defeat",
+        "targetId": "mossbun",
+        "targetName": "Mossbun",
+        "requiredCount": 5,
+        "description": "Defeat 5 Mossbuns"
+      }
+    ],
+    "rewards": {
+      "experience": 50,
+      "gold": 25,
+      "items": [
+        { "itemId": "potion-small", "quantity": 3 }
+      ],
+      "equipmentId": null
+    },
+    "rewardEquipmentTier": 1,
+    "rewardEquipmentSlots": ["weapon", "armor"],
+    "prerequisiteQuestIds": [],
+    "isRepeatable": false,
+    "celebrationMessage": "Well done, young tamer! You've proven yourself capable. The village is safer thanks to you!"
+  },
+  {
+    "questId": "herbal-helper",
+    "name": "Herbal Helper",
+    "description": "The village healer needs healing herbs for her remedies. Collect soft fur from forest creatures - it's used in many healing potions.",
+    "giverNpcId": "healer",
+    "turnInNpcId": "healer",
+    "recommendedLevel": 2,
+    "objectives": [
+      {
+        "objectiveId": "collect-fur",
+        "type": "collect",
+        "targetId": "soft-fur",
+        "targetName": "Soft Fur",
+        "requiredCount": 3,
+        "description": "Collect 3 Soft Fur"
+      }
+    ],
+    "rewards": {
+      "experience": 75,
+      "gold": 40,
+      "items": [
+        { "itemId": "potion-medium", "quantity": 2 }
+      ],
+      "equipmentId": null
+    },
+    "rewardEquipmentTier": 1,
+    "rewardEquipmentSlots": ["accessory"],
+    "prerequisiteQuestIds": [],
+    "isRepeatable": false,
+    "celebrationMessage": "These are perfect! I can make so many remedies with this. You have the heart of a true helper!"
+  },
+  {
+    "questId": "forest-explorer",
+    "name": "Forest Explorer",
+    "description": "The village guide wants you to explore the Whispering Woods. There are reports of interesting sights there.",
+    "giverNpcId": "guide",
+    "turnInNpcId": "guide",
+    "recommendedLevel": 3,
+    "objectives": [
+      {
+        "objectiveId": "explore-forest",
+        "type": "explore",
+        "targetId": "whispering-woods",
+        "targetName": "Whispering Woods",
+        "requiredCount": 1,
+        "description": "Visit the Whispering Woods"
+      }
+    ],
+    "rewards": {
+      "experience": 100,
+      "gold": 60,
+      "items": [
+        { "itemId": "capture-capsule", "quantity": 5 }
+      ],
+      "equipmentId": null
+    },
+    "rewardEquipmentTier": 1,
+    "rewardEquipmentSlots": ["helmet"],
+    "prerequisiteQuestIds": ["slime-slayer"],
+    "isRepeatable": false,
+    "celebrationMessage": "Wonderful! Your courage to explore is admirable. The world needs more adventurers like you!"
+  },
+  {
+    "questId": "monster-friendship",
+    "name": "Monster Friendship",
+    "description": "The monster breeder wants to teach you about bonding with monsters. Visit her to learn the basics of monster friendship and breeding.",
+    "giverNpcId": "guide",
+    "turnInNpcId": "breeder",
+    "recommendedLevel": 1,
+    "objectives": [
+      {
+        "objectiveId": "talk-breeder",
+        "type": "talk",
+        "targetId": "breeder",
+        "targetName": "Monster Breeder",
+        "requiredCount": 1,
+        "description": "Talk to the Monster Breeder"
+      }
+    ],
+    "rewards": {
+      "experience": 25,
+      "gold": 10,
+      "items": [
+        { "itemId": "breeding-charm", "quantity": 1 }
+      ],
+      "equipmentId": null
+    },
+    "rewardEquipmentTier": 1,
+    "rewardEquipmentSlots": [],
+    "prerequisiteQuestIds": [],
+    "isRepeatable": false,
+    "celebrationMessage": "I'm so glad you came! Here's a breeding charm to help you on your journey. Come back when you're ready to breed monsters!"
+  },
+  {
+    "questId": "guardians-challenge",
+    "name": "Guardian's Challenge",
+    "description": "A powerful guardian monster has appeared in the Whispering Woods. Defeat the Forest Guardian to prove your strength!",
+    "giverNpcId": "guide",
+    "turnInNpcId": "guide",
+    "recommendedLevel": 5,
+    "objectives": [
+      {
+        "objectiveId": "defeat-guardian",
+        "type": "boss",
+        "targetId": "forest-guardian",
+        "targetName": "Forest Guardian",
+        "requiredCount": 1,
+        "description": "Defeat the Forest Guardian"
+      }
+    ],
+    "rewards": {
+      "experience": 250,
+      "gold": 150,
+      "items": [
+        { "itemId": "potion-large", "quantity": 2 },
+        { "itemId": "ether-medium", "quantity": 2 }
+      ],
+      "equipmentId": null
+    },
+    "rewardEquipmentTier": 2,
+    "rewardEquipmentSlots": ["weapon", "armor"],
+    "prerequisiteQuestIds": ["forest-explorer"],
+    "isRepeatable": false,
+    "celebrationMessage": "Incredible! You've defeated the Forest Guardian! Your strength is remarkable. You are truly worthy of the title Monster Tamer!"
+  },
+  {
+    "questId": "fire-and-water",
+    "name": "Fire and Water",
+    "description": "The shopkeeper is curious about elemental monsters. Defeat some Flamepups and Bubblefins to gather elemental shards for his research.",
+    "giverNpcId": "shopkeeper",
+    "turnInNpcId": "shopkeeper",
+    "recommendedLevel": 3,
+    "objectives": [
+      {
+        "objectiveId": "defeat-flamepups",
+        "type": "defeat",
+        "targetId": "flamepup",
+        "targetName": "Flamepup",
+        "requiredCount": 3,
+        "description": "Defeat 3 Flamepups"
+      },
+      {
+        "objectiveId": "defeat-bubblefins",
+        "type": "defeat",
+        "targetId": "bubblefin",
+        "targetName": "Bubblefin",
+        "requiredCount": 3,
+        "description": "Defeat 3 Bubblefins"
+      }
+    ],
+    "rewards": {
+      "experience": 120,
+      "gold": 80,
+      "items": [
+        { "itemId": "flame-shard", "quantity": 2 },
+        { "itemId": "aqua-shard", "quantity": 2 }
+      ],
+      "equipmentId": null
+    },
+    "rewardEquipmentTier": 1,
+    "rewardEquipmentSlots": ["accessory"],
+    "prerequisiteQuestIds": ["slime-slayer"],
+    "isRepeatable": false,
+    "celebrationMessage": "Fascinating! These elemental specimens will help my research greatly. Here's something special for your trouble!"
+  },
+  {
+    "questId": "crystal-depths",
+    "name": "Crystal Depths",
+    "description": "Rumors speak of mysterious crystal caves beyond the forest. Explore the Crystal Caverns to uncover their secrets.",
+    "giverNpcId": "guide",
+    "turnInNpcId": "guide",
+    "recommendedLevel": 8,
+    "objectives": [
+      {
+        "objectiveId": "explore-caverns",
+        "type": "explore",
+        "targetId": "crystal-caverns",
+        "targetName": "Crystal Caverns",
+        "requiredCount": 1,
+        "description": "Visit the Crystal Caverns"
+      }
+    ],
+    "rewards": {
+      "experience": 200,
+      "gold": 120,
+      "items": [
+        { "itemId": "capture-capsule-super", "quantity": 3 }
+      ],
+      "equipmentId": null
+    },
+    "rewardEquipmentTier": 2,
+    "rewardEquipmentSlots": ["armor", "helmet"],
+    "prerequisiteQuestIds": ["guardians-challenge"],
+    "isRepeatable": false,
+    "celebrationMessage": "The Crystal Caverns! Few have ventured there and returned. Your bravery is truly inspiring!"
+  },
+  {
+    "questId": "supply-run",
+    "name": "Supply Run",
+    "description": "The shopkeeper needs monster bones to craft new items. Help gather materials by defeating monsters in the wild.",
+    "giverNpcId": "shopkeeper",
+    "turnInNpcId": "shopkeeper",
+    "recommendedLevel": 2,
+    "objectives": [
+      {
+        "objectiveId": "collect-bones",
+        "type": "collect",
+        "targetId": "monster-bone",
+        "targetName": "Monster Bone",
+        "requiredCount": 5,
+        "description": "Collect 5 Monster Bones"
+      }
+    ],
+    "rewards": {
+      "experience": 60,
+      "gold": 50,
+      "items": [
+        { "itemId": "antidote", "quantity": 3 }
+      ],
+      "equipmentId": null
+    },
+    "rewardEquipmentTier": 1,
+    "rewardEquipmentSlots": [],
+    "prerequisiteQuestIds": [],
+    "isRepeatable": true,
+    "celebrationMessage": "Perfect! These bones will make excellent crafting materials. Come back anytime you have more!"
+  }
+]

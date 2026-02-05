@@ -1,6 +1,8 @@
 import Phaser from 'phaser'
 import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS, DEPTH, TEXT_STYLES } from '../config'
 import type { Battle, BattleCombatant, BattleAction, MonsterElement, ItemDrop, MonsterInstance, BossDefinition } from '../models/types'
+import { initAudioSystem, playMusic, crossfadeMusic, playSfx, stopMusic, MUSIC_KEYS, SFX_KEYS } from '../systems/AudioSystem'
+import { checkAndShowTutorial } from '../systems/TutorialSystem'
 import {
   createBattle,
   executeAction,
@@ -25,7 +27,9 @@ import {
   updateMonsterStorage,
   updateDiscoveredSpecies,
   addDefeatedBoss,
+  updateActiveQuests,
 } from '../systems/GameStateManager'
+import { trackDefeat, trackBossDefeat } from '../systems/QuestSystem'
 import { useItem, getConsumableItems, getCaptureDevices, getItem } from '../systems/InventorySystem'
 import { useItemOnCombatant } from '../systems/ItemEffectSystem'
 import { getSpecies } from '../systems/MonsterSystem'
@@ -71,6 +75,16 @@ export class BattleScene extends Phaser.Scene {
     this.isBossBattle = data.isBossBattle ?? false
     this.bossData = data.bossData ?? null
 
+    // Initialize audio system
+    initAudioSystem(this)
+
+    // Play battle music
+    if (this.isBossBattle) {
+      playMusic(MUSIC_KEYS.BATTLE_BOSS, { fadeIn: 500 })
+    } else {
+      playMusic(MUSIC_KEYS.BATTLE_NORMAL, { fadeIn: 500 })
+    }
+
     this.battle = createBattle(
       data.playerCombatants,
       data.enemyCombatants,
@@ -94,6 +108,9 @@ export class BattleScene extends Phaser.Scene {
       const introMessage = this.isBossBattle && this.bossData
         ? `${this.bossData.name}, ${this.bossData.title}, appears!`
         : 'A wild monster appeared!'
+
+      // Show first battle tutorial
+      checkAndShowTutorial(this, 'first_battle')
 
       this.hud.showMessage(introMessage).then(() => {
         this.startNextTurn()
@@ -446,6 +463,7 @@ export class BattleScene extends Phaser.Scene {
       }
 
       // Play capture animation
+      playSfx(SFX_KEYS.CAPTURE_THROW)
       this.hud.showMessage(`Throwing ${deviceSlot.item.name}...`).then(() => {
         playCaptureAnimation({
           scene: this,
@@ -474,6 +492,11 @@ export class BattleScene extends Phaser.Scene {
     enemyLevel: number,
   ): void {
     if (captureAttempt.succeeded) {
+      // Play capture success SFX
+      playSfx(SFX_KEYS.CAPTURE_SUCCESS)
+
+      // Show first capture tutorial
+      checkAndShowTutorial(this, 'first_capture')
       // Create captured monster
       const capturedMonster = createCapturedMonster(speciesId, enemyLevel)
 
@@ -537,6 +560,7 @@ export class BattleScene extends Phaser.Scene {
       }
     } else {
       // Capture failed
+      playSfx(SFX_KEYS.CAPTURE_FAIL)
       EventBus.emit(GAME_EVENTS.CAPTURE_FAIL, { attempt: captureAttempt, shakeCount })
 
       this.hud.showMessage(`${target.name} broke free!`).then(() => {
@@ -607,6 +631,9 @@ export class BattleScene extends Phaser.Scene {
     const targetSprite = this.findSprite(targetId)
     if (!targetSprite) return
 
+    // Play hit SFX
+    playSfx(SFX_KEYS.ATTACK_HIT)
+
     // Flash the target
     this.tweens.add({
       targets: targetSprite,
@@ -652,6 +679,9 @@ export class BattleScene extends Phaser.Scene {
   private handleVictory(): void {
     this.phase = 'victory'
 
+    // Play victory music
+    playMusic(MUSIC_KEYS.VICTORY_FANFARE, { loop: false })
+
     // For boss battles, use boss rewards; otherwise calculate normal rewards
     const isBoss = this.isBossBattle && this.bossData
     const bossRewards = isBoss ? this.bossData!.rewards : null
@@ -690,6 +720,25 @@ export class BattleScene extends Phaser.Scene {
       if (isBoss) {
         const updatedState = getGameState(this)
         setGameState(this, addDefeatedBoss(updatedState, this.bossData!.bossId))
+
+        // Track boss defeat for quests
+        const stateAfterBoss = getGameState(this)
+        const questsAfterBoss = trackBossDefeat(stateAfterBoss.activeQuests, this.bossData!.bossId)
+        if (questsAfterBoss !== stateAfterBoss.activeQuests) {
+          setGameState(this, updateActiveQuests(stateAfterBoss, questsAfterBoss))
+        }
+      }
+
+      // Track monster defeats for quests
+      if (speciesIds.length > 0) {
+        const stateForQuests = getGameState(this)
+        let updatedQuests = stateForQuests.activeQuests
+        for (const speciesId of speciesIds) {
+          updatedQuests = trackDefeat(updatedQuests, speciesId)
+        }
+        if (updatedQuests !== stateForQuests.activeQuests) {
+          setGameState(this, updateActiveQuests(stateForQuests, updatedQuests))
+        }
       }
 
       // Discover encountered species

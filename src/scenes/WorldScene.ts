@@ -14,6 +14,7 @@ import type {
   ChestObject,
   SignObject,
   FountainObject,
+  TutorialStep,
 } from '../models/types'
 import {
   loadSpeciesData,
@@ -38,6 +39,7 @@ import {
   updateSquad,
   updateDiscoveredSpecies,
   updateCurrentArea,
+  updateActiveQuests,
   type GameState,
 } from '../systems/GameStateManager'
 import { createSquadCombatants } from '../systems/SquadSystem'
@@ -69,6 +71,17 @@ import {
   isFountainObject,
 } from '../systems/InteractableSystem'
 import { generateMap, getCollisionTiles } from '../utils/mapGenerator'
+import { initAudioSystem, playMusic, crossfadeMusic, playSfx, stopMusic, MUSIC_KEYS, SFX_KEYS } from '../systems/AudioSystem'
+import { loadTutorialData, checkAndShowTutorial } from '../systems/TutorialSystem'
+import { autoSave } from '../systems/SaveSystem'
+import {
+  loadQuestData,
+  trackAreaExploration,
+  getQuestsForNpc,
+} from '../systems/QuestSystem'
+import type { QuestDefinition } from '../models/types'
+import { QuestTrackerHUD } from '../ui/hud/QuestTrackerHUD'
+import type { QuestIndicatorType } from '../entities/NPC'
 
 interface WorldSceneData {
   readonly newGame: boolean
@@ -85,6 +98,8 @@ interface WorldSceneData {
     items: ReadonlyArray<ItemDrop>
     unlocksArea?: string
   }
+  readonly savedState?: import('../systems/GameStateManager').GameState
+  readonly playTime?: number
 }
 
 const ENCOUNTER_STEP_THRESHOLD = 20
@@ -108,6 +123,10 @@ export class WorldScene extends Phaser.Scene {
   private nearbyInteractable: Interactable | null = null
   private transitionZones: Phaser.GameObjects.Zone[] = []
   private proceduralMapGraphics: Phaser.GameObjects.Graphics | null = null
+  private playTime: number = 0
+  private playTimeStart: number = 0
+  private currentSaveSlot: number = 0
+  private questTrackerHUD: QuestTrackerHUD | null = null
 
   constructor() {
     super({ key: SCENE_KEYS.WORLD })
@@ -116,10 +135,20 @@ export class WorldScene extends Phaser.Scene {
   create(data: WorldSceneData): void {
     this.cameras.main.fadeIn(500, 0, 0, 0)
 
+    // Initialize audio system
+    initAudioSystem(this)
+
+    // Track play time
+    this.playTime = data.playTime ?? 0
+    this.playTimeStart = Date.now()
+    this.currentSaveSlot = data.saveSlot ?? 0
+
     const isNewGame = !hasGameState(this)
 
-    // Initialize game state on new game
-    if (isNewGame) {
+    // Initialize game state - either from save or new
+    if (data.savedState) {
+      setGameState(this, data.savedState)
+    } else if (isNewGame) {
       setGameState(this, createInitialGameState('Hero'))
     }
 
@@ -152,6 +181,10 @@ export class WorldScene extends Phaser.Scene {
     this.setupInput()
     this.showAreaName(this.currentArea?.name ?? 'Unknown Area')
 
+    // Create quest tracker HUD
+    this.questTrackerHUD = new QuestTrackerHUD(this)
+    this.updateQuestTracker()
+
     // Apply battle rewards if returning from victory
     if (data.battleResult === 'victory' && data.rewards) {
       this.applyBattleRewards(data.rewards)
@@ -161,6 +194,9 @@ export class WorldScene extends Phaser.Scene {
     if (data.loot && data.loot.length > 0) {
       this.applyLoot(data.loot)
     }
+
+    // Play area music
+    this.playAreaMusic()
   }
 
   update(): void {
@@ -235,6 +271,29 @@ export class WorldScene extends Phaser.Scene {
 
     // Check for boss encounters
     this.setupBossEncounters(this.currentArea)
+
+    // Track area exploration for quests
+    this.trackAreaForQuests(this.currentAreaId)
+
+    // Update NPC quest indicators
+    this.updateNpcQuestIndicators()
+
+    // Update quest tracker
+    this.updateQuestTracker()
+  }
+
+  private trackAreaForQuests(areaId: string): void {
+    try {
+      const state = getGameState(this)
+      const updatedQuests = trackAreaExploration(state.activeQuests, areaId)
+
+      if (updatedQuests !== state.activeQuests) {
+        setGameState(this, updateActiveQuests(state, updatedQuests))
+        this.updateQuestTracker()
+      }
+    } catch {
+      // No game state yet
+    }
   }
 
   private clearAreaContent(): void {
@@ -565,6 +624,12 @@ export class WorldScene extends Phaser.Scene {
       return
     }
 
+    // Show tutorial on first area transition
+    checkAndShowTutorial(this, 'first_area_transition')
+
+    // Auto-save on area transition
+    autoSave(this, this.currentSaveSlot, this.getCurrentPlayTime())
+
     // Fade out and transition to new area
     this.inputSystem.setEnabled(false)
     this.player.update({
@@ -583,6 +648,8 @@ export class WorldScene extends Phaser.Scene {
         newGame: false,
         areaId: transition.targetAreaId,
         spawnPosition: transition.targetPosition,
+        playTime: this.getCurrentPlayTime(),
+        saveSlot: this.currentSaveSlot,
       })
     })
   }
@@ -608,6 +675,7 @@ export class WorldScene extends Phaser.Scene {
       return
     }
 
+    playSfx(SFX_KEYS.CHEST_OPEN)
     setGameState(this, result.newState)
     interactable.markAsUsed()
 
@@ -654,6 +722,7 @@ export class WorldScene extends Phaser.Scene {
     const result = useFountain(fountain, gameState)
 
     if (result.healed) {
+      playSfx(SFX_KEYS.HEAL)
       setGameState(this, result.newState)
       this.showMessage(`Healed ${result.healAmount} HP!`)
     } else {
@@ -867,6 +936,71 @@ export class WorldScene extends Phaser.Scene {
 
     const bossesData = this.cache.json.get('bosses-data') as BossDefinition[] | undefined
     if (bossesData) loadBossData(bossesData)
+
+    // Load tutorial data
+    const tutorialsData = this.cache.json.get('tutorials-data') as TutorialStep[] | undefined
+    if (tutorialsData) loadTutorialData(tutorialsData)
+
+    // Load quest data
+    const questsData = this.cache.json.get('quests-data') as QuestDefinition[] | undefined
+    if (questsData) loadQuestData(questsData)
+  }
+
+  private updateQuestTracker(): void {
+    if (!this.questTrackerHUD) return
+    try {
+      const state = getGameState(this)
+      this.questTrackerHUD.update(state.activeQuests)
+    } catch {
+      // No game state yet
+    }
+  }
+
+  private updateNpcQuestIndicators(): void {
+    try {
+      const state = getGameState(this)
+
+      for (const npc of this.npcs) {
+        const npcId = npc.getNpcId()
+        const questStatus = getQuestsForNpc(
+          npcId,
+          state.completedQuestIds,
+          state.activeQuests,
+          state.player.level,
+        )
+
+        let indicatorType: QuestIndicatorType = 'none'
+
+        if (questStatus.readyToTurnIn.length > 0) {
+          indicatorType = 'ready'
+        } else if (questStatus.available.length > 0) {
+          indicatorType = 'available'
+        } else if (questStatus.inProgress.length > 0) {
+          indicatorType = 'in_progress'
+        }
+
+        npc.setQuestIndicator(indicatorType)
+      }
+    } catch {
+      // No game state yet
+    }
+  }
+
+  private playAreaMusic(): void {
+    const areaConfig = this.cache.json.get('audio-config')
+    const areaMusic = areaConfig?.areaMusic?.[this.currentAreaId] as string | undefined
+
+    if (areaMusic) {
+      crossfadeMusic(areaMusic, 1000)
+    } else {
+      // Default to village music
+      crossfadeMusic(MUSIC_KEYS.VILLAGE_PEACEFUL, 1000)
+    }
+  }
+
+  private getCurrentPlayTime(): number {
+    const sessionTime = Math.floor((Date.now() - this.playTimeStart) / 1000)
+    return this.playTime + sessionTime
   }
 
   private giveStarterContent(): void {
@@ -1096,6 +1230,9 @@ export class WorldScene extends Phaser.Scene {
         },
       )
     }
+
+    // Update quest indicators after creating NPCs
+    this.updateNpcQuestIndicators()
   }
 
   private handleNpcInteraction(npc: NPC): void {
@@ -1114,6 +1251,7 @@ export class WorldScene extends Phaser.Scene {
       dialogTreeId: npc.getDialogTreeId(),
       npcName: npc.getNpcName(),
       npcType: npc.getNpcType(),
+      npcId: npc.getNpcId(),
     })
 
     this.scene.pause()
@@ -1121,10 +1259,17 @@ export class WorldScene extends Phaser.Scene {
     this.events.once('resume', () => {
       this.inputSystem.setEnabled(true)
       this.nearbyNpc = null
+
+      // Update quest-related state after dialog
+      this.updateQuestTracker()
+      this.updateNpcQuestIndicators()
     })
   }
 
   private openMenu(): void {
+    playSfx(SFX_KEYS.MENU_SELECT)
+    checkAndShowTutorial(this, 'first_menu')
+
     this.inputSystem.setEnabled(false)
     this.player.update({
       up: false,
@@ -1136,7 +1281,7 @@ export class WorldScene extends Phaser.Scene {
       cancel: false,
     })
 
-    this.scene.launch(SCENE_KEYS.MENU)
+    this.scene.launch(SCENE_KEYS.MENU, { playTime: this.getCurrentPlayTime() })
     this.scene.pause()
 
     this.events.once('resume', () => {

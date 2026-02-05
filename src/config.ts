@@ -49,6 +49,8 @@ export const COLORS = {
   HP_YELLOW: 0xffa726,
   HP_RED: 0xef5350,
   MP_BLUE: 0x42a5f5,
+  XP_PURPLE: 0x7c4dff,
+  BAR_BG: 0x333333,
 } as const
 
 export const FONTS = {
@@ -77,4 +79,10 @@ export const TEXT_STYLES = {
     fontSize: '14px',
     color: '#cccccc',
   },
+} as const
+
+export const TEXT_SPEED_MS = {
+  slow: 80,
+  normal: 40,
+  fast: 15,
 } as const

@@ -1,0 +1,44 @@
+[
+  {
+    "id": "tutorial-first-battle",
+    "trigger": "first_battle",
+    "title": "Battle Basics",
+    "message": "Choose Attack to deal damage, Ability for special moves (costs MP), or Item to use potions. You can also try to Capture weakened monsters!",
+    "position": "top"
+  },
+  {
+    "id": "tutorial-first-capture",
+    "trigger": "first_capture",
+    "title": "Capturing Monsters",
+    "message": "Lower a monster's HP to increase capture chances. Different capture devices have different success rates. Captured monsters join your squad!",
+    "position": "center"
+  },
+  {
+    "id": "tutorial-first-menu",
+    "trigger": "first_menu",
+    "title": "Game Menu",
+    "message": "Access your Inventory, Equipment, Squad, and Bestiary from the menu. Press ESC or M to open the menu while exploring.",
+    "position": "center"
+  },
+  {
+    "id": "tutorial-first-shop",
+    "trigger": "first_shop",
+    "title": "Shopping",
+    "message": "Visit the shopkeeper to buy items like potions and capture devices. Sell items you don't need for gold!",
+    "position": "bottom"
+  },
+  {
+    "id": "tutorial-first-breeding",
+    "trigger": "first_breeding",
+    "title": "Monster Breeding",
+    "message": "Combine two monsters to create offspring with inherited traits. Compatible monsters produce stronger babies!",
+    "position": "center"
+  },
+  {
+    "id": "tutorial-first-area-transition",
+    "trigger": "first_area_transition",
+    "title": "Exploring New Areas",
+    "message": "Different areas have different monsters to discover. Watch the recommended level - stronger monsters await in distant lands!",
+    "position": "top"
+  }
+]

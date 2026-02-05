@@ -1,0 +1,30 @@
+{
+  "music": {
+    "title-theme": "assets/audio/music/title.ogg",
+    "village-peaceful": "assets/audio/music/village.ogg",
+    "forest-mystical": "assets/audio/music/forest.ogg",
+    "cave-ambient": "assets/audio/music/cave.ogg",
+    "battle-normal": "assets/audio/music/battle.ogg",
+    "battle-boss": "assets/audio/music/boss.ogg",
+    "victory-fanfare": "assets/audio/music/victory.ogg"
+  },
+  "sfx": {
+    "menu-select": "assets/audio/sfx/menu-select.ogg",
+    "menu-confirm": "assets/audio/sfx/menu-confirm.ogg",
+    "attack-hit": "assets/audio/sfx/attack-hit.ogg",
+    "capture-throw": "assets/audio/sfx/capture-throw.ogg",
+    "capture-shake": "assets/audio/sfx/capture-shake.ogg",
+    "capture-success": "assets/audio/sfx/capture-success.ogg",
+    "capture-fail": "assets/audio/sfx/capture-fail.ogg",
+    "level-up": "assets/audio/sfx/level-up.ogg",
+    "heal": "assets/audio/sfx/heal.ogg",
+    "chest-open": "assets/audio/sfx/chest-open.ogg"
+  },
+  "defaultMusicVolume": 0.7,
+  "defaultSfxVolume": 0.8,
+  "areaMusic": {
+    "sunlit-village": "village-peaceful",
+    "whispering-forest": "forest-mystical",
+    "crystal-caverns": "cave-ambient"
+  }
+}

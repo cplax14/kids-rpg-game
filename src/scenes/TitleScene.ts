@@ -1,17 +1,36 @@
 import Phaser from 'phaser'
-import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS, TEXT_STYLES } from '../config'
+import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS, TEXT_STYLES, DEPTH } from '../config'
 import { hasSaveData } from '../utils/storage'
+import { SaveLoadPanel } from '../ui/menus/SaveLoadPanel'
+import { SettingsPanel } from '../ui/menus/SettingsPanel'
+import { loadSaveGame, gameStateFromSave } from '../systems/SaveSystem'
+import { setGameState } from '../systems/GameStateManager'
+import { loadSettings, applyAudioSettings } from '../systems/SettingsManager'
+import { initAudioSystem, playMusic, playSfx, MUSIC_KEYS, SFX_KEYS } from '../systems/AudioSystem'
 
 export class TitleScene extends Phaser.Scene {
+  private saveLoadPanel: SaveLoadPanel | null = null
+  private settingsPanel: SettingsPanel | null = null
+  private mainMenuContainer: Phaser.GameObjects.Container | null = null
+  private audioUnlocked = false
+
   constructor() {
     super({ key: SCENE_KEYS.TITLE })
   }
 
   create(): void {
+    // Initialize audio system
+    initAudioSystem(this)
+
+    // Apply saved audio settings
+    const settings = loadSettings()
+    applyAudioSettings(settings)
+
     this.createBackground()
     this.createTitle()
-    this.createMenuButtons()
+    this.createMainMenu()
     this.createFooter()
+    this.createAudioPrompt()
   }
 
   private createBackground(): void {
@@ -78,17 +97,23 @@ export class TitleScene extends Phaser.Scene {
     })
   }
 
-  private createMenuButtons(): void {
+  private createMainMenu(): void {
+    this.mainMenuContainer = this.add.container(0, 0)
+
     const centerX = GAME_WIDTH / 2
     const startY = 300
 
     this.createButton(centerX, startY, 'New Game', () => {
+      playSfx(SFX_KEYS.MENU_CONFIRM)
       this.startNewGame()
     })
 
     const hasSave = hasSaveData(0) || hasSaveData(1) || hasSaveData(2)
-    const continueButton = this.createButton(centerX, startY + 80, 'Continue', () => {
-      this.continueGame()
+    const continueButton = this.createButton(centerX, startY + 70, 'Continue', () => {
+      if (hasSave) {
+        playSfx(SFX_KEYS.MENU_SELECT)
+        this.showSaveLoadPanel()
+      }
     })
 
     if (!hasSave) {
@@ -98,6 +123,11 @@ export class TitleScene extends Phaser.Scene {
         }
       })
     }
+
+    this.createButton(centerX, startY + 140, 'Settings', () => {
+      playSfx(SFX_KEYS.MENU_SELECT)
+      this.showSettingsPanel()
+    })
   }
 
   private createButton(
@@ -112,6 +142,10 @@ export class TitleScene extends Phaser.Scene {
 
     const text = this.add.text(x, y, label, TEXT_STYLES.BUTTON)
     text.setOrigin(0.5)
+
+    if (this.mainMenuContainer) {
+      this.mainMenuContainer.add([bg, text])
+    }
 
     bg.on('pointerover', () => {
       bg.setTexture('button-hover')
@@ -151,27 +185,132 @@ export class TitleScene extends Phaser.Scene {
   }
 
   private createFooter(): void {
-    const text = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 30, 'v0.1.0 - Phase 1', {
+    const text = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 30, 'v0.7.0 - Phase 7', {
       ...TEXT_STYLES.SMALL,
       color: '#546e7a',
     })
     text.setOrigin(0.5)
   }
 
+  private createAudioPrompt(): void {
+    const promptContainer = this.add.container(GAME_WIDTH / 2, GAME_HEIGHT - 80)
+    promptContainer.setDepth(DEPTH.UI)
+
+    const promptText = this.add.text(0, 0, 'Click anywhere to enable audio', {
+      ...TEXT_STYLES.SMALL,
+      fontSize: '14px',
+      color: '#888888',
+    })
+    promptText.setOrigin(0.5)
+    promptContainer.add(promptText)
+
+    // Blink animation
+    this.tweens.add({
+      targets: promptText,
+      alpha: 0.4,
+      duration: 800,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    })
+
+    // Click anywhere to unlock audio
+    this.input.once('pointerdown', () => {
+      if (!this.audioUnlocked) {
+        this.audioUnlocked = true
+        promptContainer.destroy()
+
+        // Play title music
+        playMusic(MUSIC_KEYS.TITLE_THEME, { fadeIn: 1000 })
+      }
+    })
+  }
+
+  private showSaveLoadPanel(): void {
+    if (this.mainMenuContainer) {
+      this.mainMenuContainer.setVisible(false)
+    }
+
+    this.saveLoadPanel = new SaveLoadPanel(this, GAME_WIDTH / 2 - 300, GAME_HEIGHT / 2 - 200, {
+      mode: 'load',
+      onSelect: (slot) => {
+        this.loadFromSlot(slot)
+      },
+      onCancel: () => {
+        this.hideSaveLoadPanel()
+      },
+    })
+  }
+
+  private hideSaveLoadPanel(): void {
+    if (this.saveLoadPanel) {
+      this.saveLoadPanel.destroy()
+      this.saveLoadPanel = null
+    }
+    if (this.mainMenuContainer) {
+      this.mainMenuContainer.setVisible(true)
+    }
+  }
+
+  private showSettingsPanel(): void {
+    if (this.mainMenuContainer) {
+      this.mainMenuContainer.setVisible(false)
+    }
+
+    // Create a container for settings panel with close button
+    const settingsContainer = this.add.container(GAME_WIDTH / 2 - 300, GAME_HEIGHT / 2 - 220)
+    settingsContainer.setDepth(DEPTH.OVERLAY)
+
+    // Background overlay
+    const overlay = this.add.graphics()
+    overlay.fillStyle(0x000000, 0.7)
+    overlay.fillRect(-GAME_WIDTH, -GAME_HEIGHT, GAME_WIDTH * 3, GAME_HEIGHT * 3)
+    settingsContainer.add(overlay)
+
+    this.settingsPanel = new SettingsPanel(this, GAME_WIDTH / 2 - 300, GAME_HEIGHT / 2 - 200)
+
+    // Close button
+    const closeBtn = this.add.text(GAME_WIDTH / 2 + 270, GAME_HEIGHT / 2 - 190, 'X', {
+      ...TEXT_STYLES.HEADING,
+      fontSize: '24px',
+      color: '#ef5350',
+    })
+    closeBtn.setInteractive({ useHandCursor: true })
+    closeBtn.on('pointerdown', () => {
+      settingsContainer.destroy()
+      this.settingsPanel?.destroy()
+      this.settingsPanel = null
+      if (this.mainMenuContainer) {
+        this.mainMenuContainer.setVisible(true)
+      }
+    })
+  }
+
+  private loadFromSlot(slot: number): void {
+    const save = loadSaveGame(slot)
+    if (!save) return
+
+    playSfx(SFX_KEYS.MENU_CONFIRM)
+
+    this.cameras.main.fadeOut(500, 0, 0, 0)
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      // Set game state from save before starting world scene
+      const gameState = gameStateFromSave(save)
+
+      this.scene.start(SCENE_KEYS.WORLD, {
+        newGame: false,
+        saveSlot: slot,
+        savedState: gameState,
+        playTime: save.playTime,
+        areaId: save.currentAreaId,
+      })
+    })
+  }
+
   private startNewGame(): void {
     this.cameras.main.fadeOut(500, 0, 0, 0)
     this.cameras.main.once('camerafadeoutcomplete', () => {
       this.scene.start(SCENE_KEYS.WORLD, { newGame: true })
-    })
-  }
-
-  private continueGame(): void {
-    const hasSave = hasSaveData(0) || hasSaveData(1) || hasSaveData(2)
-    if (!hasSave) return
-
-    this.cameras.main.fadeOut(500, 0, 0, 0)
-    this.cameras.main.once('camerafadeoutcomplete', () => {
-      this.scene.start(SCENE_KEYS.WORLD, { newGame: false, saveSlot: 0 })
     })
   }
 }

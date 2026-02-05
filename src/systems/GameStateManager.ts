@@ -1,4 +1,4 @@
-import type { PlayerCharacter, Inventory, MonsterInstance } from '../models/types'
+import type { PlayerCharacter, Inventory, MonsterInstance, QuestProgress } from '../models/types'
 import { createNewPlayer } from './CharacterSystem'
 import { MAX_INVENTORY_SLOTS } from '../config'
 
@@ -13,6 +13,8 @@ export interface GameState {
   readonly currentAreaId: string
   readonly defeatedBosses: ReadonlyArray<string>
   readonly openedChests: ReadonlyArray<string>
+  readonly activeQuests: ReadonlyArray<QuestProgress>
+  readonly completedQuestIds: ReadonlyArray<string>
 }
 
 const REGISTRY_KEY = 'gameState'
@@ -33,6 +35,8 @@ export function createInitialGameState(playerName: string): GameState {
     currentAreaId: 'sunlit-village',
     defeatedBosses: [],
     openedChests: [],
+    activeQuests: [],
+    completedQuestIds: [],
   }
 }
 
@@ -101,4 +105,18 @@ export function addOpenedChest(state: GameState, chestId: string): GameState {
     return state
   }
   return { ...state, openedChests: [...state.openedChests, chestId] }
+}
+
+export function updateActiveQuests(
+  state: GameState,
+  activeQuests: ReadonlyArray<QuestProgress>,
+): GameState {
+  return { ...state, activeQuests }
+}
+
+export function updateCompletedQuests(
+  state: GameState,
+  completedQuestIds: ReadonlyArray<string>,
+): GameState {
+  return { ...state, completedQuestIds }
 }

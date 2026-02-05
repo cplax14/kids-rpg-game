@@ -9,13 +9,33 @@ import {
   type DialogTree,
   type DialogChoice,
 } from '../systems/DialogSystem'
-import { getGameState, setGameState, updatePlayer } from '../systems/GameStateManager'
-import { fullHeal } from '../systems/CharacterSystem'
+import {
+  getGameState,
+  setGameState,
+  updatePlayer,
+  updateActiveQuests,
+  updateCompletedQuests,
+  updateInventory,
+} from '../systems/GameStateManager'
+import { fullHeal, updatePlayerGold, addExperience } from '../systems/CharacterSystem'
+import {
+  getQuest,
+  acceptQuest,
+  completeQuest,
+  trackNpcTalk,
+} from '../systems/QuestSystem'
+import { addItem } from '../systems/InventorySystem'
+import { getEquipment } from '../systems/EquipmentSystem'
+import { EventBus } from '../events/EventBus'
+import { GAME_EVENTS } from '../events/GameEvents'
+import { playSfx, SFX_KEYS } from '../systems/AudioSystem'
 
 interface DialogSceneData {
   readonly dialogTreeId: string
   readonly npcName: string
   readonly npcType: string
+  readonly npcId?: string
+  readonly messages?: ReadonlyArray<string>
 }
 
 const TYPEWRITER_DELAY = 30
@@ -25,6 +45,7 @@ export class DialogScene extends Phaser.Scene {
   private currentNode!: DialogNode
   private npcName!: string
   private npcType!: string
+  private npcId: string = ''
   private dialogBox!: Phaser.GameObjects.Container
   private speakerText!: Phaser.GameObjects.Text
   private messageText!: Phaser.GameObjects.Text
@@ -32,6 +53,7 @@ export class DialogScene extends Phaser.Scene {
   private isTyping: boolean = false
   private fullText: string = ''
   private typewriterTimer: Phaser.Time.TimerEvent | null = null
+  private pendingCelebration: { questId: string } | null = null
 
   constructor() {
     super({ key: SCENE_KEYS.DIALOG })
@@ -40,6 +62,27 @@ export class DialogScene extends Phaser.Scene {
   create(data: DialogSceneData): void {
     this.npcName = data.npcName
     this.npcType = data.npcType
+    this.npcId = data.npcId ?? ''
+    this.pendingCelebration = null
+
+    // Track NPC talk for quest objectives
+    if (this.npcId) {
+      try {
+        const state = getGameState(this)
+        const updatedQuests = trackNpcTalk(state.activeQuests, this.npcId)
+        if (updatedQuests !== state.activeQuests) {
+          setGameState(this, updateActiveQuests(state, updatedQuests))
+        }
+      } catch {
+        // No game state yet
+      }
+    }
+
+    // Handle simple messages (for signs, boss dialogs, etc.)
+    if (data.messages && data.messages.length > 0) {
+      this.handleSimpleMessages(data)
+      return
+    }
 
     const tree = getDialogTree(data.dialogTreeId)
     if (!tree) {
@@ -246,7 +289,150 @@ export class DialogScene extends Phaser.Scene {
         setGameState(this, updatePlayer(state, healed))
         break
       }
+      case 'accept_quest': {
+        if (!data) break
+        this.handleAcceptQuest(data)
+        break
+      }
+      case 'complete_quest': {
+        if (!data) break
+        this.handleCompleteQuest(data)
+        break
+      }
     }
+  }
+
+  private handleAcceptQuest(questId: string): void {
+    const quest = getQuest(questId)
+    if (!quest) return
+
+    try {
+      const state = getGameState(this)
+      const newActiveQuests = acceptQuest(quest, state.activeQuests)
+
+      setGameState(this, updateActiveQuests(state, newActiveQuests))
+
+      // Play SFX
+      playSfx(SFX_KEYS.QUEST_ACCEPT)
+
+      // Emit event
+      const newProgress = newActiveQuests.find((q) => q.questId === questId)
+      if (newProgress) {
+        EventBus.emit(GAME_EVENTS.QUEST_ACCEPTED, { quest, progress: newProgress })
+      }
+    } catch {
+      // No game state yet
+    }
+  }
+
+  private handleCompleteQuest(questId: string): void {
+    const quest = getQuest(questId)
+    if (!quest) return
+
+    try {
+      const state = getGameState(this)
+
+      // Find the quest progress
+      const progress = state.activeQuests.find((q) => q.questId === questId)
+      if (!progress || progress.status !== 'completed') return
+
+      // Complete the quest
+      const result = completeQuest(state.activeQuests, state.completedQuestIds, questId)
+
+      // Apply rewards
+      let updatedPlayer = addExperience(state.player, quest.rewards.experience)
+      updatedPlayer = updatePlayerGold(updatedPlayer, quest.rewards.gold)
+
+      // Add item rewards
+      let inventory = state.inventory
+      for (const reward of quest.rewards.items) {
+        const newInv = addItem(inventory, reward.itemId, reward.quantity)
+        if (newInv) inventory = newInv
+      }
+
+      // Add equipment reward as a key item (equipment grants are handled separately)
+      // The equipmentId would be granted via EquipmentSystem when implementing equipment grants
+
+      // Update state
+      let newState = updateActiveQuests(state, result.activeQuests)
+      newState = updateCompletedQuests(newState, result.completedIds)
+      newState = updatePlayer(newState, updatedPlayer)
+      newState = updateInventory(newState, inventory)
+
+      setGameState(this, newState)
+
+      // Play SFX
+      playSfx(SFX_KEYS.QUEST_COMPLETE)
+
+      // Emit event
+      EventBus.emit(GAME_EVENTS.QUEST_COMPLETED, { quest, rewards: quest.rewards })
+
+      // Set pending celebration (will be shown after dialog closes)
+      this.pendingCelebration = { questId }
+    } catch {
+      // No game state yet
+    }
+  }
+
+  private handleSimpleMessages(data: DialogSceneData): void {
+    if (!data.messages || data.messages.length === 0) {
+      this.closeDialog()
+      return
+    }
+
+    // Semi-transparent background
+    const bg = this.add.graphics()
+    bg.fillStyle(0x000000, 0.5)
+    bg.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
+    bg.setDepth(DEPTH.OVERLAY)
+
+    this.createDialogBox()
+
+    // Create simple nodes from messages
+    const nodes: DialogNode[] = data.messages.map((msg, i) => ({
+      nodeId: `msg-${i}`,
+      speaker: data.npcName,
+      text: msg,
+      choices: [],
+      isEnd: i === data.messages!.length - 1,
+    }))
+
+    // Create a synthetic dialog tree
+    this.dialogTree = {
+      treeId: 'simple-messages',
+      startNodeId: 'msg-0',
+      nodes,
+    }
+
+    this.currentNode = nodes[0]
+    this.showNode(this.currentNode)
+
+    // Override advance to go through messages
+    let currentIndex = 0
+    const advanceHandler = () => {
+      if (this.isTyping) {
+        this.typewriterTimer?.remove()
+        this.typewriterTimer = null
+        this.isTyping = false
+        this.messageText.setText(this.fullText)
+        return
+      }
+
+      currentIndex++
+      if (currentIndex < nodes.length) {
+        this.showNode(nodes[currentIndex])
+      } else {
+        this.closeDialog()
+      }
+    }
+
+    this.input.off('pointerdown')
+    this.input.keyboard?.off('keydown-SPACE')
+    this.input.keyboard?.off('keydown-E')
+
+    this.input.on('pointerdown', advanceHandler)
+    this.input.keyboard?.on('keydown-SPACE', advanceHandler)
+    this.input.keyboard?.on('keydown-E', advanceHandler)
   }
 
   private clearChoices(): void {

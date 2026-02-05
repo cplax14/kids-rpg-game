@@ -342,3 +342,53 @@ export const GameSettingsSchema = z.object({
   textSpeed: z.enum(['slow', 'normal', 'fast']),
   screenShake: z.boolean(),
 })
+
+// ── Quest System ──
+
+export const QuestTypeSchema = z.enum(['defeat', 'collect', 'boss', 'explore', 'talk'])
+export const QuestStatusSchema = z.enum(['available', 'active', 'completed', 'turned_in'])
+
+export const QuestObjectiveSchema = z.object({
+  objectiveId: z.string().min(1),
+  type: QuestTypeSchema,
+  targetId: z.string().min(1),
+  targetName: z.string().min(1),
+  requiredCount: z.number().int().min(1),
+  description: z.string(),
+})
+
+export const QuestRewardItemSchema = z.object({
+  itemId: z.string().min(1),
+  quantity: z.number().int().min(1),
+})
+
+export const QuestRewardsSchema = z.object({
+  experience: z.number().int().min(0),
+  gold: z.number().int().min(0),
+  items: z.array(QuestRewardItemSchema),
+  equipmentId: z.string().nullable(),
+})
+
+export const QuestDefinitionSchema = z.object({
+  questId: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string(),
+  giverNpcId: z.string().min(1),
+  turnInNpcId: z.string().min(1),
+  recommendedLevel: z.number().int().min(1),
+  objectives: z.array(QuestObjectiveSchema),
+  rewards: QuestRewardsSchema,
+  rewardEquipmentTier: z.number().int().min(1).max(5),
+  rewardEquipmentSlots: z.array(z.enum(['weapon', 'armor', 'helmet', 'accessory'])),
+  prerequisiteQuestIds: z.array(z.string()),
+  isRepeatable: z.boolean(),
+  celebrationMessage: z.string(),
+})
+
+export const QuestProgressSchema = z.object({
+  questId: z.string().min(1),
+  status: QuestStatusSchema,
+  objectiveProgress: z.record(z.string(), z.number().int().min(0)),
+  acceptedAt: z.string(),
+  completedAt: z.string().nullable(),
+})

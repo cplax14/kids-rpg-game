@@ -5,6 +5,9 @@ import type {
   PlayerCharacter,
   GameSettings,
   CaptureAttempt,
+  QuestDefinition,
+  QuestProgress,
+  QuestRewards,
 } from '../models/types'
 
 export const GAME_EVENTS = {
@@ -74,6 +77,13 @@ export const GAME_EVENTS = {
   MENU_OPEN: 'ui:menu_open',
   MENU_CLOSE: 'ui:menu_close',
 
+  // Quest
+  QUEST_ACCEPTED: 'quest:accepted',
+  QUEST_PROGRESS_UPDATED: 'quest:progress_updated',
+  QUEST_OBJECTIVE_COMPLETE: 'quest:objective_complete',
+  QUEST_READY_TO_TURN_IN: 'quest:ready_to_turn_in',
+  QUEST_COMPLETED: 'quest:completed',
+
   // Audio
   MUSIC_PLAY: 'audio:music_play',
   SFX_PLAY: 'audio:sfx_play',
@@ -115,4 +125,11 @@ export interface GameEventPayloads {
 
   // Bond events
   [GAME_EVENTS.BOND_INCREASED]: { monster: MonsterInstance; amount: number; newLevel: number }
+
+  // Quest events
+  [GAME_EVENTS.QUEST_ACCEPTED]: { quest: QuestDefinition; progress: QuestProgress }
+  [GAME_EVENTS.QUEST_PROGRESS_UPDATED]: { questId: string; objectiveId: string; current: number; required: number }
+  [GAME_EVENTS.QUEST_OBJECTIVE_COMPLETE]: { questId: string; objectiveId: string }
+  [GAME_EVENTS.QUEST_READY_TO_TURN_IN]: { quest: QuestDefinition; progress: QuestProgress }
+  [GAME_EVENTS.QUEST_COMPLETED]: { quest: QuestDefinition; rewards: QuestRewards }
 }

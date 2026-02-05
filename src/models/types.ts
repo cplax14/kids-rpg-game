@@ -480,6 +480,24 @@ export interface GameAreaDefinition {
   readonly ambientColor?: number
 }
 
+// ── Tutorial ──
+
+export type TutorialTrigger =
+  | 'first_battle'
+  | 'first_capture'
+  | 'first_menu'
+  | 'first_shop'
+  | 'first_breeding'
+  | 'first_area_transition'
+
+export interface TutorialStep {
+  readonly id: string
+  readonly trigger: TutorialTrigger
+  readonly title: string
+  readonly message: string
+  readonly position: 'top' | 'bottom' | 'center'
+}
+
 // ── Save Game ──
 
 export interface GameSettings {
@@ -504,4 +522,56 @@ export interface SaveGame {
   readonly questFlags: Record<string, boolean>
   readonly playTime: number
   readonly settings: GameSettings
+  readonly activeQuests: ReadonlyArray<QuestProgress>
+  readonly completedQuestIds: ReadonlyArray<string>
+}
+
+// ── Quest System ──
+
+export type QuestType = 'defeat' | 'collect' | 'boss' | 'explore' | 'talk'
+export type QuestStatus = 'available' | 'active' | 'completed' | 'turned_in'
+
+export interface QuestObjective {
+  readonly objectiveId: string
+  readonly type: QuestType
+  readonly targetId: string
+  readonly targetName: string
+  readonly requiredCount: number
+  readonly description: string
+}
+
+export interface QuestRewardItem {
+  readonly itemId: string
+  readonly quantity: number
+}
+
+export interface QuestRewards {
+  readonly experience: number
+  readonly gold: number
+  readonly items: ReadonlyArray<QuestRewardItem>
+  readonly equipmentId: string | null
+}
+
+export interface QuestDefinition {
+  readonly questId: string
+  readonly name: string
+  readonly description: string
+  readonly giverNpcId: string
+  readonly turnInNpcId: string
+  readonly recommendedLevel: number
+  readonly objectives: ReadonlyArray<QuestObjective>
+  readonly rewards: QuestRewards
+  readonly rewardEquipmentTier: number
+  readonly rewardEquipmentSlots: ReadonlyArray<EquipmentSlot>
+  readonly prerequisiteQuestIds: ReadonlyArray<string>
+  readonly isRepeatable: boolean
+  readonly celebrationMessage: string
+}
+
+export interface QuestProgress {
+  readonly questId: string
+  readonly status: QuestStatus
+  readonly objectiveProgress: Record<string, number>
+  readonly acceptedAt: string
+  readonly completedAt: string | null
 }

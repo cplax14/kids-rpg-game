@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
-import type { BattleCombatant, Ability, InventorySlot } from '../../models/types'
+import type { BattleCombatant, Ability, InventorySlot, MonsterElement } from '../../models/types'
 import { GAME_WIDTH, GAME_HEIGHT, COLORS, TEXT_STYLES, DEPTH } from '../../config'
+import { drawElementIndicator, ELEMENT_INDICATORS } from '../../utils/accessibility'
 
 export type CommandChoice = 'attack' | 'ability' | 'defend' | 'item' | 'capture' | 'flee'
 
@@ -82,11 +83,10 @@ export class BattleHUD {
       })
       container.add(mpText)
 
-      const elementColor = this.getElementColor(ability.element)
-      const elemDot = this.scene.add.graphics()
-      elemDot.fillStyle(elementColor, 1)
-      elemDot.fillCircle(360, y + 19, 6)
-      container.add(elemDot)
+      // Element indicator with shape for accessibility
+      const elemIndicator = this.scene.add.graphics()
+      drawElementIndicator(elemIndicator, 360, y + 19, ability.element as MonsterElement, 14)
+      container.add(elemIndicator)
 
       if (canUse) {
         const hitArea = this.scene.add.rectangle(200, y + 19, 380, 38)
