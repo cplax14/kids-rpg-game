@@ -9,6 +9,7 @@ import {
   getSpecies,
   calculateMonsterStats,
   getLearnedAbilitiesAtLevel,
+  createMonsterInstance,
 } from '../systems/MonsterSystem'
 import { createCombatantFromPlayer, createCombatantFromEnemy } from '../systems/CombatSystem'
 import { addExperience, updatePlayerGold } from '../systems/CharacterSystem'
@@ -22,6 +23,7 @@ import {
   hasGameState,
   updatePlayer,
   updateInventory,
+  updateSquad,
   updateDiscoveredSpecies,
   type GameState,
 } from '../systems/GameStateManager'
@@ -45,13 +47,12 @@ interface WorldSceneData {
 
 // Encounter data for the area around the village
 const VILLAGE_ENCOUNTERS = [
-  { speciesId: 'flamepup', weight: 15, minLevel: 1, maxLevel: 4 },
-  { speciesId: 'bubblefin', weight: 15, minLevel: 1, maxLevel: 4 },
-  { speciesId: 'pebblit', weight: 15, minLevel: 1, maxLevel: 4 },
-  { speciesId: 'breezling', weight: 15, minLevel: 1, maxLevel: 3 },
-  { speciesId: 'mossbun', weight: 20, minLevel: 1, maxLevel: 3 },
-  { speciesId: 'shadowpup', weight: 10, minLevel: 2, maxLevel: 5 },
-  { speciesId: 'glowmoth', weight: 10, minLevel: 1, maxLevel: 4 },
+  { speciesId: 'flamepup', weight: 15, minLevel: 1, maxLevel: 2 },
+  { speciesId: 'bubblefin', weight: 15, minLevel: 1, maxLevel: 2 },
+  { speciesId: 'pebblit', weight: 15, minLevel: 1, maxLevel: 2 },
+  { speciesId: 'breezling', weight: 20, minLevel: 1, maxLevel: 2 },
+  { speciesId: 'mossbun', weight: 25, minLevel: 1, maxLevel: 2 },
+  { speciesId: 'glowmoth', weight: 10, minLevel: 1, maxLevel: 2 },
 ]
 
 const ENCOUNTER_STEP_THRESHOLD = 20
@@ -77,13 +78,20 @@ export class WorldScene extends Phaser.Scene {
   create(data: WorldSceneData): void {
     this.cameras.main.fadeIn(500, 0, 0, 0)
 
+    const isNewGame = !hasGameState(this)
+
     // Initialize game state on new game
-    if (!hasGameState(this)) {
+    if (isNewGame) {
       setGameState(this, createInitialGameState('Hero'))
     }
 
     // Load game data into systems
     this.loadGameData()
+
+    // Give starter content to new players
+    if (isNewGame) {
+      this.giveStarterContent()
+    }
 
     this.createMap()
     this.createPlayer(data)
@@ -150,6 +158,30 @@ export class WorldScene extends Phaser.Scene {
 
     const breedingRecipesData = this.cache.json.get('breeding-recipes-data') as BreedingRecipe[] | undefined
     if (breedingRecipesData) loadBreedingRecipes(breedingRecipesData)
+  }
+
+  private giveStarterContent(): void {
+    const gameState = getGameState(this)
+
+    // Give starter monster: Level 3 Mossbun named "Clover"
+    const starterMonster = createMonsterInstance('mossbun', 3, { nickname: 'Clover' })
+    if (starterMonster) {
+      const monsterInSquad = { ...starterMonster, isInSquad: true }
+      let newState = updateSquad(gameState, [monsterInSquad])
+
+      // Discover mossbun in bestiary
+      newState = updateDiscoveredSpecies(newState, ['mossbun'])
+
+      // Give starter items: 5 small potions and 5 capture capsules
+      let inventory = newState.inventory
+      const withPotions = addItem(inventory, 'potion-small', 5)
+      if (withPotions) inventory = withPotions
+      const withCapsules = addItem(inventory, 'capture-capsule', 5)
+      if (withCapsules) inventory = withCapsules
+      newState = updateInventory(newState, inventory)
+
+      setGameState(this, newState)
+    }
   }
 
   private checkForEncounter(): void {
