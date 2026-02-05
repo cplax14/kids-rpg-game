@@ -98,37 +98,33 @@ export class PreloaderScene extends Phaser.Scene {
   }
 
   private loadAudioAssets(): void {
-    // Load music tracks (placeholder paths - real files would be added later)
-    this.load.audio(MUSIC_KEYS.TITLE_THEME, 'assets/audio/music/title.ogg')
-    this.load.audio(MUSIC_KEYS.VILLAGE_PEACEFUL, 'assets/audio/music/village.ogg')
-    this.load.audio(MUSIC_KEYS.FOREST_MYSTICAL, 'assets/audio/music/forest.ogg')
-    this.load.audio(MUSIC_KEYS.CAVE_AMBIENT, 'assets/audio/music/cave.ogg')
-    this.load.audio(MUSIC_KEYS.BATTLE_NORMAL, 'assets/audio/music/battle.ogg')
-    this.load.audio(MUSIC_KEYS.BATTLE_BOSS, 'assets/audio/music/boss.ogg')
-    this.load.audio(MUSIC_KEYS.VICTORY_FANFARE, 'assets/audio/music/victory.ogg')
-
-    // Load SFX
-    this.load.audio(SFX_KEYS.MENU_SELECT, 'assets/audio/sfx/menu-select.ogg')
-    this.load.audio(SFX_KEYS.MENU_CONFIRM, 'assets/audio/sfx/menu-confirm.ogg')
-    this.load.audio(SFX_KEYS.ATTACK_HIT, 'assets/audio/sfx/attack-hit.ogg')
-    this.load.audio(SFX_KEYS.CAPTURE_THROW, 'assets/audio/sfx/capture-throw.ogg')
-    this.load.audio(SFX_KEYS.CAPTURE_SHAKE, 'assets/audio/sfx/capture-shake.ogg')
-    this.load.audio(SFX_KEYS.CAPTURE_SUCCESS, 'assets/audio/sfx/capture-success.ogg')
-    this.load.audio(SFX_KEYS.CAPTURE_FAIL, 'assets/audio/sfx/capture-fail.ogg')
-    this.load.audio(SFX_KEYS.LEVEL_UP, 'assets/audio/sfx/level-up.ogg')
-    this.load.audio(SFX_KEYS.HEAL, 'assets/audio/sfx/heal.ogg')
-    this.load.audio(SFX_KEYS.CHEST_OPEN, 'assets/audio/sfx/chest-open.ogg')
-    this.load.audio(SFX_KEYS.QUEST_ACCEPT, 'assets/audio/sfx/quest-accept.ogg')
-    this.load.audio(SFX_KEYS.QUEST_PROGRESS, 'assets/audio/sfx/quest-progress.ogg')
-    this.load.audio(SFX_KEYS.QUEST_COMPLETE, 'assets/audio/sfx/quest-complete.ogg')
-
-    // Handle audio loading errors gracefully (audio files may not exist yet)
-    this.load.on('loaderror', (fileObj: Phaser.Loader.File) => {
-      if (fileObj.type === 'audio') {
-        // Silently ignore missing audio files during development
-        console.warn(`Audio file not found: ${fileObj.key}`)
-      }
-    })
+    // Audio loading disabled until real audio files are added
+    // The audio system will handle missing audio gracefully
+    // TODO: Enable audio loading when assets/audio/ files are added
+    //
+    // Music tracks to add:
+    // - assets/audio/music/title.ogg
+    // - assets/audio/music/village.ogg
+    // - assets/audio/music/forest.ogg
+    // - assets/audio/music/cave.ogg
+    // - assets/audio/music/battle.ogg
+    // - assets/audio/music/boss.ogg
+    // - assets/audio/music/victory.ogg
+    //
+    // SFX to add:
+    // - assets/audio/sfx/menu-select.ogg
+    // - assets/audio/sfx/menu-confirm.ogg
+    // - assets/audio/sfx/attack-hit.ogg
+    // - assets/audio/sfx/capture-throw.ogg
+    // - assets/audio/sfx/capture-shake.ogg
+    // - assets/audio/sfx/capture-success.ogg
+    // - assets/audio/sfx/capture-fail.ogg
+    // - assets/audio/sfx/level-up.ogg
+    // - assets/audio/sfx/heal.ogg
+    // - assets/audio/sfx/chest-open.ogg
+    // - assets/audio/sfx/quest-accept.ogg
+    // - assets/audio/sfx/quest-progress.ogg
+    // - assets/audio/sfx/quest-complete.ogg
   }
 
   private createPlayerAnimations(): void {
