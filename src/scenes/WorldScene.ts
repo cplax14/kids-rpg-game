@@ -197,6 +197,14 @@ export class WorldScene extends Phaser.Scene {
 
     // Play area music
     this.playAreaMusic()
+
+    // Show tutorial on first area transition (when entering a new area that isn't the starting village)
+    if (!data.newGame && this.currentAreaId !== 'village') {
+      // Use setTimeout to ensure scene is fully ready before showing tutorial
+      this.time.delayedCall(100, () => {
+        checkAndShowTutorial(this, 'first_area_transition')
+      })
+    }
   }
 
   update(): void {
@@ -624,8 +632,8 @@ export class WorldScene extends Phaser.Scene {
       return
     }
 
-    // Show tutorial on first area transition
-    checkAndShowTutorial(this, 'first_area_transition')
+    // Note: Tutorial for first area transition is shown in the new scene's create()
+    // Don't show tutorials during transition as the scene is about to be destroyed
 
     // Auto-save on area transition
     autoSave(this, this.currentSaveSlot, this.getCurrentPlayTime())
