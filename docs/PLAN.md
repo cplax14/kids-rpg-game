@@ -107,28 +107,32 @@ Fire > Earth > Wind > Water > Fire (cycle), Light <> Dark (mutual weakness), Neu
 - [x] Battle animations -- attack, hit, damage numbers, KO, victory fanfare
 - [x] 127 unit tests for CharacterSystem, MonsterSystem, CombatSystem (86%+ coverage)
 
-### Phase 3: Inventory, Equipment, and Items
-- 20+ consumable items, 15+ weapons, 15+ armor, 10+ accessories
-- InventorySystem -- add/remove items, stacking, usage
-- EquipmentSystem -- equip/unequip, stat recalculation
-- Inventory and Equipment menu UI
-- Item usage in battle
-- Loot drops from defeated monsters
-- NPC entity with interaction triggers
-- ShopScene -- buy/sell interface
-- DialogSystem -- dialog trees, typewriter effect, branching choices
-- Unit tests for inventory operations, equipment stats
+### Phase 3: Inventory, Equipment, and Items (COMPLETED)
+- [x] 28 consumable items, 15 weapons, 15 armor, 15 helmets, 10 accessories (55 equipment total)
+- [x] GameStateManager -- registry-based cross-scene state sharing
+- [x] InventorySystem -- add/remove items, stacking, sorting, usage
+- [x] EquipmentSystem -- equip/unequip, stat bonuses, comparison preview
+- [x] ItemEffectSystem -- heal/cure/buff effects on combatants and players
+- [x] LootSystem -- species-based loot tables with weighted drops
+- [x] Inventory and Equipment menu UI (MenuScene with tab panels)
+- [x] Item usage in battle (Item command in BattleHUD)
+- [x] Loot drops from defeated monsters
+- [x] NPC entity with color-coded types, interaction zones, press-E prompts
+- [x] ShopScene -- buy/sell interface with gold display and inventory checks
+- [x] DialogSystem -- JSON-driven dialog trees, typewriter effect, branching choices
+- [x] DialogScene -- overlay with actions (open_shop, heal_party)
+- [x] 429 unit tests passing, 93.56% statement coverage on src/systems/
 
-### Phase 4: Monster Capture System
-- SquadSystem -- player + up to 3 monsters (4 total combatants)
-- CaptureSystem -- success rate based on HP%, rarity, device quality, status, luck
-- 3-4 capture devices (Basic Trap through Crystal Trap)
-- Capture animation in battle (device flies, shakes, success/fail)
-- Squad members fight alongside player
-- Squad management UI, monster detail view
-- BestiaryMenu -- discovered monsters catalog
-- Bond system -- monsters grow stronger with use (0-100 bond level)
-- Unit/integration tests for capture flow
+### Phase 4: Monster Capture System (COMPLETED)
+- [x] SquadSystem -- player + up to 3 monsters (4 total combatants)
+- [x] CaptureSystem -- success rate based on HP%, rarity, device quality, status, luck
+- [x] 4 capture devices (capture-capsule, super-capsule, ultra-capsule, master-capsule)
+- [x] Capture animation in battle (device flies, shakes, success/fail)
+- [x] Squad members fight alongside player with AI control
+- [x] Squad management UI with storage, monster detail view
+- [x] BestiaryPanel -- discovered monsters catalog with stats and abilities
+- [x] Bond system -- monsters grow stronger with use (0-100 bond level)
+- [x] 534 unit tests passing
 
 ### Phase 5: Monster Breeding System
 - Breeding group compatibility rules

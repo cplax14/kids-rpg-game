@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS, DEPTH, TEXT_STYLES } from '../config'
-import type { Battle, BattleCombatant, BattleAction, MonsterElement, ItemDrop } from '../models/types'
+import type { Battle, BattleCombatant, BattleAction, MonsterElement, ItemDrop, MonsterInstance } from '../models/types'
 import {
   createBattle,
   executeAction,
@@ -17,9 +17,26 @@ import { BattleHUD, type CommandChoice } from '../ui/hud/BattleHUD'
 import { EventBus } from '../events/EventBus'
 import { GAME_EVENTS } from '../events/GameEvents'
 import { generateBattleLoot } from '../systems/LootSystem'
-import { getGameState, setGameState, updateInventory } from '../systems/GameStateManager'
-import { useItem, getConsumableItems } from '../systems/InventorySystem'
+import {
+  getGameState,
+  setGameState,
+  updateInventory,
+  updateSquad,
+  updateMonsterStorage,
+  updateDiscoveredSpecies,
+} from '../systems/GameStateManager'
+import { useItem, getConsumableItems, getCaptureDevices, getItem } from '../systems/InventorySystem'
 import { useItemOnCombatant } from '../systems/ItemEffectSystem'
+import { getSpecies } from '../systems/MonsterSystem'
+import {
+  attemptCapture,
+  calculateShakeCount,
+  createCapturedMonster,
+} from '../systems/CaptureSystem'
+import { addToSquad, applyPostBattleBond, isSquadFull } from '../systems/SquadSystem'
+import { discoverSpecies, discoverMultipleSpecies } from '../systems/BestiarySystem'
+import { getSquadMonsterAction } from '../systems/SquadAI'
+import { playCaptureAnimation } from '../ui/animations/CaptureAnimation'
 
 interface BattleSceneData {
   readonly playerCombatants: ReadonlyArray<BattleCombatant>
@@ -217,13 +234,26 @@ export class BattleScene extends Phaser.Scene {
       return
     }
 
-    if (current.isPlayer) {
+    if (current.isPlayer && !current.isMonster) {
+      // Human player's turn
       this.phase = 'player_input'
       this.hud.showCommandMenu()
+    } else if (current.isPlayer && current.isMonster) {
+      // Squad monster's turn - use AI
+      this.phase = 'executing'
+      this.executeSquadMonsterTurn(current)
     } else {
+      // Enemy's turn
       this.phase = 'enemy_turn'
       this.executeEnemyTurn(current)
     }
+  }
+
+  private executeSquadMonsterTurn(monster: BattleCombatant): void {
+    this.time.delayedCall(400, () => {
+      const action = getSquadMonsterAction(this.battle, monster)
+      this.executeActionAndAnimate(action)
+    })
   }
 
   private handlePlayerCommand(choice: CommandChoice, targetId?: string, abilityId?: string): void {
@@ -252,6 +282,25 @@ export class BattleScene extends Phaser.Scene {
         // No game state yet, show nothing
       }
       this.phase = 'player_input'
+      return
+    }
+
+    // Handle capture device selection
+    if (choice === 'capture' && !abilityId) {
+      try {
+        const state = getGameState(this)
+        const devices = getCaptureDevices(state.inventory)
+        this.hud.showCaptureDeviceMenu(devices)
+      } catch {
+        // No game state yet, show nothing
+      }
+      this.phase = 'player_input'
+      return
+    }
+
+    // Handle capture attempt
+    if (choice === 'capture' && abilityId) {
+      this.handleCaptureAttempt(current, abilityId)
       return
     }
 
@@ -325,6 +374,181 @@ export class BattleScene extends Phaser.Scene {
       this.phase = 'player_input'
       this.hud.showCommandMenu()
     }
+  }
+
+  private handleCaptureAttempt(actor: BattleCombatant, deviceItemId: string): void {
+    try {
+      const state = getGameState(this)
+      const deviceSlot = state.inventory.items.find((s) => s.item.itemId === deviceItemId)
+      if (!deviceSlot) {
+        this.phase = 'player_input'
+        this.hud.showCommandMenu()
+        return
+      }
+
+      // Find the target enemy (first alive, capturable enemy)
+      const aliveEnemies = this.battle.enemySquad.filter(
+        (e) => e.stats.currentHp > 0 && e.capturable,
+      )
+      if (aliveEnemies.length === 0) {
+        this.hud.showMessage('No capturable targets!').then(() => {
+          this.phase = 'player_input'
+          this.hud.showCommandMenu()
+        })
+        return
+      }
+
+      const target = aliveEnemies[0]
+
+      // Get species difficulty
+      const speciesId = this.sceneData.enemySpeciesIds?.[0] ?? ''
+      const species = getSpecies(speciesId)
+      const baseDifficulty = species?.captureBaseDifficulty ?? 0.5
+      const enemyLevel = this.extractLevelFromName(target.name)
+
+      // Decrement device from inventory
+      const newInventory = useItem(state.inventory, deviceItemId)
+      if (newInventory) {
+        setGameState(this, updateInventory(state, newInventory))
+      }
+
+      // Perform capture attempt
+      const captureAttempt = attemptCapture(
+        target,
+        deviceSlot.item,
+        actor.stats.luck,
+        baseDifficulty,
+      )
+
+      const shakeCount = calculateShakeCount(captureAttempt)
+
+      // Emit capture attempt event
+      EventBus.emit(GAME_EVENTS.CAPTURE_ATTEMPT, { attempt: captureAttempt, shakeCount })
+
+      // Get sprite positions for animation
+      const actorSprite = this.findSprite(actor.combatantId)
+      const targetSprite = this.findSprite(target.combatantId)
+
+      if (!actorSprite || !targetSprite) {
+        this.finalizeCaptureAttempt(captureAttempt, shakeCount, target, speciesId, enemyLevel)
+        return
+      }
+
+      // Play capture animation
+      this.hud.showMessage(`Throwing ${deviceSlot.item.name}...`).then(() => {
+        playCaptureAnimation({
+          scene: this,
+          deviceX: actorSprite.x,
+          deviceY: actorSprite.y,
+          targetX: targetSprite.x,
+          targetY: targetSprite.y,
+          shakeCount,
+          succeeded: captureAttempt.succeeded,
+          deviceName: deviceSlot.item.name,
+        }).then(() => {
+          this.finalizeCaptureAttempt(captureAttempt, shakeCount, target, speciesId, enemyLevel)
+        })
+      })
+    } catch {
+      this.phase = 'player_input'
+      this.hud.showCommandMenu()
+    }
+  }
+
+  private finalizeCaptureAttempt(
+    captureAttempt: ReturnType<typeof attemptCapture>,
+    shakeCount: number,
+    target: BattleCombatant,
+    speciesId: string,
+    enemyLevel: number,
+  ): void {
+    if (captureAttempt.succeeded) {
+      // Create captured monster
+      const capturedMonster = createCapturedMonster(speciesId, enemyLevel)
+
+      if (capturedMonster) {
+        // Add to squad or storage
+        const state = getGameState(this)
+        const newSquad = addToSquad(state.squad, capturedMonster)
+
+        if (newSquad) {
+          setGameState(this, updateSquad(state, newSquad))
+          EventBus.emit(GAME_EVENTS.SQUAD_MONSTER_ADDED, { monster: capturedMonster })
+        } else {
+          // Squad full, add to storage
+          const newStorage = [...state.monsterStorage, capturedMonster]
+          setGameState(this, updateMonsterStorage(state, newStorage))
+        }
+
+        // Discover species
+        const updatedState = getGameState(this)
+        const newDiscovered = discoverSpecies(updatedState.discoveredSpecies, speciesId)
+        setGameState(this, updateDiscoveredSpecies(updatedState, newDiscovered))
+
+        // Emit success events
+        EventBus.emit(GAME_EVENTS.CAPTURE_SUCCESS, { monster: capturedMonster, attempt: captureAttempt })
+        EventBus.emit(GAME_EVENTS.MONSTER_CAPTURED, { monster: capturedMonster })
+
+        const species = getSpecies(speciesId)
+        if (species) {
+          EventBus.emit(GAME_EVENTS.SPECIES_DISCOVERED, { speciesId, speciesName: species.name })
+        }
+
+        // Remove target from battle
+        this.battle = {
+          ...this.battle,
+          enemySquad: this.battle.enemySquad.filter(
+            (e) => e.combatantId !== target.combatantId,
+          ),
+          turnOrder: this.battle.turnOrder.filter(
+            (c) => c.combatantId !== target.combatantId,
+          ),
+        }
+
+        // Hide the target sprite
+        const targetSprite = this.findSprite(target.combatantId)
+        if (targetSprite) {
+          targetSprite.setVisible(false)
+        }
+
+        const locationText = newSquad ? 'squad' : 'storage'
+        this.hud.showMessage(`Caught ${target.name}! Added to ${locationText}!`).then(() => {
+          this.hud.updatePlayerStats(this.battle.playerSquad)
+          this.hud.updateEnemyStats(this.battle.enemySquad)
+
+          // Check if battle should end (no more enemies)
+          if (this.battle.enemySquad.every((e) => e.stats.currentHp <= 0)) {
+            this.handleVictory()
+          } else {
+            this.advanceToNextTurn()
+          }
+        })
+      }
+    } else {
+      // Capture failed
+      EventBus.emit(GAME_EVENTS.CAPTURE_FAIL, { attempt: captureAttempt, shakeCount })
+
+      this.hud.showMessage(`${target.name} broke free!`).then(() => {
+        this.advanceToNextTurn()
+      })
+    }
+  }
+
+  private advanceToNextTurn(): void {
+    this.currentTurnIndex++
+
+    const aliveCount = [...this.battle.playerSquad, ...this.battle.enemySquad].filter(
+      (c) => c.stats.currentHp > 0,
+    ).length
+    if (this.currentTurnIndex >= aliveCount) {
+      this.currentTurnIndex = 0
+    }
+    this.startNextTurn()
+  }
+
+  private extractLevelFromName(name: string): number {
+    const match = name.match(/Lv\.(\d+)/)
+    return match ? parseInt(match[1], 10) : 1
   }
 
   private executeEnemyTurn(enemy: BattleCombatant): void {
@@ -421,6 +645,43 @@ export class BattleScene extends Phaser.Scene {
     // Generate loot
     const speciesIds = this.sceneData.enemySpeciesIds ?? []
     const loot = generateBattleLoot(speciesIds)
+
+    // Apply bond increases to squad
+    try {
+      const state = getGameState(this)
+      if (state.squad.length > 0) {
+        const updatedSquad = applyPostBattleBond(state.squad, true)
+        setGameState(this, updateSquad(state, updatedSquad))
+
+        // Emit bond events
+        for (let i = 0; i < updatedSquad.length; i++) {
+          const monster = updatedSquad[i]
+          const oldMonster = state.squad[i]
+          if (monster.bondLevel !== oldMonster.bondLevel) {
+            EventBus.emit(GAME_EVENTS.BOND_INCREASED, {
+              monster,
+              amount: monster.bondLevel - oldMonster.bondLevel,
+              newLevel: monster.bondLevel,
+            })
+          }
+        }
+      }
+
+      // Discover encountered species
+      if (speciesIds.length > 0) {
+        const updatedState = getGameState(this)
+        const newDiscovered = discoverMultipleSpecies(updatedState.discoveredSpecies, speciesIds)
+        if (newDiscovered !== updatedState.discoveredSpecies) {
+          setGameState(this, updateDiscoveredSpecies(updatedState, newDiscovered))
+          EventBus.emit(GAME_EVENTS.BESTIARY_UPDATED, {
+            discovered: newDiscovered,
+            newCount: newDiscovered.length - updatedState.discoveredSpecies.length,
+          })
+        }
+      }
+    } catch {
+      // No game state
+    }
 
     // Victory flash
     this.cameras.main.flash(300, 255, 255, 200)

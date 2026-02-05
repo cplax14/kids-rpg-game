@@ -128,6 +128,10 @@ export function executeAction(battle: Battle, action: BattleAction): ActionResul
       return executeDefend(battle, action)
     case 'flee':
       return executeFlee(battle, action)
+    case 'capture':
+      return executeCaptureAction(battle, action)
+    case 'item':
+      return executeItemAction(battle, action)
     default:
       return {
         battle,
@@ -137,6 +141,31 @@ export function executeAction(battle: Battle, action: BattleAction): ActionResul
         statusApplied: null,
         message: 'Nothing happened.',
       }
+  }
+}
+
+function executeCaptureAction(battle: Battle, action: BattleAction): ActionResult {
+  // Capture logic is handled in BattleScene as it requires external systems
+  // This just transitions to capture_attempt state
+  return {
+    battle: { ...battle, state: 'capture_attempt' },
+    damage: 0,
+    isCritical: false,
+    isEffective: 'normal',
+    statusApplied: null,
+    message: 'Attempting to capture...',
+  }
+}
+
+function executeItemAction(battle: Battle, action: BattleAction): ActionResult {
+  // Item logic is handled in BattleScene as it requires inventory system
+  return {
+    battle,
+    damage: 0,
+    isCritical: false,
+    isEffective: 'normal',
+    statusApplied: null,
+    message: 'Used item.',
   }
 }
 

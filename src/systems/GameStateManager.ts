@@ -8,6 +8,8 @@ export interface GameState {
   readonly player: PlayerCharacter
   readonly inventory: Inventory
   readonly squad: ReadonlyArray<MonsterInstance>
+  readonly monsterStorage: ReadonlyArray<MonsterInstance>
+  readonly discoveredSpecies: ReadonlyArray<string>
 }
 
 const REGISTRY_KEY = 'gameState'
@@ -23,6 +25,8 @@ export function createInitialGameState(playerName: string): GameState {
       equipment: [],
     },
     squad: [],
+    monsterStorage: [],
+    discoveredSpecies: [],
   }
 }
 
@@ -59,4 +63,18 @@ export function updateInventory(state: GameState, inventory: Inventory): GameSta
 
 export function updateSquad(state: GameState, squad: ReadonlyArray<MonsterInstance>): GameState {
   return { ...state, squad }
+}
+
+export function updateMonsterStorage(
+  state: GameState,
+  monsterStorage: ReadonlyArray<MonsterInstance>,
+): GameState {
+  return { ...state, monsterStorage }
+}
+
+export function updateDiscoveredSpecies(
+  state: GameState,
+  discoveredSpecies: ReadonlyArray<string>,
+): GameState {
+  return { ...state, discoveredSpecies }
 }

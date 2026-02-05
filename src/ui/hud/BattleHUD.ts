@@ -126,6 +126,90 @@ export class BattleHUD {
     }
   }
 
+  showCaptureDeviceMenu(devices: ReadonlyArray<InventorySlot>): void {
+    this.hideAbilityMenu()
+
+    const container = this.scene.add.container(GAME_WIDTH / 2 - 200, GAME_HEIGHT - 220)
+    container.setDepth(DEPTH.UI + 1)
+
+    const menuHeight = Math.max(devices.length, 1) * 45 + 20
+    const bg = this.scene.add.graphics()
+    bg.fillStyle(0x16213e, 0.95)
+    bg.fillRoundedRect(0, 0, 400, menuHeight, 12)
+    bg.lineStyle(2, COLORS.WARNING)
+    bg.strokeRoundedRect(0, 0, 400, menuHeight, 12)
+    container.add(bg)
+
+    if (devices.length === 0) {
+      const emptyText = this.scene.add.text(200, menuHeight / 2, 'No capture devices!', {
+        ...TEXT_STYLES.BODY,
+        fontSize: '16px',
+        color: '#666666',
+      })
+      emptyText.setOrigin(0.5)
+      container.add(emptyText)
+    } else {
+      devices.forEach((slot, index) => {
+        const y = 10 + index * 45
+        const hasQty = slot.quantity > 0
+
+        const btn = this.scene.add.graphics()
+        btn.fillStyle(COLORS.WARNING, 0.3)
+        btn.fillRoundedRect(10, y, 380, 38, 8)
+        container.add(btn)
+
+        const nameText = this.scene.add.text(20, y + 8, slot.item.name, {
+          ...TEXT_STYLES.BODY,
+          fontSize: '16px',
+        })
+        nameText.setAlpha(hasQty ? 1.0 : 0.4)
+        container.add(nameText)
+
+        // Show capture rate modifier
+        const multiplier = slot.item.useEffect?.magnitude ?? 1.0
+        const modText = this.scene.add.text(240, y + 8, `${multiplier}x`, {
+          ...TEXT_STYLES.SMALL,
+          color: '#ffa726',
+        })
+        container.add(modText)
+
+        const qtyText = this.scene.add.text(320, y + 8, `x${slot.quantity}`, {
+          ...TEXT_STYLES.SMALL,
+          color: hasQty ? '#ffa726' : '#ef5350',
+        })
+        container.add(qtyText)
+
+        if (hasQty) {
+          const hitArea = this.scene.add.rectangle(200, y + 19, 380, 38)
+          hitArea.setInteractive({ useHandCursor: true })
+          hitArea.on('pointerdown', () => {
+            this.onCommand?.('capture', undefined, slot.item.itemId)
+          })
+          hitArea.on('pointerover', () => btn.clear().fillStyle(COLORS.WARNING, 0.6).fillRoundedRect(10, y, 380, 38, 8))
+          hitArea.on('pointerout', () => btn.clear().fillStyle(COLORS.WARNING, 0.3).fillRoundedRect(10, y, 380, 38, 8))
+          container.add(hitArea)
+        }
+      })
+    }
+
+    // Back button
+    const backY = Math.max(devices.length, 1) * 45 + 10
+    const backText = this.scene.add.text(200, backY - 15, '< Back', {
+      ...TEXT_STYLES.BODY,
+      fontSize: '14px',
+      color: '#b0bec5',
+    })
+    backText.setOrigin(0.5)
+    backText.setInteractive({ useHandCursor: true })
+    backText.on('pointerdown', () => {
+      this.hideAbilityMenu()
+      this.showCommandMenu()
+    })
+    container.add(backText)
+
+    this.elements = { ...this.elements, abilityMenu: container }
+  }
+
   showItemMenu(items: ReadonlyArray<InventorySlot>): void {
     this.hideAbilityMenu()
 
@@ -285,20 +369,21 @@ export class BattleHUD {
   }
 
   private createCommandMenu(): Phaser.GameObjects.Container {
-    const container = this.scene.add.container(20, GAME_HEIGHT - 160)
+    const container = this.scene.add.container(20, GAME_HEIGHT - 180)
     container.setDepth(DEPTH.UI)
 
     const bg = this.scene.add.graphics()
     bg.fillStyle(0x16213e, 0.95)
-    bg.fillRoundedRect(0, 0, 250, 210, 12)
+    bg.fillRoundedRect(0, 0, 250, 170, 12)
     bg.lineStyle(2, COLORS.PRIMARY)
-    bg.strokeRoundedRect(0, 0, 250, 210, 12)
+    bg.strokeRoundedRect(0, 0, 250, 170, 12)
     container.add(bg)
 
     const commands: ReadonlyArray<{ label: string; command: CommandChoice }> = [
       { label: 'Attack', command: 'attack' },
       { label: 'Ability', command: 'ability' },
       { label: 'Item', command: 'item' },
+      { label: 'Capture', command: 'capture' },
       { label: 'Defend', command: 'defend' },
       { label: 'Flee', command: 'flee' },
     ]
@@ -307,32 +392,32 @@ export class BattleHUD {
       const col = index % 2
       const row = Math.floor(index / 2)
       const x = 15 + col * 118
-      const y = 15 + row * 62
+      const y = 10 + row * 52
 
       const btnBg = this.scene.add.graphics()
       btnBg.fillStyle(COLORS.SECONDARY, 0.4)
-      btnBg.fillRoundedRect(x, y, 110, 50, 8)
+      btnBg.fillRoundedRect(x, y, 110, 44, 8)
       container.add(btnBg)
 
-      const text = this.scene.add.text(x + 55, y + 25, cmd.label, {
+      const text = this.scene.add.text(x + 55, y + 22, cmd.label, {
         ...TEXT_STYLES.BUTTON,
-        fontSize: '18px',
+        fontSize: '16px',
       })
       text.setOrigin(0.5)
       container.add(text)
 
-      const hitArea = this.scene.add.rectangle(x + 55, y + 25, 110, 50)
+      const hitArea = this.scene.add.rectangle(x + 55, y + 22, 110, 44)
       hitArea.setInteractive({ useHandCursor: true })
 
       hitArea.on('pointerover', () => {
         btnBg.clear()
         btnBg.fillStyle(COLORS.SECONDARY, 0.7)
-        btnBg.fillRoundedRect(x, y, 110, 50, 8)
+        btnBg.fillRoundedRect(x, y, 110, 44, 8)
       })
       hitArea.on('pointerout', () => {
         btnBg.clear()
         btnBg.fillStyle(COLORS.SECONDARY, 0.4)
-        btnBg.fillRoundedRect(x, y, 110, 50, 8)
+        btnBg.fillRoundedRect(x, y, 110, 44, 8)
       })
       hitArea.on('pointerdown', () => {
         this.onCommand?.(cmd.command)

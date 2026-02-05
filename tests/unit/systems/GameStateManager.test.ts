@@ -13,6 +13,8 @@ import {
   updatePlayer,
   updateInventory,
   updateSquad,
+  updateMonsterStorage,
+  updateDiscoveredSpecies,
   type GameState,
 } from '../../../src/systems/GameStateManager'
 import type { PlayerCharacter, Inventory, MonsterInstance } from '../../../src/models/types'
@@ -53,6 +55,18 @@ describe('createInitialGameState', () => {
     const state = createInitialGameState('Hero')
 
     expect(state.squad).toHaveLength(0)
+  })
+
+  it('should create empty monster storage', () => {
+    const state = createInitialGameState('Hero')
+
+    expect(state.monsterStorage).toHaveLength(0)
+  })
+
+  it('should create empty discovered species list', () => {
+    const state = createInitialGameState('Hero')
+
+    expect(state.discoveredSpecies).toHaveLength(0)
   })
 })
 
@@ -140,22 +154,36 @@ describe('updateInventory', () => {
   })
 })
 
+const createMockMonster = (): MonsterInstance => ({
+  instanceId: 'mon-1',
+  speciesId: 'flamepup',
+  nickname: 'Sparky',
+  level: 3,
+  experience: 50,
+  stats: {
+    maxHp: 100,
+    currentHp: 100,
+    maxMp: 30,
+    currentMp: 30,
+    attack: 15,
+    defense: 10,
+    magicAttack: 12,
+    magicDefense: 8,
+    speed: 11,
+    luck: 5,
+  },
+  learnedAbilities: [],
+  inheritedTraits: [],
+  parentSpeciesIds: [],
+  isInSquad: true,
+  capturedAt: new Date().toISOString(),
+  bondLevel: 0,
+})
+
 describe('updateSquad', () => {
   it('should return a new state with the updated squad', () => {
     const state = createInitialGameState('Hero')
-    const newSquad: MonsterInstance[] = [
-      {
-        instanceId: 'mon-1',
-        speciesId: 'flamepup',
-        nickname: 'Sparky',
-        level: 3,
-        experience: 50,
-        experienceToNextLevel: 100,
-        stats: state.player.stats,
-        abilities: [],
-        statusEffects: [],
-      },
-    ]
+    const newSquad: MonsterInstance[] = [createMockMonster()]
 
     const newState = updateSquad(state, newSquad)
 
@@ -171,5 +199,47 @@ describe('updateSquad', () => {
     updateSquad(state, [])
 
     expect(state.squad).toHaveLength(0)
+  })
+})
+
+describe('updateMonsterStorage', () => {
+  it('should return a new state with the updated monster storage', () => {
+    const state = createInitialGameState('Hero')
+    const newStorage: MonsterInstance[] = [createMockMonster()]
+
+    const newState = updateMonsterStorage(state, newStorage)
+
+    expect(newState.monsterStorage).toHaveLength(1)
+    expect(newState.player).toBe(state.player)
+    expect(newState.squad).toBe(state.squad)
+  })
+
+  it('should not mutate the original state', () => {
+    const state = createInitialGameState('Hero')
+
+    updateMonsterStorage(state, [createMockMonster()])
+
+    expect(state.monsterStorage).toHaveLength(0)
+  })
+})
+
+describe('updateDiscoveredSpecies', () => {
+  it('should return a new state with the updated discovered species', () => {
+    const state = createInitialGameState('Hero')
+    const newDiscovered = ['flamepup', 'bubblefin']
+
+    const newState = updateDiscoveredSpecies(state, newDiscovered)
+
+    expect(newState.discoveredSpecies).toHaveLength(2)
+    expect(newState.discoveredSpecies).toContain('flamepup')
+    expect(newState.player).toBe(state.player)
+  })
+
+  it('should not mutate the original state', () => {
+    const state = createInitialGameState('Hero')
+
+    updateDiscoveredSpecies(state, ['flamepup'])
+
+    expect(state.discoveredSpecies).toHaveLength(0)
   })
 })

@@ -4,6 +4,7 @@ import type {
   BreedingResult,
   PlayerCharacter,
   GameSettings,
+  CaptureAttempt,
 } from '../models/types'
 
 export const GAME_EVENTS = {
@@ -21,6 +22,18 @@ export const GAME_EVENTS = {
   MONSTER_DEFEATED: 'monster:defeated',
   MONSTER_LEVEL_UP: 'monster:level_up',
   MONSTER_ABILITY_LEARNED: 'monster:ability_learned',
+
+  // Capture
+  CAPTURE_ATTEMPT: 'capture:attempt',
+  CAPTURE_SUCCESS: 'capture:success',
+  CAPTURE_FAIL: 'capture:fail',
+
+  // Bestiary
+  BESTIARY_UPDATED: 'bestiary:updated',
+  SPECIES_DISCOVERED: 'bestiary:species_discovered',
+
+  // Bond
+  BOND_INCREASED: 'bond:increased',
 
   // Player
   PLAYER_LEVEL_UP: 'player:level_up',
@@ -90,4 +103,16 @@ export interface GameEventPayloads {
   [GAME_EVENTS.LOAD_GAME]: { slot: number }
   [GAME_EVENTS.MENU_OPEN]: { menuId: string }
   [GAME_EVENTS.MENU_CLOSE]: { menuId: string }
+
+  // Capture events
+  [GAME_EVENTS.CAPTURE_ATTEMPT]: { attempt: CaptureAttempt; shakeCount: number }
+  [GAME_EVENTS.CAPTURE_SUCCESS]: { monster: MonsterInstance; attempt: CaptureAttempt }
+  [GAME_EVENTS.CAPTURE_FAIL]: { attempt: CaptureAttempt; shakeCount: number }
+
+  // Bestiary events
+  [GAME_EVENTS.BESTIARY_UPDATED]: { discovered: ReadonlyArray<string>; newCount: number }
+  [GAME_EVENTS.SPECIES_DISCOVERED]: { speciesId: string; speciesName: string }
+
+  // Bond events
+  [GAME_EVENTS.BOND_INCREASED]: { monster: MonsterInstance; amount: number; newLevel: number }
 }

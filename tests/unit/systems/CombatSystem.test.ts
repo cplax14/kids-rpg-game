@@ -683,7 +683,7 @@ describe('executeAction - unknown action type', () => {
   it('returns nothing happened message for unknown type', () => {
     const battle = makeBattle()
     const action: BattleAction = {
-      type: 'item' as any,
+      type: 'unknown_type' as any,
       actorId: battle.playerSquad[0].combatantId,
       targetId: null,
       abilityId: null,

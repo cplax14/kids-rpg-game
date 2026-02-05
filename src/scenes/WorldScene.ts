@@ -22,8 +22,11 @@ import {
   hasGameState,
   updatePlayer,
   updateInventory,
+  updateDiscoveredSpecies,
   type GameState,
 } from '../systems/GameStateManager'
+import { createSquadCombatants } from '../systems/SquadSystem'
+import { discoverMultipleSpecies } from '../systems/BestiarySystem'
 import { addItem, loadItemData } from '../systems/InventorySystem'
 import { loadEquipmentData } from '../systems/EquipmentSystem'
 import { loadDialogData } from '../systems/DialogSystem'
@@ -190,10 +193,22 @@ export class WorldScene extends Phaser.Scene {
         playerAbilities,
       )
 
+      // Create squad combatants
+      const squadCombatants = createSquadCombatants(gameState.squad)
+
+      // Discover encountered species (add to bestiary on encounter)
+      const newDiscovered = discoverMultipleSpecies(
+        gameState.discoveredSpecies,
+        encounter.speciesIds,
+      )
+      if (newDiscovered !== gameState.discoveredSpecies) {
+        setGameState(this, updateDiscoveredSpecies(gameState, newDiscovered))
+      }
+
       this.cameras.main.fadeOut(300)
       this.cameras.main.once('camerafadeoutcomplete', () => {
         this.scene.start(SCENE_KEYS.BATTLE, {
-          playerCombatants: [playerCombatant],
+          playerCombatants: [playerCombatant, ...squadCombatants],
           enemyCombatants: encounter.combatants,
           enemySpeciesIds: encounter.speciesIds,
         })

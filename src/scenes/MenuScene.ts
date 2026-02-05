@@ -2,14 +2,18 @@ import Phaser from 'phaser'
 import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS, DEPTH, TEXT_STYLES } from '../config'
 import { InventoryPanel } from '../ui/menus/InventoryPanel'
 import { EquipmentPanel } from '../ui/menus/EquipmentPanel'
+import { SquadPanel } from '../ui/menus/SquadPanel'
+import { BestiaryPanel } from '../ui/menus/BestiaryPanel'
 import { getGameState } from '../systems/GameStateManager'
 
-type MenuTab = 'inventory' | 'equipment'
+type MenuTab = 'inventory' | 'equipment' | 'squad' | 'bestiary'
 
 export class MenuScene extends Phaser.Scene {
   private activeTab: MenuTab = 'inventory'
   private inventoryPanel: InventoryPanel | null = null
   private equipmentPanel: EquipmentPanel | null = null
+  private squadPanel: SquadPanel | null = null
+  private bestiaryPanel: BestiaryPanel | null = null
   private tabButtons: Phaser.GameObjects.Container[] = []
 
   constructor() {
@@ -73,6 +77,8 @@ export class MenuScene extends Phaser.Scene {
     const tabs: ReadonlyArray<{ label: string; tab: MenuTab }> = [
       { label: 'Inventory', tab: 'inventory' },
       { label: 'Equipment', tab: 'equipment' },
+      { label: 'Squad', tab: 'squad' },
+      { label: 'Bestiary', tab: 'bestiary' },
     ]
 
     tabs.forEach((tabDef, index) => {
@@ -125,6 +131,10 @@ export class MenuScene extends Phaser.Scene {
       this.inventoryPanel = new InventoryPanel(this, 70, 125)
     } else if (tab === 'equipment') {
       this.equipmentPanel = new EquipmentPanel(this, 70, 125)
+    } else if (tab === 'squad') {
+      this.squadPanel = new SquadPanel(this, 70, 125)
+    } else if (tab === 'bestiary') {
+      this.bestiaryPanel = new BestiaryPanel(this, 70, 125)
     }
   }
 
@@ -136,6 +146,14 @@ export class MenuScene extends Phaser.Scene {
     if (this.equipmentPanel) {
       this.equipmentPanel.destroy()
       this.equipmentPanel = null
+    }
+    if (this.squadPanel) {
+      this.squadPanel.destroy()
+      this.squadPanel = null
+    }
+    if (this.bestiaryPanel) {
+      this.bestiaryPanel.destroy()
+      this.bestiaryPanel = null
     }
   }
 
