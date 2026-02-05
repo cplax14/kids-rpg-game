@@ -13,7 +13,7 @@ import { getGameState, setGameState, updatePlayer, updateInventory } from '../sy
 import { updatePlayerGold } from '../systems/CharacterSystem'
 import { addItem, removeItem, getItem } from '../systems/InventorySystem'
 import { getEquipment } from '../systems/EquipmentSystem'
-import type { Inventory } from '../models/types'
+import type { Inventory, Equipment } from '../models/types'
 
 interface ShopSceneData {
   readonly shopId: string
@@ -249,17 +249,20 @@ export class ShopScene extends Phaser.Scene {
     readonly description: string
     readonly price: number
     readonly type: 'item' | 'equipment'
+    readonly equipment: Equipment | null
   }> {
     return this.shop.items
       .map((shopItem) => {
         const details = getShopItemDetails(shopItem)
         if (!details) return null
+        const equipment = shopItem.type === 'equipment' ? getEquipment(shopItem.id) : null
         return {
           id: shopItem.id,
           name: details.name,
           description: details.description,
           price: calculateBuyPrice(shopItem, this.shop),
           type: shopItem.type,
+          equipment: equipment ?? null,
         }
       })
       .filter((x): x is NonNullable<typeof x> => x !== null)
@@ -271,6 +274,7 @@ export class ShopScene extends Phaser.Scene {
     readonly description: string
     readonly price: number
     readonly type: 'item' | 'equipment'
+    readonly equipment: Equipment | null
   }> {
     const state = getGameState(this)
     return state.inventory.items
@@ -281,6 +285,7 @@ export class ShopScene extends Phaser.Scene {
         description: slot.item.description,
         price: calculateItemSellPrice(slot.item, this.shop),
         type: 'item' as const,
+        equipment: null,
       }))
   }
 
@@ -288,12 +293,17 @@ export class ShopScene extends Phaser.Scene {
     readonly name: string
     readonly description: string
     readonly price: number
+    readonly equipment: Equipment | null
   }): void {
     this.detailContainer.removeAll(true)
 
+    // Calculate panel height based on content
+    const hasStats = entry.equipment && Object.keys(entry.equipment.statModifiers).length > 0
+    const panelHeight = hasStats ? 320 : 200
+
     const bg = this.add.graphics()
     bg.fillStyle(COLORS.PANEL_BG, 0.6)
-    bg.fillRoundedRect(0, 0, 380, 200, 10)
+    bg.fillRoundedRect(0, 0, 380, panelHeight, 10)
     this.detailContainer.add(bg)
 
     const name = this.add.text(15, 15, entry.name, {
@@ -311,7 +321,88 @@ export class ShopScene extends Phaser.Scene {
     })
     this.detailContainer.add(desc)
 
-    const price = this.add.text(15, 140, `Price: ${entry.price} G`, {
+    let nextY = 100
+
+    // Show equipment stats if available
+    if (entry.equipment) {
+      const stats = entry.equipment.statModifiers
+
+      // Slot type badge
+      const slotLabel = this.add.text(15, nextY, `Slot: ${entry.equipment.slot.charAt(0).toUpperCase() + entry.equipment.slot.slice(1)}`, {
+        ...TEXT_STYLES.BODY,
+        fontSize: '13px',
+        color: '#90caf9',
+      })
+      this.detailContainer.add(slotLabel)
+      nextY += 22
+
+      // Level requirement
+      if (entry.equipment.levelRequirement > 1) {
+        const levelReq = this.add.text(15, nextY, `Required Level: ${entry.equipment.levelRequirement}`, {
+          ...TEXT_STYLES.BODY,
+          fontSize: '13px',
+          color: '#ffab91',
+        })
+        this.detailContainer.add(levelReq)
+        nextY += 22
+      }
+
+      // Stats header
+      if (Object.keys(stats).length > 0) {
+        nextY += 8
+        const statsHeader = this.add.text(15, nextY, 'Stats:', {
+          ...TEXT_STYLES.BODY,
+          fontSize: '14px',
+          color: '#ffffff',
+        })
+        this.detailContainer.add(statsHeader)
+        nextY += 22
+
+        // Display each stat modifier
+        const statLabels: Record<string, string> = {
+          maxHp: 'HP',
+          maxMp: 'MP',
+          attack: 'Attack',
+          defense: 'Defense',
+          magicAttack: 'Magic Atk',
+          magicDefense: 'Magic Def',
+          speed: 'Speed',
+          luck: 'Luck',
+        }
+
+        Object.entries(stats).forEach(([stat, value]) => {
+          if (value === undefined || value === 0) return
+          const label = statLabels[stat] ?? stat
+          const sign = value > 0 ? '+' : ''
+          const color = value > 0 ? '#66bb6a' : '#ef5350'
+
+          const statText = this.add.text(25, nextY, `${label}: ${sign}${value}`, {
+            ...TEXT_STYLES.BODY,
+            fontSize: '13px',
+            color,
+          })
+          this.detailContainer.add(statText)
+          nextY += 20
+        })
+      }
+
+      // Special effect
+      if (entry.equipment.specialEffect) {
+        nextY += 8
+        const effectText = this.add.text(15, nextY, `Special: ${entry.equipment.specialEffect}`, {
+          ...TEXT_STYLES.BODY,
+          fontSize: '13px',
+          color: '#ce93d8',
+          wordWrap: { width: 350 },
+        })
+        this.detailContainer.add(effectText)
+        nextY += 24
+      }
+
+      nextY += 10
+    }
+
+    const price = this.add.text(15, Math.max(nextY, 140), `Price: ${entry.price} G`, {
       ...TEXT_STYLES.BODY,
       fontSize: '16px',
       color: '#ffd54f',
