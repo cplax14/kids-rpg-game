@@ -123,6 +123,7 @@ export class WorldScene extends Phaser.Scene {
   private interactables: Interactable[] = []
   private nearbyInteractable: Interactable | null = null
   private transitionZones: Phaser.GameObjects.Zone[] = []
+  private transitionInProgress: boolean = false
   private proceduralMapGraphics: Phaser.GameObjects.Graphics | null = null
   private playTime: number = 0
   private playTimeStart: number = 0
@@ -627,6 +628,11 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private handleTransition(transition: TransitionZone): void {
+    // Prevent multiple transitions (overlap callback fires every frame)
+    if (this.transitionInProgress) {
+      return
+    }
+
     const gameState = getGameState(this)
     const result = checkTransition(transition, gameState)
 
@@ -635,6 +641,8 @@ export class WorldScene extends Phaser.Scene {
       this.showWarningMessage(result.reason ?? 'Cannot enter this area.')
       return
     }
+
+    this.transitionInProgress = true
 
     // Note: Tutorial for first area transition is shown in the new scene's create()
     // Don't show tutorials during transition as the scene is about to be destroyed
