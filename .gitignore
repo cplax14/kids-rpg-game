@@ -4,3 +4,4 @@ coverage/
 *.local
 .env
 .env.*
+public/assets/downloads/
