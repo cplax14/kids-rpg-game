@@ -681,12 +681,14 @@ export function createCombatantFromPlayer(
   name: string,
   stats: CharacterStats,
   abilities: ReadonlyArray<Ability>,
+  speciesId?: string,
 ): BattleCombatant {
   return {
     combatantId: `player-${generateId()}`,
     name,
     isPlayer: true,
-    isMonster: false,
+    isMonster: !!speciesId,
+    speciesId,
     stats: { ...stats },
     abilities,
     statusEffects: [],
@@ -700,12 +702,14 @@ export function createCombatantFromEnemy(
   element: MonsterElement,
   abilities: ReadonlyArray<Ability>,
   capturable: boolean = true,
+  speciesId?: string,
 ): BattleCombatant {
   return {
     combatantId: `enemy-${generateId()}`,
     name,
     isPlayer: false,
     isMonster: true,
+    speciesId,
     stats: { ...stats },
     abilities,
     statusEffects: [],

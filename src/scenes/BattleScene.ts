@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS, DEPTH, TEXT_STYLES } from '../config'
+import { getMonsterFrame } from '../config/spriteMapping'
 import type { Battle, BattleCombatant, BattleAction, MonsterElement, ItemDrop, MonsterInstance, BossDefinition } from '../models/types'
 import { initAudioSystem, playMusic, crossfadeMusic, playSfx, stopMusic, MUSIC_KEYS, SFX_KEYS } from '../systems/AudioSystem'
 import { checkAndShowTutorial } from '../systems/TutorialSystem'
@@ -54,12 +55,14 @@ interface BattleSceneData {
 
 type BattlePhase = 'intro' | 'player_input' | 'executing' | 'enemy_turn' | 'victory' | 'defeat' | 'fled'
 
+type BattleSprite = Phaser.GameObjects.Rectangle | Phaser.GameObjects.Sprite
+
 export class BattleScene extends Phaser.Scene {
   private battle!: Battle
   private hud!: BattleHUD
   private phase: BattlePhase = 'intro'
-  private playerSprites: Phaser.GameObjects.Rectangle[] = []
-  private enemySprites: Phaser.GameObjects.Rectangle[] = []
+  private playerSprites: BattleSprite[] = []
+  private enemySprites: BattleSprite[] = []
   private sceneData!: BattleSceneData
   private currentTurnIndex: number = 0
   private isBossBattle: boolean = false
@@ -141,15 +144,30 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private createCombatantSprites(): void {
+    const hasCreatureSheet = this.textures.exists('creatures-sheet')
+
     // Enemy sprites (left side)
     this.enemySprites = this.battle.enemySquad.map((enemy, index) => {
       const x = GAME_WIDTH * 0.18 + index * 120
       const y = GAME_HEIGHT * 0.38
-      const color = this.getElementColor(this.guessEnemyElement(enemy))
 
-      const sprite = this.add.rectangle(x, y, 64, 64, color)
-      sprite.setDepth(DEPTH.PLAYER)
-      sprite.setStrokeStyle(2, 0xffffff, 0.8)
+      let sprite: BattleSprite
+
+      if (hasCreatureSheet && enemy.speciesId) {
+        // Use real creature sprite
+        const frameIndex = getMonsterFrame(enemy.speciesId)
+        const creatureSprite = this.add.sprite(x, y, 'creatures-sheet', frameIndex)
+        creatureSprite.setScale(4) // Scale up 16x16 to 64x64
+        creatureSprite.setDepth(DEPTH.PLAYER)
+        sprite = creatureSprite
+      } else {
+        // Fallback to colored rectangle
+        const color = this.getElementColor(this.guessEnemyElement(enemy))
+        const rectSprite = this.add.rectangle(x, y, 64, 64, color)
+        rectSprite.setDepth(DEPTH.PLAYER)
+        rectSprite.setStrokeStyle(2, 0xffffff, 0.8)
+        sprite = rectSprite
+      }
 
       // Name label above
       const label = this.add.text(x, y - 45, enemy.name, {
@@ -163,13 +181,15 @@ export class BattleScene extends Phaser.Scene {
       label.setDepth(DEPTH.PLAYER + 1)
 
       // Entry animation
+      const startScale = hasCreatureSheet && enemy.speciesId ? 1.2 : 0.3
+      const endScale = hasCreatureSheet && enemy.speciesId ? 4 : 1
       sprite.setAlpha(0)
-      sprite.setScale(0.3)
+      sprite.setScale(startScale)
       this.tweens.add({
         targets: sprite,
         alpha: 1,
-        scaleX: 1,
-        scaleY: 1,
+        scaleX: endScale,
+        scaleY: endScale,
         duration: 400,
         delay: index * 150,
         ease: 'Back.easeOut',
@@ -182,11 +202,32 @@ export class BattleScene extends Phaser.Scene {
     this.playerSprites = this.battle.playerSquad.map((player, index) => {
       const x = GAME_WIDTH * 0.65 + index * 100
       const y = GAME_HEIGHT * 0.58
-      const color = player.isMonster ? COLORS.PRIMARY : COLORS.SECONDARY
 
-      const sprite = this.add.rectangle(x, y, 56, 56, color)
-      sprite.setDepth(DEPTH.PLAYER)
-      sprite.setStrokeStyle(2, 0xffffff, 0.8)
+      let sprite: BattleSprite
+
+      if (hasCreatureSheet && player.isMonster && player.speciesId) {
+        // Use real creature sprite for squad monsters
+        const frameIndex = getMonsterFrame(player.speciesId)
+        const creatureSprite = this.add.sprite(x, y, 'creatures-sheet', frameIndex)
+        creatureSprite.setScale(3.5) // Slightly smaller for player side
+        creatureSprite.setDepth(DEPTH.PLAYER)
+        creatureSprite.setFlipX(true) // Face the enemies
+        sprite = creatureSprite
+      } else if (hasCreatureSheet && !player.isMonster) {
+        // Use character sprite for player hero
+        const heroSprite = this.add.sprite(x, y, 'characters-sheet', 0)
+        heroSprite.setScale(3.5)
+        heroSprite.setDepth(DEPTH.PLAYER)
+        heroSprite.setFlipX(true)
+        sprite = heroSprite
+      } else {
+        // Fallback to colored rectangle
+        const color = player.isMonster ? COLORS.PRIMARY : COLORS.SECONDARY
+        const rectSprite = this.add.rectangle(x, y, 56, 56, color)
+        rectSprite.setDepth(DEPTH.PLAYER)
+        rectSprite.setStrokeStyle(2, 0xffffff, 0.8)
+        sprite = rectSprite
+      }
 
       // Entry slide from right
       sprite.setX(GAME_WIDTH + 100)
@@ -883,7 +924,7 @@ export class BattleScene extends Phaser.Scene {
     })
   }
 
-  private findSprite(combatantId: string): Phaser.GameObjects.Rectangle | undefined {
+  private findSprite(combatantId: string): BattleSprite | undefined {
     const playerIndex = this.battle.playerSquad.findIndex((c) => c.combatantId === combatantId)
     if (playerIndex >= 0) return this.playerSprites[playerIndex]
 

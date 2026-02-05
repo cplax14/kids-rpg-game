@@ -4,16 +4,35 @@ import type { InputState } from '../systems/InputSystem'
 
 export type PlayerDirection = 'up' | 'down' | 'left' | 'right'
 
+// Scale factor for 16x16 sprites to make them visible
+const PLAYER_SCALE = 3
+
 export class Player {
   readonly sprite: Phaser.Physics.Arcade.Sprite
   private direction: PlayerDirection = 'down'
   private isMoving: boolean = false
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    this.sprite = scene.physics.add.sprite(x, y, 'player', 'down-1')
-    // Use a smaller collision body to prevent getting stuck on tile corners
-    this.sprite.setSize(12, 12)
-    this.sprite.setOffset(10, 34)
+    // Check if we have the real character sheet, otherwise fall back to procedural texture
+    const hasCharacterSheet = scene.textures.exists('characters-sheet')
+    const textureKey = hasCharacterSheet ? 'characters-sheet' : 'player'
+    const initialFrame = hasCharacterSheet ? 1 : 'down-1' // Frame 1 is down-facing idle
+
+    this.sprite = scene.physics.add.sprite(x, y, textureKey, initialFrame)
+
+    if (hasCharacterSheet) {
+      // Scale up the 16x16 sprite
+      this.sprite.setScale(PLAYER_SCALE)
+      // Collision body for scaled 16x16 sprite (centered, smaller for tile navigation)
+      const scaledSize = 16 * PLAYER_SCALE
+      this.sprite.setSize(10, 10)
+      this.sprite.setOffset(3, 5)
+    } else {
+      // Fallback collision settings for procedural texture
+      this.sprite.setSize(12, 12)
+      this.sprite.setOffset(10, 34)
+    }
+
     this.sprite.setDepth(10)
   }
 
@@ -86,9 +105,17 @@ export class Player {
     if (this.sprite.anims.currentAnim?.key !== animKey) {
       this.sprite.anims.play(animKey, true)
     }
+    this.updateSpriteFlip()
   }
 
   private playIdleAnimation(): void {
     this.sprite.anims.play(`player-idle-${this.direction}`, true)
+    this.updateSpriteFlip()
+  }
+
+  private updateSpriteFlip(): void {
+    // Left direction uses same frames as right but flipped horizontally
+    // Right direction should not be flipped
+    this.sprite.setFlipX(this.direction === 'left')
   }
 }

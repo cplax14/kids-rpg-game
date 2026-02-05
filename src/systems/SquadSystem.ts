@@ -161,6 +161,7 @@ export function createSquadCombatants(
         name: monster.nickname ?? species?.name ?? 'Monster',
         isPlayer: true,
         isMonster: true,
+        speciesId: monster.speciesId,
         stats: bondedStats,
         abilities: monster.learnedAbilities,
         statusEffects: [],

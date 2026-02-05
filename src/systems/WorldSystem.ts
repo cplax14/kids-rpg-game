@@ -81,6 +81,8 @@ export function generateAreaEncounter(areaId: string): AreaEncounterResult | nul
         stats,
         species.element,
         abilities,
+        true,
+        picked.speciesId,
       ),
     )
     speciesIds.push(picked.speciesId)
@@ -113,6 +115,7 @@ export function createBossEncounter(bossId: string): BossEncounterResult | null 
     species.element,
     abilities,
     false, // not capturable
+    boss.speciesId,
   )
 
   return {

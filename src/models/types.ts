@@ -227,6 +227,7 @@ export interface BattleCombatant {
   readonly name: string
   readonly isPlayer: boolean
   readonly isMonster: boolean
+  readonly speciesId?: string
   readonly stats: CharacterStats
   readonly abilities: ReadonlyArray<Ability>
   readonly statusEffects: ReadonlyArray<ActiveStatusEffect>

@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import type { NpcDefinition, NpcType } from '../models/types'
 import { DEPTH, TILE_SIZE, TEXT_STYLES } from '../config'
 
+// Fallback colors for procedural NPCs
 const NPC_COLORS: Readonly<Record<NpcType, number>> = {
   shop: 0xffd54f,
   healer: 0xef5350,
@@ -10,13 +11,24 @@ const NPC_COLORS: Readonly<Record<NpcType, number>> = {
   quest: 0x42a5f5,
 }
 
+// Frame indices from characters-sheet for each NPC type (12 cols per row)
+// Using idle frame (index 1) from different character rows
+const NPC_FRAMES: Readonly<Record<NpcType, number>> = {
+  shop: 13,     // Row 1, idle frame
+  healer: 25,   // Row 2, idle frame
+  info: 37,     // Row 3, idle frame
+  breeder: 49,  // Row 4, idle frame
+  quest: 61,    // Row 5, idle frame
+}
+
+const NPC_SCALE = 3
 const INTERACTION_RADIUS = 2 * TILE_SIZE
 
 export type QuestIndicatorType = 'available' | 'ready' | 'in_progress' | 'none'
 
 export class NPC {
   private readonly scene: Phaser.Scene
-  private readonly sprite: Phaser.GameObjects.Rectangle
+  private readonly sprite: Phaser.GameObjects.Rectangle | Phaser.GameObjects.Sprite
   private readonly nameLabel: Phaser.GameObjects.Text
   private readonly promptText: Phaser.GameObjects.Text
   private readonly interactionZone: Phaser.GameObjects.Zone
@@ -29,12 +41,20 @@ export class NPC {
     this.scene = scene
     this.definition = definition
 
-    const color = NPC_COLORS[definition.type]
+    const hasCharacterSheet = scene.textures.exists('characters-sheet')
 
-    // Create colored rectangle sprite
-    this.sprite = scene.add.rectangle(x, y, 28, 28, color)
+    if (hasCharacterSheet) {
+      // Use real sprite from character sheet
+      const frameIndex = NPC_FRAMES[definition.type]
+      this.sprite = scene.add.sprite(x, y, 'characters-sheet', frameIndex)
+      this.sprite.setScale(NPC_SCALE)
+    } else {
+      // Fallback to colored rectangle
+      const color = NPC_COLORS[definition.type]
+      this.sprite = scene.add.rectangle(x, y, 28, 28, color)
+      ;(this.sprite as Phaser.GameObjects.Rectangle).setStrokeStyle(2, 0xffffff, 0.8)
+    }
     this.sprite.setDepth(DEPTH.PLAYER)
-    this.sprite.setStrokeStyle(2, 0xffffff, 0.8)
 
     // Name label above
     this.nameLabel = scene.add.text(x, y - 24, definition.name, {

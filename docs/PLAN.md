@@ -158,21 +158,41 @@ Fire > Earth > Wind > Water > Fire (cycle), Light <> Dark (mutual weakness), Neu
 - [x] TransitionZone system with level and boss-defeat requirements
 - [x] 647 unit tests passing
 
-### Phase 7: Audio, Save System, Polish
-- AudioSystem -- background music per area, battle themes, SFX
-- SaveSystem -- 3 slots, auto-save on area transitions
-- Settings menu (volume, text speed, screen shake)
-- UI polish pass (kid-friendly colors, large tap targets, smooth transitions)
-- Tutorial system (progressive disclosure)
-- Accessibility (color-blind indicators, readable fonts, keyboard navigation)
-- Performance optimization (texture atlases, object pooling)
+### Phase 7: Audio, Save System, Polish (COMPLETED)
+- [x] AudioSystem -- background music per area, battle themes, SFX with volume controls
+- [x] SaveSystem -- 3 slots with play time tracking, auto-save support
+- [x] SettingsManager -- volume, text speed, screen shake settings with persistence
+- [x] TutorialSystem -- progressive disclosure with trigger-based tutorials
+- [x] Accessibility utilities (color-blind indicators, readable fonts, keyboard navigation)
+- [x] SaveLoadPanel -- save/load UI with slot management
+- [x] 732 unit tests passing
 
-### Phase 8: Content Expansion and Balancing
-- Expand to 60-80 monster species, 40+ items, 30+ weapons/armor
-- Game balance pass (XP curve, difficulty, economy, capture rates)
-- Simple quest system (10-15 fetch/defeat quests)
-- Final art pass
-- QA and bug fixing
+### Phase 8: Quest System (COMPLETED)
+- [x] QuestSystem with registry pattern for quest management
+- [x] Quest types: defeat, collect, boss, explore, talk
+- [x] Quest objectives with progress tracking
+- [x] Level-appropriate equipment rewards (tier 1-5)
+- [x] NPC quest indicators (! for available, ? for ready)
+- [x] QuestTrackerHUD for active quest progress display
+- [x] QuestLogPanel in menu for full quest management
+- [x] QuestCelebration overlay with confetti and reward reveal
+- [x] Quest integration in BattleScene, WorldScene, DialogScene
+- [x] Quest-related game events (accepted, progress, completed)
+- [ ] Expand to 60-80 monster species, 40+ items, 30+ weapons/armor
+- [ ] Game balance pass (XP curve, difficulty, economy, capture rates)
+- [ ] Final art pass
+- [ ] QA and bug fixing
+
+### Phase 9: Menu UI Polish (COMPLETED)
+- [x] PlayerHeader component with XP/HP/MP progress bars
+- [x] Level display with XP percentage (e.g., "340/500 XP (68%)")
+- [x] HP bar with color changes based on health (green/yellow/red)
+- [x] Improved MenuScene tab bar with hover effects and active indicators
+- [x] InventoryPanel overhaul with category badges and filter buttons
+- [x] EquipmentPanel with visual slot layout and total stat bonuses
+- [x] SettingsPanel polish with section headers and reset defaults
+- [x] Slider component for volume controls
+- [x] Empty state messages for inventory and equipment
 
 ---
 
