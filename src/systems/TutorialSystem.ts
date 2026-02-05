@@ -55,9 +55,10 @@ export function getCompletedTutorials(): ReadonlyArray<string> {
   return Array.from(completedTutorials)
 }
 
-export function showTutorial(scene: Phaser.Scene, step: TutorialStep): Promise<void> {
+export async function showTutorial(scene: Phaser.Scene, step: TutorialStep): Promise<void> {
+  const { TutorialOverlay } = await import('../ui/components/TutorialOverlay')
+
   return new Promise((resolve) => {
-    const { TutorialOverlay } = require('../ui/components/TutorialOverlay')
     const overlay = new TutorialOverlay(scene, step, () => {
       markTutorialComplete(step.id)
       overlay.destroy()
