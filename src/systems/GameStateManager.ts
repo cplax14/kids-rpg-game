@@ -10,6 +10,9 @@ export interface GameState {
   readonly squad: ReadonlyArray<MonsterInstance>
   readonly monsterStorage: ReadonlyArray<MonsterInstance>
   readonly discoveredSpecies: ReadonlyArray<string>
+  readonly currentAreaId: string
+  readonly defeatedBosses: ReadonlyArray<string>
+  readonly openedChests: ReadonlyArray<string>
 }
 
 const REGISTRY_KEY = 'gameState'
@@ -27,6 +30,9 @@ export function createInitialGameState(playerName: string): GameState {
     squad: [],
     monsterStorage: [],
     discoveredSpecies: [],
+    currentAreaId: 'sunlit-village',
+    defeatedBosses: [],
+    openedChests: [],
   }
 }
 
@@ -77,4 +83,22 @@ export function updateDiscoveredSpecies(
   discoveredSpecies: ReadonlyArray<string>,
 ): GameState {
   return { ...state, discoveredSpecies }
+}
+
+export function updateCurrentArea(state: GameState, areaId: string): GameState {
+  return { ...state, currentAreaId: areaId }
+}
+
+export function addDefeatedBoss(state: GameState, bossId: string): GameState {
+  if (state.defeatedBosses.includes(bossId)) {
+    return state
+  }
+  return { ...state, defeatedBosses: [...state.defeatedBosses, bossId] }
+}
+
+export function addOpenedChest(state: GameState, chestId: string): GameState {
+  if (state.openedChests.includes(chestId)) {
+    return state
+  }
+  return { ...state, openedChests: [...state.openedChests, chestId] }
 }

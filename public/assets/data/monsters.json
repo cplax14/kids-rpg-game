@@ -984,5 +984,124 @@
     "evolutionChain": null,
     "breedingGroup": "aquatic",
     "breedingTraits": ["thick-skin", "waterproof", "tough"]
+  },
+  {
+    "speciesId": "thornwarden",
+    "name": "Thornwarden",
+    "description": "A fearsome guardian wrapped in thorny vines. It defends the forest paths with vicious strikes and poisonous barbs.",
+    "element": "earth",
+    "rarity": "rare",
+    "baseStats": {
+      "maxHp": 180,
+      "currentHp": 180,
+      "maxMp": 35,
+      "currentMp": 35,
+      "attack": 22,
+      "defense": 24,
+      "magicAttack": 16,
+      "magicDefense": 18,
+      "speed": 14,
+      "luck": 10
+    },
+    "statGrowth": {
+      "hp": 12,
+      "mp": 3,
+      "attack": 3,
+      "defense": 3,
+      "magicAttack": 2,
+      "magicDefense": 2,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "vine-whip", "learnAtLevel": 1 },
+      { "abilityId": "poison-sting", "learnAtLevel": 1 },
+      { "abilityId": "shield-wall", "learnAtLevel": 1 },
+      { "abilityId": "slam", "learnAtLevel": 1 }
+    ],
+    "captureBaseDifficulty": 1.0,
+    "spriteKey": "thornwarden",
+    "evolutionChain": null,
+    "breedingGroup": "elemental",
+    "breedingTraits": ["fierce", "thick-skin"]
+  },
+  {
+    "speciesId": "elderwood",
+    "name": "Elderwood",
+    "description": "An ancient tree awakened by the forest's magic. Its roots reach deep into the earth, drawing power from the land itself.",
+    "element": "earth",
+    "rarity": "legendary",
+    "baseStats": {
+      "maxHp": 280,
+      "currentHp": 280,
+      "maxMp": 50,
+      "currentMp": 50,
+      "attack": 24,
+      "defense": 30,
+      "magicAttack": 22,
+      "magicDefense": 26,
+      "speed": 10,
+      "luck": 12
+    },
+    "statGrowth": {
+      "hp": 16,
+      "mp": 5,
+      "attack": 3,
+      "defense": 4,
+      "magicAttack": 3,
+      "magicDefense": 3,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "earthquake", "learnAtLevel": 1 },
+      { "abilityId": "regen", "learnAtLevel": 1 },
+      { "abilityId": "slam", "learnAtLevel": 1 },
+      { "abilityId": "vine-whip", "learnAtLevel": 1 },
+      { "abilityId": "boulder-crush", "learnAtLevel": 1 }
+    ],
+    "captureBaseDifficulty": 1.0,
+    "spriteKey": "elderwood",
+    "evolutionChain": null,
+    "breedingGroup": "elemental",
+    "breedingTraits": ["tough", "thick-skin", "iron-will"]
+  },
+  {
+    "speciesId": "crystallix",
+    "name": "Crystallix",
+    "description": "A massive golem of living crystal. Light refracts through its body creating deadly beams, and its defenses are nearly impenetrable.",
+    "element": "earth",
+    "rarity": "legendary",
+    "baseStats": {
+      "maxHp": 350,
+      "currentHp": 350,
+      "maxMp": 60,
+      "currentMp": 60,
+      "attack": 28,
+      "defense": 35,
+      "magicAttack": 30,
+      "magicDefense": 32,
+      "speed": 8,
+      "luck": 10
+    },
+    "statGrowth": {
+      "hp": 20,
+      "mp": 6,
+      "attack": 3,
+      "defense": 5,
+      "magicAttack": 4,
+      "magicDefense": 4,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "boulder-crush", "learnAtLevel": 1 },
+      { "abilityId": "light-beam", "learnAtLevel": 1 },
+      { "abilityId": "shield-wall", "learnAtLevel": 1 },
+      { "abilityId": "earthquake", "learnAtLevel": 1 },
+      { "abilityId": "rock-throw", "learnAtLevel": 1 }
+    ],
+    "captureBaseDifficulty": 1.0,
+    "spriteKey": "crystallix",
+    "evolutionChain": null,
+    "breedingGroup": "elemental",
+    "breedingTraits": ["tough", "thick-skin", "iron-will"]
   }
 ]

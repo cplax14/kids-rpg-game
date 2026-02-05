@@ -904,15 +904,17 @@ export class WorldScene extends Phaser.Scene {
     this.lastPlayerTileY = tileY
 
     // Check if in safe zone based on current area
-    this.inSafeZone = this.currentArea?.isSafeZone ?? false
+    const hasEncounters = (this.currentArea?.encounters.length ?? 0) > 0
+    this.inSafeZone = this.currentArea?.isSafeZone ?? true
 
-    // For village, also check proximity to center
+    // For village, center area is safe but grass edges can have encounters
     if (this.currentAreaId === 'sunlit-village') {
       const isNearCenter = tileX > 8 && tileX < 22 && tileY > 8 && tileY < 22
       this.inSafeZone = isNearCenter
     }
 
-    if (this.inSafeZone) {
+    // No encounters if: in safe zone OR area has no encounters defined
+    if (this.inSafeZone || !hasEncounters) {
       this.stepCounter = 0
       return
     }

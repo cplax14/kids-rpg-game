@@ -1,0 +1,90 @@
+[
+  {
+    "bossId": "thornwarden",
+    "speciesId": "thornwarden",
+    "name": "Thornwarden",
+    "title": "Guardian of the Thorns",
+    "level": 5,
+    "areaId": "whispering-forest",
+    "position": { "x": 320, "y": 800 },
+    "introDialog": [
+      "A creature emerges from the tangled undergrowth...",
+      "THORNWARDEN: You dare enter my domain, young one?",
+      "THORNWARDEN: Very well. Show me your strength!"
+    ],
+    "defeatDialog": [
+      "THORNWARDEN: Impressive... You have proven your worth.",
+      "THORNWARDEN: But Elderwood awaits. It will not be so merciful.",
+      "The thorny guardian retreats into the forest..."
+    ],
+    "rewards": {
+      "experience": 250,
+      "gold": 200,
+      "guaranteedItems": [
+        { "itemId": "potion-medium", "quantity": 2 }
+      ]
+    }
+  },
+  {
+    "bossId": "elderwood",
+    "speciesId": "elderwood",
+    "name": "Elderwood",
+    "title": "Ancient Protector of the Forest",
+    "level": 8,
+    "areaId": "whispering-forest",
+    "position": { "x": 960, "y": 640 },
+    "introDialog": [
+      "The ancient tree before you begins to stir...",
+      "ELDERWOOD: For centuries I have guarded this passage.",
+      "ELDERWOOD: None shall enter the Crystal Caves without proving themselves!",
+      "ELDERWOOD: Prepare yourself, young adventurer!"
+    ],
+    "defeatDialog": [
+      "ELDERWOOD: You have... done well...",
+      "ELDERWOOD: The path to the Crystal Caves is now open to you.",
+      "ELDERWOOD: But beware... Crystallix's power far exceeds my own...",
+      "The ancient tree returns to slumber, clearing the way forward."
+    ],
+    "rewards": {
+      "experience": 500,
+      "gold": 400,
+      "guaranteedItems": [
+        { "itemId": "potion-large", "quantity": 2 },
+        { "itemId": "super-capsule", "quantity": 1 }
+      ],
+      "unlocksArea": "crystal-caves"
+    }
+  },
+  {
+    "bossId": "crystallix",
+    "speciesId": "crystallix",
+    "name": "Crystallix",
+    "title": "The Living Crystal",
+    "level": 12,
+    "areaId": "crystal-caves",
+    "position": { "x": 560, "y": 560 },
+    "introDialog": [
+      "The cave begins to shake as crystals glow with fierce energy...",
+      "A massive crystalline entity rises from the ground!",
+      "CRYSTALLIX: You have come far, mortal.",
+      "CRYSTALLIX: But this is where your journey ends!",
+      "CRYSTALLIX: Face the power of the earth itself!"
+    ],
+    "defeatDialog": [
+      "CRYSTALLIX: Impossible... defeated by one so small...",
+      "CRYSTALLIX: Perhaps... you are worthy after all.",
+      "CRYSTALLIX: Take this as proof of your victory...",
+      "The cave trembles as Crystallix shatters into dormant crystals.",
+      "You have conquered the Crystal Caves!"
+    ],
+    "rewards": {
+      "experience": 1000,
+      "gold": 800,
+      "guaranteedItems": [
+        { "itemId": "potion-large", "quantity": 3 },
+        { "itemId": "ultra-capsule", "quantity": 2 },
+        { "itemId": "ether-medium", "quantity": 2 }
+      ]
+    }
+  }
+]

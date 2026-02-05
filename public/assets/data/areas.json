@@ -1,0 +1,189 @@
+[
+  {
+    "areaId": "sunlit-village",
+    "name": "Sunlit Village",
+    "description": "A peaceful village bathed in warm sunlight. The perfect starting point for any young adventurer.",
+    "recommendedLevel": 1,
+    "isSafeZone": true,
+    "mapWidth": 30,
+    "mapHeight": 30,
+    "terrainType": "village",
+    "encounters": [
+      { "speciesId": "mossbun", "weight": 30, "minLevel": 1, "maxLevel": 2 },
+      { "speciesId": "pebblit", "weight": 25, "minLevel": 1, "maxLevel": 2 },
+      { "speciesId": "breezling", "weight": 20, "minLevel": 1, "maxLevel": 3 },
+      { "speciesId": "flamepup", "weight": 15, "minLevel": 2, "maxLevel": 3 },
+      { "speciesId": "bubblefin", "weight": 10, "minLevel": 2, "maxLevel": 3 }
+    ],
+    "transitions": [
+      {
+        "zoneId": "village-to-forest",
+        "targetAreaId": "whispering-forest",
+        "targetPosition": { "x": 480, "y": 64 },
+        "triggerBounds": { "x": 416, "y": 928, "width": 128, "height": 32 },
+        "requiredLevel": 3
+      }
+    ],
+    "interactables": [
+      {
+        "objectId": "village-sign-1",
+        "type": "sign",
+        "position": { "x": 480, "y": 384 },
+        "isOneTime": false,
+        "message": [
+          "Welcome to Sunlit Village!",
+          "Speak to the villagers to learn about monster taming.",
+          "Head south when you're ready for adventure!"
+        ]
+      }
+    ],
+    "bossIds": [],
+    "ambientColor": 16777164
+  },
+  {
+    "areaId": "whispering-forest",
+    "name": "Whispering Forest",
+    "description": "A dense, mystical forest where the trees seem to whisper ancient secrets. Home to many forest creatures.",
+    "recommendedLevel": 3,
+    "isSafeZone": false,
+    "mapWidth": 40,
+    "mapHeight": 40,
+    "terrainType": "forest",
+    "encounters": [
+      { "speciesId": "mossbun", "weight": 20, "minLevel": 3, "maxLevel": 5 },
+      { "speciesId": "breezling", "weight": 18, "minLevel": 3, "maxLevel": 5 },
+      { "speciesId": "glowmoth", "weight": 15, "minLevel": 4, "maxLevel": 6 },
+      { "speciesId": "shadowpup", "weight": 12, "minLevel": 5, "maxLevel": 7 },
+      { "speciesId": "thornback", "weight": 10, "minLevel": 5, "maxLevel": 7 },
+      { "speciesId": "pebblit", "weight": 15, "minLevel": 3, "maxLevel": 5 }
+    ],
+    "transitions": [
+      {
+        "zoneId": "forest-to-village",
+        "targetAreaId": "sunlit-village",
+        "targetPosition": { "x": 480, "y": 864 },
+        "triggerBounds": { "x": 416, "y": 0, "width": 128, "height": 32 }
+      },
+      {
+        "zoneId": "forest-to-caves",
+        "targetAreaId": "crystal-caves",
+        "targetPosition": { "x": 64, "y": 640 },
+        "triggerBounds": { "x": 1216, "y": 576, "width": 32, "height": 128 },
+        "requiredLevel": 7,
+        "requiredBossDefeated": "elderwood"
+      }
+    ],
+    "interactables": [
+      {
+        "objectId": "forest-chest-1",
+        "type": "chest",
+        "position": { "x": 256, "y": 512 },
+        "isOneTime": true,
+        "contents": {
+          "items": [
+            { "itemId": "potion-medium", "quantity": 2 },
+            { "itemId": "capture-capsule", "quantity": 3 }
+          ],
+          "gold": 150
+        }
+      },
+      {
+        "objectId": "forest-fountain",
+        "type": "fountain",
+        "position": { "x": 640, "y": 640 },
+        "isOneTime": false,
+        "healPercent": 1.0,
+        "healsSquad": true
+      },
+      {
+        "objectId": "forest-sign-1",
+        "type": "sign",
+        "position": { "x": 480, "y": 128 },
+        "isOneTime": false,
+        "message": [
+          "Whispering Forest",
+          "Beware: Wild monsters roam freely here.",
+          "The ancient Elderwood guards the eastern path."
+        ]
+      },
+      {
+        "objectId": "forest-sign-2",
+        "type": "sign",
+        "position": { "x": 1152, "y": 640 },
+        "isOneTime": false,
+        "message": [
+          "Crystal Caves ahead.",
+          "Only those who defeat Elderwood may pass.",
+          "Recommended level: 7+"
+        ]
+      }
+    ],
+    "bossIds": ["thornwarden", "elderwood"],
+    "ambientColor": 5025616
+  },
+  {
+    "areaId": "crystal-caves",
+    "name": "Crystal Caves",
+    "description": "A network of underground caves filled with glowing crystals. Powerful earth monsters make their home in these depths.",
+    "recommendedLevel": 7,
+    "isSafeZone": false,
+    "mapWidth": 35,
+    "mapHeight": 35,
+    "terrainType": "cave",
+    "encounters": [
+      { "speciesId": "pebblit", "weight": 15, "minLevel": 7, "maxLevel": 9 },
+      { "speciesId": "crystalgolem", "weight": 12, "minLevel": 8, "maxLevel": 10 },
+      { "speciesId": "ironshell", "weight": 18, "minLevel": 9, "maxLevel": 11 },
+      { "speciesId": "magnetite", "weight": 10, "minLevel": 10, "maxLevel": 12 }
+    ],
+    "transitions": [
+      {
+        "zoneId": "caves-to-forest",
+        "targetAreaId": "whispering-forest",
+        "targetPosition": { "x": 1152, "y": 640 },
+        "triggerBounds": { "x": 0, "y": 576, "width": 32, "height": 128 }
+      }
+    ],
+    "interactables": [
+      {
+        "objectId": "caves-chest-1",
+        "type": "chest",
+        "position": { "x": 832, "y": 320 },
+        "isOneTime": true,
+        "contents": {
+          "items": [
+            { "itemId": "potion-large", "quantity": 3 },
+            { "itemId": "super-capsule", "quantity": 2 }
+          ],
+          "gold": 350
+        }
+      },
+      {
+        "objectId": "caves-chest-2",
+        "type": "chest",
+        "position": { "x": 320, "y": 896 },
+        "isOneTime": true,
+        "contents": {
+          "items": [
+            { "itemId": "ether-small", "quantity": 2 },
+            { "itemId": "antidote", "quantity": 3 }
+          ],
+          "gold": 200
+        }
+      },
+      {
+        "objectId": "caves-sign-1",
+        "type": "sign",
+        "position": { "x": 128, "y": 640 },
+        "isOneTime": false,
+        "message": [
+          "Crystal Caves",
+          "The crystals here are said to hold ancient power.",
+          "Deep within lurks the mighty Crystallix..."
+        ]
+      }
+    ],
+    "bossIds": ["crystallix"],
+    "ambientColor": 4473924
+  }
+]

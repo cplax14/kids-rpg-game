@@ -699,6 +699,7 @@ export function createCombatantFromEnemy(
   stats: CharacterStats,
   element: MonsterElement,
   abilities: ReadonlyArray<Ability>,
+  capturable: boolean = true,
 ): BattleCombatant {
   return {
     combatantId: `enemy-${generateId()}`,
@@ -708,7 +709,7 @@ export function createCombatantFromEnemy(
     stats: { ...stats },
     abilities,
     statusEffects: [],
-    capturable: true,
+    capturable,
   }
 }
 

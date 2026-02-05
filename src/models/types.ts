@@ -383,6 +383,103 @@ export interface GameArea {
   readonly isSafeZone: boolean
 }
 
+// ── Interactables ──
+
+export type InteractableType = 'chest' | 'sign' | 'fountain'
+
+export interface InteractableObject {
+  readonly objectId: string
+  readonly type: InteractableType
+  readonly position: Position
+  readonly isOneTime: boolean
+}
+
+export interface ChestContents {
+  readonly items: ReadonlyArray<ItemDrop>
+  readonly gold: number
+}
+
+export interface ChestObject extends InteractableObject {
+  readonly type: 'chest'
+  readonly contents: ChestContents
+}
+
+export interface SignObject extends InteractableObject {
+  readonly type: 'sign'
+  readonly message: ReadonlyArray<string>
+}
+
+export interface FountainObject extends InteractableObject {
+  readonly type: 'fountain'
+  readonly healPercent: number
+  readonly healsSquad: boolean
+}
+
+// ── Area Transitions ──
+
+export interface TransitionZone {
+  readonly zoneId: string
+  readonly targetAreaId: string
+  readonly targetPosition: Position
+  readonly triggerBounds: {
+    readonly x: number
+    readonly y: number
+    readonly width: number
+    readonly height: number
+  }
+  readonly requiredLevel?: number
+  readonly requiredBossDefeated?: string
+}
+
+// ── Boss System ──
+
+export interface BossRewards {
+  readonly experience: number
+  readonly gold: number
+  readonly guaranteedItems: ReadonlyArray<ItemDrop>
+  readonly unlocksArea?: string
+}
+
+export interface BossDefinition {
+  readonly bossId: string
+  readonly speciesId: string
+  readonly name: string
+  readonly title: string
+  readonly level: number
+  readonly areaId: string
+  readonly position: Position
+  readonly introDialog: ReadonlyArray<string>
+  readonly defeatDialog: ReadonlyArray<string>
+  readonly rewards: BossRewards
+}
+
+// ── Extended Area Definition ──
+
+export type TerrainType = 'village' | 'forest' | 'cave'
+
+export interface AreaEncounterEntry {
+  readonly speciesId: string
+  readonly weight: number
+  readonly minLevel: number
+  readonly maxLevel: number
+}
+
+export interface GameAreaDefinition {
+  readonly areaId: string
+  readonly name: string
+  readonly description: string
+  readonly recommendedLevel: number
+  readonly isSafeZone: boolean
+  readonly mapWidth: number
+  readonly mapHeight: number
+  readonly terrainType: TerrainType
+  readonly encounters: ReadonlyArray<AreaEncounterEntry>
+  readonly transitions: ReadonlyArray<TransitionZone>
+  readonly interactables: ReadonlyArray<InteractableObject>
+  readonly bossIds: ReadonlyArray<string>
+  readonly ambientColor?: number
+}
+
 // ── Save Game ──
 
 export interface GameSettings {
@@ -401,6 +498,9 @@ export interface SaveGame {
   readonly monsterStorage: ReadonlyArray<MonsterInstance>
   readonly discoveredSpecies: ReadonlyArray<string>
   readonly visitedAreas: ReadonlyArray<string>
+  readonly defeatedBosses: ReadonlyArray<string>
+  readonly openedChests: ReadonlyArray<string>
+  readonly currentAreaId: string
   readonly questFlags: Record<string, boolean>
   readonly playTime: number
   readonly settings: GameSettings

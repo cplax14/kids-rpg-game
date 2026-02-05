@@ -63,6 +63,8 @@ export class PreloaderScene extends Phaser.Scene {
     this.load.json('dialogs-data', 'assets/data/dialogs.json')
     this.load.json('traits-data', 'assets/data/traits.json')
     this.load.json('breeding-recipes-data', 'assets/data/breeding-recipes.json')
+    this.load.json('areas-data', 'assets/data/areas.json')
+    this.load.json('bosses-data', 'assets/data/bosses.json')
   }
 
   private createPlayerAnimations(): void {

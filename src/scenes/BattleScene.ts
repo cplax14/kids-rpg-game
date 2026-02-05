@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS, DEPTH, TEXT_STYLES } from '../config'
-import type { Battle, BattleCombatant, BattleAction, MonsterElement, ItemDrop, MonsterInstance } from '../models/types'
+import type { Battle, BattleCombatant, BattleAction, MonsterElement, ItemDrop, MonsterInstance, BossDefinition } from '../models/types'
 import {
   createBattle,
   executeAction,
@@ -24,6 +24,7 @@ import {
   updateSquad,
   updateMonsterStorage,
   updateDiscoveredSpecies,
+  addDefeatedBoss,
 } from '../systems/GameStateManager'
 import { useItem, getConsumableItems, getCaptureDevices, getItem } from '../systems/InventorySystem'
 import { useItemOnCombatant } from '../systems/ItemEffectSystem'
@@ -43,6 +44,8 @@ interface BattleSceneData {
   readonly enemyCombatants: ReadonlyArray<BattleCombatant>
   readonly backgroundKey?: string
   readonly enemySpeciesIds?: ReadonlyArray<string>
+  readonly isBossBattle?: boolean
+  readonly bossData?: BossDefinition
 }
 
 type BattlePhase = 'intro' | 'player_input' | 'executing' | 'enemy_turn' | 'victory' | 'defeat' | 'fled'
@@ -55,6 +58,8 @@ export class BattleScene extends Phaser.Scene {
   private enemySprites: Phaser.GameObjects.Rectangle[] = []
   private sceneData!: BattleSceneData
   private currentTurnIndex: number = 0
+  private isBossBattle: boolean = false
+  private bossData: BossDefinition | null = null
 
   constructor() {
     super({ key: SCENE_KEYS.BATTLE })
@@ -63,6 +68,8 @@ export class BattleScene extends Phaser.Scene {
   create(data: BattleSceneData): void {
     this.sceneData = data
     this.phase = 'intro'
+    this.isBossBattle = data.isBossBattle ?? false
+    this.bossData = data.bossData ?? null
 
     this.battle = createBattle(
       data.playerCombatants,
@@ -84,7 +91,11 @@ export class BattleScene extends Phaser.Scene {
     // Intro sequence
     this.cameras.main.fadeIn(300)
     this.time.delayedCall(500, () => {
-      this.hud.showMessage('A wild monster appeared!').then(() => {
+      const introMessage = this.isBossBattle && this.bossData
+        ? `${this.bossData.name}, ${this.bossData.title}, appears!`
+        : 'A wild monster appeared!'
+
+      this.hud.showMessage(introMessage).then(() => {
         this.startNextTurn()
       })
     })
@@ -640,11 +651,19 @@ export class BattleScene extends Phaser.Scene {
 
   private handleVictory(): void {
     this.phase = 'victory'
-    const rewards = calculateBattleRewards(this.battle)
 
-    // Generate loot
+    // For boss battles, use boss rewards; otherwise calculate normal rewards
+    const isBoss = this.isBossBattle && this.bossData
+    const bossRewards = isBoss ? this.bossData!.rewards : null
+    const normalRewards = calculateBattleRewards(this.battle)
+
+    const rewards = bossRewards
+      ? { experience: bossRewards.experience, gold: bossRewards.gold }
+      : normalRewards
+
+    // Generate loot (for non-boss battles)
     const speciesIds = this.sceneData.enemySpeciesIds ?? []
-    const loot = generateBattleLoot(speciesIds)
+    const loot = isBoss ? bossRewards!.guaranteedItems : generateBattleLoot(speciesIds)
 
     // Apply bond increases to squad
     try {
@@ -665,6 +684,12 @@ export class BattleScene extends Phaser.Scene {
             })
           }
         }
+      }
+
+      // Mark boss as defeated
+      if (isBoss) {
+        const updatedState = getGameState(this)
+        setGameState(this, addDefeatedBoss(updatedState, this.bossData!.bossId))
       }
 
       // Discover encountered species
@@ -691,7 +716,52 @@ export class BattleScene extends Phaser.Scene {
       : ''
 
     this.hud.hideCommandMenu()
-    this.hud.showMessage(`Victory! Gained ${rewards.experience} XP and ${rewards.gold} gold!${lootMsg}`).then(() => {
+
+    // For boss battles, show defeat dialog before victory message
+    if (isBoss && this.bossData!.defeatDialog.length > 0) {
+      this.showBossDefeatDialog()
+    } else {
+      this.showVictoryMessage(rewards, loot, lootMsg)
+    }
+  }
+
+  private showBossDefeatDialog(): void {
+    if (!this.bossData) return
+
+    const bossRewards = this.bossData.rewards
+    const rewards = { experience: bossRewards.experience, gold: bossRewards.gold }
+    const loot = bossRewards.guaranteedItems
+
+    // Show defeat dialog via dialog scene
+    this.scene.launch(SCENE_KEYS.DIALOG, {
+      dialogTreeId: null,
+      messages: this.bossData.defeatDialog,
+      npcName: this.bossData.name,
+      npcType: 'quest',
+    })
+
+    this.scene.pause()
+
+    this.events.once('resume', () => {
+      const lootMsg = loot.length > 0
+        ? ` Found: ${loot.map((d) => `${d.itemId} x${d.quantity}`).join(', ')}`
+        : ''
+
+      this.showVictoryMessage(rewards, loot, lootMsg)
+    })
+  }
+
+  private showVictoryMessage(
+    rewards: { experience: number; gold: number },
+    loot: ReadonlyArray<ItemDrop>,
+    lootMsg: string,
+  ): void {
+    const isBoss = this.isBossBattle && this.bossData
+    const victoryMsg = isBoss
+      ? `${this.bossData!.name} defeated! Gained ${rewards.experience} XP and ${rewards.gold} gold!${lootMsg}`
+      : `Victory! Gained ${rewards.experience} XP and ${rewards.gold} gold!${lootMsg}`
+
+    this.hud.showMessage(victoryMsg).then(() => {
       this.time.delayedCall(1000, () => {
         EventBus.emit(GAME_EVENTS.BATTLE_VICTORY, { rewards })
         EventBus.emit(GAME_EVENTS.BATTLE_END, { result: 'victory' })
@@ -699,12 +769,30 @@ export class BattleScene extends Phaser.Scene {
         this.cameras.main.fadeOut(500)
         this.cameras.main.once('camerafadeoutcomplete', () => {
           this.cleanUp()
-          this.scene.start(SCENE_KEYS.WORLD, {
-            newGame: false,
-            battleResult: 'victory',
-            rewards,
-            loot,
-          })
+
+          // For boss battles, pass boss-specific data
+          if (isBoss) {
+            this.scene.start(SCENE_KEYS.WORLD, {
+              newGame: false,
+              battleResult: 'victory',
+              rewards,
+              loot,
+              bossDefeated: this.bossData!.bossId,
+              bossRewards: {
+                experience: this.bossData!.rewards.experience,
+                gold: this.bossData!.rewards.gold,
+                items: this.bossData!.rewards.guaranteedItems,
+                unlocksArea: this.bossData!.rewards.unlocksArea,
+              },
+            })
+          } else {
+            this.scene.start(SCENE_KEYS.WORLD, {
+              newGame: false,
+              battleResult: 'victory',
+              rewards,
+              loot,
+            })
+          }
         })
       })
     })
@@ -788,5 +876,7 @@ export class BattleScene extends Phaser.Scene {
     this.playerSprites = []
     this.enemySprites = []
     this.currentTurnIndex = 0
+    this.isBossBattle = false
+    this.bossData = null
   }
 }

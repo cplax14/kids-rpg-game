@@ -199,6 +199,114 @@ export const GameAreaSchema = z.object({
   isSafeZone: z.boolean(),
 })
 
+// ── Interactables ──
+
+export const InteractableTypeSchema = z.enum(['chest', 'sign', 'fountain'])
+
+export const ItemDropSchema = z.object({
+  itemId: z.string().min(1),
+  quantity: z.number().int().min(1),
+})
+
+export const ChestContentsSchema = z.object({
+  items: z.array(ItemDropSchema),
+  gold: z.number().int().min(0),
+})
+
+export const InteractableBaseSchema = z.object({
+  objectId: z.string().min(1),
+  type: InteractableTypeSchema,
+  position: PositionSchema,
+  isOneTime: z.boolean(),
+})
+
+export const ChestObjectSchema = InteractableBaseSchema.extend({
+  type: z.literal('chest'),
+  contents: ChestContentsSchema,
+})
+
+export const SignObjectSchema = InteractableBaseSchema.extend({
+  type: z.literal('sign'),
+  message: z.array(z.string()),
+})
+
+export const FountainObjectSchema = InteractableBaseSchema.extend({
+  type: z.literal('fountain'),
+  healPercent: z.number().min(0).max(1),
+  healsSquad: z.boolean(),
+})
+
+export const InteractableObjectSchema = z.union([
+  ChestObjectSchema,
+  SignObjectSchema,
+  FountainObjectSchema,
+])
+
+// ── Area Transitions ──
+
+export const TransitionZoneSchema = z.object({
+  zoneId: z.string().min(1),
+  targetAreaId: z.string().min(1),
+  targetPosition: PositionSchema,
+  triggerBounds: z.object({
+    x: z.number(),
+    y: z.number(),
+    width: z.number().min(1),
+    height: z.number().min(1),
+  }),
+  requiredLevel: z.number().int().min(0).optional(),
+  requiredBossDefeated: z.string().optional(),
+})
+
+// ── Boss System ──
+
+export const BossRewardsSchema = z.object({
+  experience: z.number().int().min(0),
+  gold: z.number().int().min(0),
+  guaranteedItems: z.array(ItemDropSchema),
+  unlocksArea: z.string().optional(),
+})
+
+export const BossDefinitionSchema = z.object({
+  bossId: z.string().min(1),
+  speciesId: z.string().min(1),
+  name: z.string().min(1),
+  title: z.string().min(1),
+  level: z.number().int().min(1),
+  areaId: z.string().min(1),
+  position: PositionSchema,
+  introDialog: z.array(z.string()),
+  defeatDialog: z.array(z.string()),
+  rewards: BossRewardsSchema,
+})
+
+// ── Extended Area Definition ──
+
+export const TerrainTypeSchema = z.enum(['village', 'forest', 'cave'])
+
+export const AreaEncounterEntrySchema = z.object({
+  speciesId: z.string().min(1),
+  weight: z.number().min(0),
+  minLevel: z.number().int().min(1),
+  maxLevel: z.number().int().min(1),
+})
+
+export const GameAreaDefinitionSchema = z.object({
+  areaId: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string(),
+  recommendedLevel: z.number().int().min(0),
+  isSafeZone: z.boolean(),
+  mapWidth: z.number().int().min(1),
+  mapHeight: z.number().int().min(1),
+  terrainType: TerrainTypeSchema,
+  encounters: z.array(AreaEncounterEntrySchema),
+  transitions: z.array(TransitionZoneSchema),
+  interactables: z.array(InteractableObjectSchema),
+  bossIds: z.array(z.string()),
+  ambientColor: z.number().int().optional(),
+})
+
 // ── Traits ──
 
 export const TraitRaritySchema = z.enum(['common', 'rare', 'mutation'])
