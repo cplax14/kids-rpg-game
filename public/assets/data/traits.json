@@ -1,0 +1,169 @@
+[
+  {
+    "traitId": "fierce",
+    "name": "Fierce",
+    "description": "An aggressive nature that boosts attack power.",
+    "statModifiers": {
+      "attack": 10
+    },
+    "rarity": "common"
+  },
+  {
+    "traitId": "fireproof",
+    "name": "Fireproof",
+    "description": "Natural resistance to heat and flames.",
+    "statModifiers": {
+      "magicDefense": 5
+    },
+    "rarity": "common"
+  },
+  {
+    "traitId": "gentle",
+    "name": "Gentle",
+    "description": "A calm disposition that improves magical defense.",
+    "statModifiers": {
+      "magicDefense": 10
+    },
+    "rarity": "common"
+  },
+  {
+    "traitId": "keen-eye",
+    "name": "Keen Eye",
+    "description": "Sharp vision that improves accuracy in combat.",
+    "statModifiers": {
+      "luck": 8
+    },
+    "rarity": "common"
+  },
+  {
+    "traitId": "lucky",
+    "name": "Lucky",
+    "description": "Fortune seems to favor this monster.",
+    "statModifiers": {
+      "luck": 5
+    },
+    "rarity": "common"
+  },
+  {
+    "traitId": "nimble",
+    "name": "Nimble",
+    "description": "Quick and agile movements boost speed.",
+    "statModifiers": {
+      "speed": 10
+    },
+    "rarity": "common"
+  },
+  {
+    "traitId": "quick-learner",
+    "name": "Quick Learner",
+    "description": "Learns from battles faster than others.",
+    "statModifiers": {
+      "luck": 3
+    },
+    "rarity": "common"
+  },
+  {
+    "traitId": "thick-skin",
+    "name": "Thick Skin",
+    "description": "Tough hide that reduces physical damage.",
+    "statModifiers": {
+      "defense": 10
+    },
+    "rarity": "common"
+  },
+  {
+    "traitId": "tough",
+    "name": "Tough",
+    "description": "A hardy constitution that boosts maximum health.",
+    "statModifiers": {
+      "maxHp": 15
+    },
+    "rarity": "common"
+  },
+  {
+    "traitId": "waterproof",
+    "name": "Waterproof",
+    "description": "Natural ability to repel and resist water.",
+    "statModifiers": {
+      "magicDefense": 5
+    },
+    "rarity": "common"
+  },
+  {
+    "traitId": "iron-will",
+    "name": "Iron Will",
+    "description": "An unbreakable spirit that greatly improves magical defense.",
+    "statModifiers": {
+      "magicDefense": 15
+    },
+    "rarity": "rare"
+  },
+  {
+    "traitId": "elemental-affinity",
+    "name": "Elemental Affinity",
+    "description": "A deep connection to elemental forces that boosts magical power.",
+    "statModifiers": {
+      "magicAttack": 12
+    },
+    "rarity": "rare"
+  },
+  {
+    "traitId": "swift-strike",
+    "name": "Swift Strike",
+    "description": "Lightning-fast reflexes that significantly boost speed.",
+    "statModifiers": {
+      "speed": 15
+    },
+    "rarity": "rare"
+  },
+  {
+    "traitId": "regenerator",
+    "name": "Regenerator",
+    "description": "Natural healing ability that helps recover in battle.",
+    "statModifiers": {
+      "maxHp": 10,
+      "defense": 5
+    },
+    "rarity": "rare"
+  },
+  {
+    "traitId": "hardy",
+    "name": "Hardy",
+    "description": "Exceptionally tough body with greatly increased health.",
+    "statModifiers": {
+      "maxHp": 20
+    },
+    "rarity": "rare"
+  },
+  {
+    "traitId": "primal-power",
+    "name": "Primal Power",
+    "description": "An ancient force that dramatically boosts physical strength.",
+    "statModifiers": {
+      "attack": 15,
+      "maxHp": 5
+    },
+    "rarity": "mutation"
+  },
+  {
+    "traitId": "mystic-aura",
+    "name": "Mystic Aura",
+    "description": "A mysterious energy that greatly enhances magical abilities.",
+    "statModifiers": {
+      "magicAttack": 15,
+      "maxMp": 10
+    },
+    "rarity": "mutation"
+  },
+  {
+    "traitId": "chaos-touched",
+    "name": "Chaos Touched",
+    "description": "Touched by chaos, granting unpredictable power boosts.",
+    "statModifiers": {
+      "attack": 8,
+      "magicAttack": 8,
+      "speed": 4
+    },
+    "rarity": "mutation"
+  }
+]

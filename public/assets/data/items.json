@@ -240,6 +240,30 @@
     "sellPrice": 400
   },
   {
+    "itemId": "mutation-catalyst",
+    "name": "Mutation Catalyst",
+    "description": "A mysterious substance that increases the chance of rare mutations during breeding.",
+    "category": "breeding_item",
+    "iconKey": "icon-mutation-catalyst",
+    "stackable": true,
+    "maxStack": 3,
+    "useEffect": { "type": "breeding_boost", "magnitude": 0.15, "targetType": "single_monster" },
+    "buyPrice": 1200,
+    "sellPrice": 600
+  },
+  {
+    "itemId": "harmony-bell",
+    "name": "Harmony Bell",
+    "description": "A magical bell whose chime increases compatibility between breeding partners.",
+    "category": "breeding_item",
+    "iconKey": "icon-harmony-bell",
+    "stackable": true,
+    "maxStack": 3,
+    "useEffect": { "type": "breeding_boost", "magnitude": 0.25, "targetType": "single_monster" },
+    "buyPrice": 1000,
+    "sellPrice": 500
+  },
+  {
     "itemId": "monster-treat",
     "name": "Monster Treat",
     "description": "A tasty treat that increases bond level.",

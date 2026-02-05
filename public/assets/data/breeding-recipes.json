@@ -1,0 +1,225 @@
+[
+  {
+    "recipeId": "flamepup-mossbun",
+    "parents": ["flamepup", "mossbun"],
+    "offspring": [
+      { "speciesId": "flamepup", "probability": 0.35, "bonusTraits": [] },
+      { "speciesId": "mossbun", "probability": 0.35, "bonusTraits": [] },
+      { "speciesId": "emberbun", "probability": 0.30, "bonusTraits": ["fireproof"] }
+    ],
+    "requiredCompatibility": 0.3
+  },
+  {
+    "recipeId": "flamepup-bubblefin",
+    "parents": ["flamepup", "bubblefin"],
+    "offspring": [
+      { "speciesId": "steampup", "probability": 1.0, "bonusTraits": ["fireproof", "waterproof"] }
+    ],
+    "requiredCompatibility": 0.4
+  },
+  {
+    "recipeId": "volcanix-serpentide",
+    "parents": ["volcanix", "serpentide"],
+    "offspring": [
+      { "speciesId": "magmawyrm", "probability": 1.0, "bonusTraits": ["tough", "fierce"] }
+    ],
+    "requiredCompatibility": 0.5
+  },
+  {
+    "recipeId": "breezling-glowmoth",
+    "parents": ["breezling", "glowmoth"],
+    "offspring": [
+      { "speciesId": "prismbug", "probability": 1.0, "bonusTraits": ["nimble", "lucky"] }
+    ],
+    "requiredCompatibility": 0.4
+  },
+  {
+    "recipeId": "pebblit-ironshell",
+    "parents": ["pebblit", "ironshell"],
+    "offspring": [
+      { "speciesId": "crystalgolem", "probability": 0.60, "bonusTraits": [] },
+      { "speciesId": "magnetite", "probability": 0.40, "bonusTraits": ["thick-skin"] }
+    ],
+    "requiredCompatibility": 0.5
+  },
+  {
+    "recipeId": "blazefox-shadowpup",
+    "parents": ["blazefox", "shadowpup"],
+    "offspring": [
+      { "speciesId": "duskfox", "probability": 1.0, "bonusTraits": ["nimble", "fierce"] }
+    ],
+    "requiredCompatibility": 0.4
+  },
+  {
+    "recipeId": "tidecrab-pebblit",
+    "parents": ["tidecrab", "pebblit"],
+    "offspring": [
+      { "speciesId": "coralshell", "probability": 1.0, "bonusTraits": ["thick-skin", "waterproof"] }
+    ],
+    "requiredCompatibility": 0.4
+  },
+  {
+    "recipeId": "flamepup-flamepup",
+    "parents": ["flamepup", "flamepup"],
+    "offspring": [
+      { "speciesId": "flamepup", "probability": 0.85, "bonusTraits": [] },
+      { "speciesId": "blazefox", "probability": 0.15, "bonusTraits": ["fireproof"] }
+    ],
+    "requiredCompatibility": 0.2
+  },
+  {
+    "recipeId": "blazefox-blazefox",
+    "parents": ["blazefox", "blazefox"],
+    "offspring": [
+      { "speciesId": "blazefox", "probability": 0.90, "bonusTraits": [] },
+      { "speciesId": "flamepup", "probability": 0.10, "bonusTraits": ["nimble"] }
+    ],
+    "requiredCompatibility": 0.2
+  },
+  {
+    "recipeId": "bubblefin-bubblefin",
+    "parents": ["bubblefin", "bubblefin"],
+    "offspring": [
+      { "speciesId": "bubblefin", "probability": 0.85, "bonusTraits": [] },
+      { "speciesId": "tidecrab", "probability": 0.15, "bonusTraits": ["waterproof"] }
+    ],
+    "requiredCompatibility": 0.2
+  },
+  {
+    "recipeId": "tidecrab-tidecrab",
+    "parents": ["tidecrab", "tidecrab"],
+    "offspring": [
+      { "speciesId": "tidecrab", "probability": 0.90, "bonusTraits": [] },
+      { "speciesId": "bubblefin", "probability": 0.10, "bonusTraits": ["thick-skin"] }
+    ],
+    "requiredCompatibility": 0.2
+  },
+  {
+    "recipeId": "pebblit-pebblit",
+    "parents": ["pebblit", "pebblit"],
+    "offspring": [
+      { "speciesId": "pebblit", "probability": 0.85, "bonusTraits": [] },
+      { "speciesId": "crystalgolem", "probability": 0.15, "bonusTraits": ["tough"] }
+    ],
+    "requiredCompatibility": 0.2
+  },
+  {
+    "recipeId": "breezling-breezling",
+    "parents": ["breezling", "breezling"],
+    "offspring": [
+      { "speciesId": "breezling", "probability": 0.85, "bonusTraits": [] },
+      { "speciesId": "stormowl", "probability": 0.15, "bonusTraits": ["nimble"] }
+    ],
+    "requiredCompatibility": 0.2
+  },
+  {
+    "recipeId": "glowmoth-glowmoth",
+    "parents": ["glowmoth", "glowmoth"],
+    "offspring": [
+      { "speciesId": "glowmoth", "probability": 0.90, "bonusTraits": [] },
+      { "speciesId": "sunstag", "probability": 0.10, "bonusTraits": ["gentle"] }
+    ],
+    "requiredCompatibility": 0.2
+  },
+  {
+    "recipeId": "shadowpup-shadowpup",
+    "parents": ["shadowpup", "shadowpup"],
+    "offspring": [
+      { "speciesId": "shadowpup", "probability": 0.85, "bonusTraits": [] },
+      { "speciesId": "nightstalker", "probability": 0.15, "bonusTraits": ["nimble"] }
+    ],
+    "requiredCompatibility": 0.2
+  },
+  {
+    "recipeId": "mossbun-mossbun",
+    "parents": ["mossbun", "mossbun"],
+    "offspring": [
+      { "speciesId": "mossbun", "probability": 1.0, "bonusTraits": ["gentle"] }
+    ],
+    "requiredCompatibility": 0.2
+  },
+  {
+    "recipeId": "flamepup-breezling",
+    "parents": ["flamepup", "breezling"],
+    "offspring": [
+      { "speciesId": "flamepup", "probability": 0.50, "bonusTraits": ["nimble"] },
+      { "speciesId": "breezling", "probability": 0.50, "bonusTraits": ["fireproof"] }
+    ],
+    "requiredCompatibility": 0.4
+  },
+  {
+    "recipeId": "bubblefin-pebblit",
+    "parents": ["bubblefin", "pebblit"],
+    "offspring": [
+      { "speciesId": "bubblefin", "probability": 0.50, "bonusTraits": ["thick-skin"] },
+      { "speciesId": "pebblit", "probability": 0.50, "bonusTraits": ["waterproof"] }
+    ],
+    "requiredCompatibility": 0.4
+  },
+  {
+    "recipeId": "glowmoth-shadowpup",
+    "parents": ["glowmoth", "shadowpup"],
+    "offspring": [
+      { "speciesId": "glowmoth", "probability": 0.50, "bonusTraits": ["fierce"] },
+      { "speciesId": "shadowpup", "probability": 0.50, "bonusTraits": ["gentle"] }
+    ],
+    "requiredCompatibility": 0.3
+  },
+  {
+    "recipeId": "thornback-mossbun",
+    "parents": ["thornback", "mossbun"],
+    "offspring": [
+      { "speciesId": "thornback", "probability": 0.60, "bonusTraits": ["gentle"] },
+      { "speciesId": "mossbun", "probability": 0.40, "bonusTraits": ["fierce"] }
+    ],
+    "requiredCompatibility": 0.3
+  },
+  {
+    "recipeId": "stormowl-tempestdrake",
+    "parents": ["stormowl", "tempestdrake"],
+    "offspring": [
+      { "speciesId": "stormowl", "probability": 0.40, "bonusTraits": ["fierce"] },
+      { "speciesId": "tempestdrake", "probability": 0.40, "bonusTraits": ["keen-eye"] },
+      { "speciesId": "breezling", "probability": 0.20, "bonusTraits": ["swift-strike"] }
+    ],
+    "requiredCompatibility": 0.5
+  },
+  {
+    "recipeId": "sunstag-glowmoth",
+    "parents": ["sunstag", "glowmoth"],
+    "offspring": [
+      { "speciesId": "sunstag", "probability": 0.50, "bonusTraits": ["lucky"] },
+      { "speciesId": "glowmoth", "probability": 0.50, "bonusTraits": ["gentle"] }
+    ],
+    "requiredCompatibility": 0.3
+  },
+  {
+    "recipeId": "nightstalker-shadowpup",
+    "parents": ["nightstalker", "shadowpup"],
+    "offspring": [
+      { "speciesId": "nightstalker", "probability": 0.50, "bonusTraits": [] },
+      { "speciesId": "shadowpup", "probability": 0.50, "bonusTraits": ["keen-eye"] }
+    ],
+    "requiredCompatibility": 0.3
+  },
+  {
+    "recipeId": "volcanix-blazefox",
+    "parents": ["volcanix", "blazefox"],
+    "offspring": [
+      { "speciesId": "volcanix", "probability": 0.50, "bonusTraits": ["nimble"] },
+      { "speciesId": "blazefox", "probability": 0.35, "bonusTraits": ["tough"] },
+      { "speciesId": "flamepup", "probability": 0.15, "bonusTraits": ["fierce", "fireproof"] }
+    ],
+    "requiredCompatibility": 0.4
+  },
+  {
+    "recipeId": "serpentide-tidecrab",
+    "parents": ["serpentide", "tidecrab"],
+    "offspring": [
+      { "speciesId": "serpentide", "probability": 0.40, "bonusTraits": ["thick-skin"] },
+      { "speciesId": "tidecrab", "probability": 0.40, "bonusTraits": ["keen-eye"] },
+      { "speciesId": "bubblefin", "probability": 0.20, "bonusTraits": ["waterproof", "gentle"] }
+    ],
+    "requiredCompatibility": 0.4
+  }
+]

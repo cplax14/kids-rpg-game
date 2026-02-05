@@ -199,6 +199,33 @@ export const GameAreaSchema = z.object({
   isSafeZone: z.boolean(),
 })
 
+// ── Traits ──
+
+export const TraitRaritySchema = z.enum(['common', 'rare', 'mutation'])
+
+export const TraitDefinitionSchema = z.object({
+  traitId: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string(),
+  statModifiers: CharacterStatsSchema.partial(),
+  rarity: TraitRaritySchema,
+})
+
+// ── Breeding Recipes ──
+
+export const BreedingOffspringOptionSchema = z.object({
+  speciesId: z.string().min(1),
+  probability: z.number().min(0).max(1),
+  bonusTraits: z.array(z.string()),
+})
+
+export const BreedingRecipeSchema = z.object({
+  recipeId: z.string().min(1),
+  parents: z.tuple([z.string().min(1), z.string().min(1)]),
+  offspring: z.array(BreedingOffspringOptionSchema),
+  requiredCompatibility: z.number().min(0).max(1),
+})
+
 // ── Save Game ──
 
 export const GameSettingsSchema = z.object({

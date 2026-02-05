@@ -30,7 +30,10 @@ import { discoverMultipleSpecies } from '../systems/BestiarySystem'
 import { addItem, loadItemData } from '../systems/InventorySystem'
 import { loadEquipmentData } from '../systems/EquipmentSystem'
 import { loadDialogData } from '../systems/DialogSystem'
+import { loadTraitData } from '../systems/TraitSystem'
+import { loadBreedingRecipes } from '../systems/BreedingSystem'
 import { NPC } from '../entities/NPC'
+import type { TraitDefinition, BreedingRecipe } from '../models/types'
 
 interface WorldSceneData {
   readonly newGame: boolean
@@ -141,6 +144,12 @@ export class WorldScene extends Phaser.Scene {
 
     const dialogsData = this.cache.json.get('dialogs-data')
     if (dialogsData) loadDialogData(dialogsData)
+
+    const traitsData = this.cache.json.get('traits-data') as TraitDefinition[] | undefined
+    if (traitsData) loadTraitData(traitsData)
+
+    const breedingRecipesData = this.cache.json.get('breeding-recipes-data') as BreedingRecipe[] | undefined
+    if (breedingRecipesData) loadBreedingRecipes(breedingRecipesData)
   }
 
   private checkForEncounter(): void {
@@ -342,7 +351,17 @@ export class WorldScene extends Phaser.Scene {
       type: 'info',
     })
 
-    this.npcs = [shopkeeper, healer, guide]
+    // Monster Breeder
+    const breeder = new NPC(this, 19 * TILE_SIZE, 13 * TILE_SIZE, {
+      npcId: 'breeder',
+      name: 'Monster Breeder',
+      spriteKey: 'npc-breeder',
+      position: { x: 19 * TILE_SIZE, y: 13 * TILE_SIZE },
+      dialogTreeId: 'breeder-greeting',
+      type: 'breeder',
+    })
+
+    this.npcs = [shopkeeper, healer, guide, breeder]
 
     // Set up overlap detection with player
     for (const npc of this.npcs) {
@@ -405,7 +424,10 @@ export class WorldScene extends Phaser.Scene {
     const objectsLayer = this.map.createLayer('Objects', tileset, 0, 0)
     if (objectsLayer) {
       objectsLayer.setDepth(DEPTH.BELOW_PLAYER)
-      objectsLayer.setCollisionByExclusion([-1, 0, 19])
+      // Tiled tile IDs are 1-based, Phaser uses 0-based after subtracting firstgid
+      // Exclude: -1 (empty), door tiles (Tiled 19 = Phaser 18)
+      // Collide with: trees (8,9), rocks (10,11), fences (12), walls (13,14), houses (16,17), etc.
+      objectsLayer.setCollisionByExclusion([-1, 18])
       this.collisionLayer = objectsLayer
     }
   }

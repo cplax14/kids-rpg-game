@@ -11,8 +11,9 @@ export class Player {
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.sprite = scene.physics.add.sprite(x, y, 'player', 'down-1')
-    this.sprite.setSize(16, 16)
-    this.sprite.setOffset(8, 32)
+    // Use a smaller collision body to prevent getting stuck on tile corners
+    this.sprite.setSize(12, 12)
+    this.sprite.setOffset(10, 34)
     this.sprite.setDepth(10)
   }
 

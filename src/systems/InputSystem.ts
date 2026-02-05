@@ -20,58 +20,113 @@ const EMPTY_INPUT: InputState = {
   cancel: false,
 }
 
+// Key codes for movement and actions
+const KEY_BINDINGS = {
+  up: ['ArrowUp', 'KeyW'],
+  down: ['ArrowDown', 'KeyS'],
+  left: ['ArrowLeft', 'KeyA'],
+  right: ['ArrowRight', 'KeyD'],
+  interact: ['KeyE', 'Space'],
+  menu: ['Escape'],
+  cancel: ['KeyX'],
+} as const
+
 export class InputSystem {
-  private readonly cursors: Phaser.Types.Input.Keyboard.CursorKeys
-  private readonly wasd: {
-    readonly W: Phaser.Input.Keyboard.Key
-    readonly A: Phaser.Input.Keyboard.Key
-    readonly S: Phaser.Input.Keyboard.Key
-    readonly D: Phaser.Input.Keyboard.Key
-  }
-  private readonly interactKey: Phaser.Input.Keyboard.Key
-  private readonly menuKey: Phaser.Input.Keyboard.Key
-  private readonly cancelKey: Phaser.Input.Keyboard.Key
+  private readonly pressedKeys: Set<string> = new Set()
+  private readonly justPressedKeys: Set<string> = new Set()
   private enabled: boolean = true
 
-  constructor(scene: Phaser.Scene) {
-    const keyboard = scene.input.keyboard
+  private readonly keydownHandler: (e: KeyboardEvent) => void
+  private readonly keyupHandler: (e: KeyboardEvent) => void
+  private readonly blurHandler: () => void
+  private readonly visibilityHandler: () => void
 
-    if (!keyboard) {
-      throw new Error('Keyboard input not available')
+  constructor(_scene: Phaser.Scene) {
+    // Use raw DOM events instead of Phaser's keyboard system for reliability
+    this.keydownHandler = (e: KeyboardEvent) => {
+      // Prevent default for game keys to avoid scrolling
+      if (this.isGameKey(e.code)) {
+        e.preventDefault()
+      }
+
+      if (!this.pressedKeys.has(e.code)) {
+        this.pressedKeys.add(e.code)
+        this.justPressedKeys.add(e.code)
+      }
     }
 
-    this.cursors = keyboard.createCursorKeys()
-    this.wasd = {
-      W: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
-      A: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-      S: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
-      D: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+    this.keyupHandler = (e: KeyboardEvent) => {
+      this.pressedKeys.delete(e.code)
     }
-    this.interactKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E)
-    this.menuKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
-    this.cancelKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X)
+
+    this.blurHandler = () => {
+      this.pressedKeys.clear()
+      this.justPressedKeys.clear()
+    }
+
+    this.visibilityHandler = () => {
+      if (document.hidden) {
+        this.pressedKeys.clear()
+        this.justPressedKeys.clear()
+      }
+    }
+
+    window.addEventListener('keydown', this.keydownHandler)
+    window.addEventListener('keyup', this.keyupHandler)
+    window.addEventListener('blur', this.blurHandler)
+    document.addEventListener('visibilitychange', this.visibilityHandler)
+  }
+
+  private isGameKey(code: string): boolean {
+    return Object.values(KEY_BINDINGS).some(keys =>
+      (keys as readonly string[]).includes(code)
+    )
+  }
+
+  private isKeyDown(keys: readonly string[]): boolean {
+    return keys.some(key => this.pressedKeys.has(key))
+  }
+
+  private isKeyJustPressed(keys: readonly string[]): boolean {
+    return keys.some(key => this.justPressedKeys.has(key))
   }
 
   getState(): InputState {
     if (!this.enabled) return EMPTY_INPUT
 
-    return {
-      up: this.cursors.up.isDown || this.wasd.W.isDown,
-      down: this.cursors.down.isDown || this.wasd.S.isDown,
-      left: this.cursors.left.isDown || this.wasd.A.isDown,
-      right: this.cursors.right.isDown || this.wasd.D.isDown,
-      interact: Phaser.Input.Keyboard.JustDown(this.interactKey) ||
-        Phaser.Input.Keyboard.JustDown(this.cursors.space),
-      menu: Phaser.Input.Keyboard.JustDown(this.menuKey),
-      cancel: Phaser.Input.Keyboard.JustDown(this.cancelKey),
+    const state: InputState = {
+      up: this.isKeyDown(KEY_BINDINGS.up),
+      down: this.isKeyDown(KEY_BINDINGS.down),
+      left: this.isKeyDown(KEY_BINDINGS.left),
+      right: this.isKeyDown(KEY_BINDINGS.right),
+      interact: this.isKeyJustPressed(KEY_BINDINGS.interact),
+      menu: this.isKeyJustPressed(KEY_BINDINGS.menu),
+      cancel: this.isKeyJustPressed(KEY_BINDINGS.cancel),
     }
+
+    // Clear just-pressed keys after reading (they only fire once per press)
+    this.justPressedKeys.clear()
+
+    return state
   }
 
   setEnabled(enabled: boolean): void {
     this.enabled = enabled
+    if (enabled) {
+      // Clear any stale key states when re-enabling
+      this.pressedKeys.clear()
+      this.justPressedKeys.clear()
+    }
   }
 
   isEnabled(): boolean {
     return this.enabled
+  }
+
+  destroy(): void {
+    window.removeEventListener('keydown', this.keydownHandler)
+    window.removeEventListener('keyup', this.keyupHandler)
+    window.removeEventListener('blur', this.blurHandler)
+    document.removeEventListener('visibilitychange', this.visibilityHandler)
   }
 }

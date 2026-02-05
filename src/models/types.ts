@@ -284,7 +284,32 @@ export interface CaptureAttempt {
   readonly succeeded: boolean
 }
 
+// ── Traits ──
+
+export type TraitRarity = 'common' | 'rare' | 'mutation'
+
+export interface TraitDefinition {
+  readonly traitId: string
+  readonly name: string
+  readonly description: string
+  readonly statModifiers: Partial<CharacterStats>
+  readonly rarity: TraitRarity
+}
+
 // ── Breeding ──
+
+export interface BreedingOffspringOption {
+  readonly speciesId: string
+  readonly probability: number
+  readonly bonusTraits: ReadonlyArray<string>
+}
+
+export interface BreedingRecipe {
+  readonly recipeId: string
+  readonly parents: readonly [string, string]
+  readonly offspring: ReadonlyArray<BreedingOffspringOption>
+  readonly requiredCompatibility: number
+}
 
 export interface BreedingOutcome {
   readonly resultSpeciesId: string

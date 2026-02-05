@@ -704,5 +704,285 @@
     "evolutionChain": null,
     "breedingGroup": "elemental",
     "breedingTraits": ["tough", "thick-skin"]
+  },
+  {
+    "speciesId": "emberbun",
+    "name": "Emberbun",
+    "description": "A warm, cuddly bunny with smoldering ears. Its fur glows faintly like embers, and it leaves tiny sparks wherever it hops.",
+    "element": "fire",
+    "rarity": "uncommon",
+    "baseStats": {
+      "maxHp": 95,
+      "currentHp": 95,
+      "maxMp": 30,
+      "currentMp": 30,
+      "attack": 15,
+      "defense": 14,
+      "magicAttack": 16,
+      "magicDefense": 15,
+      "speed": 16,
+      "luck": 15
+    },
+    "statGrowth": {
+      "hp": 8,
+      "mp": 3,
+      "attack": 2,
+      "defense": 2,
+      "magicAttack": 2,
+      "magicDefense": 2,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "ember", "learnAtLevel": 3 },
+      { "abilityId": "heal", "learnAtLevel": 6 },
+      { "abilityId": "fireball", "learnAtLevel": 12 }
+    ],
+    "captureBaseDifficulty": 0.0,
+    "spriteKey": "emberbun",
+    "evolutionChain": null,
+    "breedingGroup": "beast",
+    "breedingTraits": ["fireproof", "gentle", "lucky"]
+  },
+  {
+    "speciesId": "steampup",
+    "name": "Steampup",
+    "description": "A playful pup surrounded by swirling steam. Born from fire and water, it can breathe both scalding vapor and cooling mist.",
+    "element": "water",
+    "rarity": "rare",
+    "baseStats": {
+      "maxHp": 110,
+      "currentHp": 110,
+      "maxMp": 35,
+      "currentMp": 35,
+      "attack": 18,
+      "defense": 16,
+      "magicAttack": 20,
+      "magicDefense": 18,
+      "speed": 17,
+      "luck": 14
+    },
+    "statGrowth": {
+      "hp": 9,
+      "mp": 4,
+      "attack": 2,
+      "defense": 2,
+      "magicAttack": 3,
+      "magicDefense": 2,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "water-splash", "learnAtLevel": 3 },
+      { "abilityId": "ember", "learnAtLevel": 5 },
+      { "abilityId": "fireball", "learnAtLevel": 10 },
+      { "abilityId": "tidal-wave", "learnAtLevel": 16 }
+    ],
+    "captureBaseDifficulty": 0.0,
+    "spriteKey": "steampup",
+    "evolutionChain": null,
+    "breedingGroup": "beast",
+    "breedingTraits": ["fireproof", "waterproof", "nimble"]
+  },
+  {
+    "speciesId": "magmawyrm",
+    "name": "Magmawyrm",
+    "description": "A legendary wyrm born from the union of volcano and ocean. Lava courses through its serpentine body, and tidal waves follow in its wake.",
+    "element": "fire",
+    "rarity": "legendary",
+    "baseStats": {
+      "maxHp": 175,
+      "currentHp": 175,
+      "maxMp": 60,
+      "currentMp": 60,
+      "attack": 28,
+      "defense": 24,
+      "magicAttack": 30,
+      "magicDefense": 26,
+      "speed": 20,
+      "luck": 16
+    },
+    "statGrowth": {
+      "hp": 13,
+      "mp": 6,
+      "attack": 3,
+      "defense": 3,
+      "magicAttack": 4,
+      "magicDefense": 3,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "bite", "learnAtLevel": 1 },
+      { "abilityId": "fireball", "learnAtLevel": 3 },
+      { "abilityId": "tidal-wave", "learnAtLevel": 6 },
+      { "abilityId": "inferno", "learnAtLevel": 12 },
+      { "abilityId": "blizzard", "learnAtLevel": 16 },
+      { "abilityId": "flame-burst", "learnAtLevel": 20 }
+    ],
+    "captureBaseDifficulty": 0.0,
+    "spriteKey": "magmawyrm",
+    "evolutionChain": null,
+    "breedingGroup": "dragon",
+    "breedingTraits": ["fireproof", "waterproof", "tough", "fierce"]
+  },
+  {
+    "speciesId": "prismbug",
+    "name": "Prismbug",
+    "description": "A dazzling insect with crystalline wings that refract light into rainbows. It flutters through the air leaving trails of shimmering color.",
+    "element": "light",
+    "rarity": "rare",
+    "baseStats": {
+      "maxHp": 85,
+      "currentHp": 85,
+      "maxMp": 40,
+      "currentMp": 40,
+      "attack": 14,
+      "defense": 14,
+      "magicAttack": 22,
+      "magicDefense": 20,
+      "speed": 22,
+      "luck": 18
+    },
+    "statGrowth": {
+      "hp": 6,
+      "mp": 4,
+      "attack": 1,
+      "defense": 2,
+      "magicAttack": 3,
+      "magicDefense": 2,
+      "speed": 3
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "light-beam", "learnAtLevel": 3 },
+      { "abilityId": "gust", "learnAtLevel": 5 },
+      { "abilityId": "heal", "learnAtLevel": 8 },
+      { "abilityId": "radiance", "learnAtLevel": 14 }
+    ],
+    "captureBaseDifficulty": 0.0,
+    "spriteKey": "prismbug",
+    "evolutionChain": null,
+    "breedingGroup": "avian",
+    "breedingTraits": ["nimble", "lucky", "gentle"]
+  },
+  {
+    "speciesId": "magnetite",
+    "name": "Magnetite",
+    "description": "A mysterious creature of living metal that floats using magnetic fields. Iron filings dance around it like a metallic aura.",
+    "element": "earth",
+    "rarity": "rare",
+    "baseStats": {
+      "maxHp": 140,
+      "currentHp": 140,
+      "maxMp": 35,
+      "currentMp": 35,
+      "attack": 20,
+      "defense": 28,
+      "magicAttack": 18,
+      "magicDefense": 24,
+      "speed": 12,
+      "luck": 10
+    },
+    "statGrowth": {
+      "hp": 11,
+      "mp": 3,
+      "attack": 2,
+      "defense": 4,
+      "magicAttack": 2,
+      "magicDefense": 3,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "rock-throw", "learnAtLevel": 3 },
+      { "abilityId": "shield-wall", "learnAtLevel": 6 },
+      { "abilityId": "earthquake", "learnAtLevel": 12 },
+      { "abilityId": "boulder-crush", "learnAtLevel": 18 }
+    ],
+    "captureBaseDifficulty": 0.0,
+    "spriteKey": "magnetite",
+    "evolutionChain": null,
+    "breedingGroup": "elemental",
+    "breedingTraits": ["thick-skin", "tough", "iron-will"]
+  },
+  {
+    "speciesId": "duskfox",
+    "name": "Duskfox",
+    "description": "A mystical fox that exists between light and shadow. Its coat shifts from fiery orange to deep purple as day turns to night.",
+    "element": "dark",
+    "rarity": "rare",
+    "baseStats": {
+      "maxHp": 115,
+      "currentHp": 115,
+      "maxMp": 40,
+      "currentMp": 40,
+      "attack": 22,
+      "defense": 16,
+      "magicAttack": 24,
+      "magicDefense": 18,
+      "speed": 24,
+      "luck": 17
+    },
+    "statGrowth": {
+      "hp": 9,
+      "mp": 4,
+      "attack": 3,
+      "defense": 2,
+      "magicAttack": 3,
+      "magicDefense": 2,
+      "speed": 3
+    },
+    "abilities": [
+      { "abilityId": "scratch", "learnAtLevel": 1 },
+      { "abilityId": "ember", "learnAtLevel": 3 },
+      { "abilityId": "shadow-strike", "learnAtLevel": 6 },
+      { "abilityId": "fireball", "learnAtLevel": 10 },
+      { "abilityId": "dark-pulse", "learnAtLevel": 16 }
+    ],
+    "captureBaseDifficulty": 0.0,
+    "spriteKey": "duskfox",
+    "evolutionChain": null,
+    "breedingGroup": "beast",
+    "breedingTraits": ["nimble", "fierce", "fireproof"]
+  },
+  {
+    "speciesId": "coralshell",
+    "name": "Coralshell",
+    "description": "A beautiful creature with a shell made of living coral. It carries a miniature reef on its back, home to tiny fish friends.",
+    "element": "water",
+    "rarity": "uncommon",
+    "baseStats": {
+      "maxHp": 125,
+      "currentHp": 125,
+      "maxMp": 32,
+      "currentMp": 32,
+      "attack": 18,
+      "defense": 24,
+      "magicAttack": 16,
+      "magicDefense": 20,
+      "speed": 12,
+      "luck": 14
+    },
+    "statGrowth": {
+      "hp": 10,
+      "mp": 3,
+      "attack": 2,
+      "defense": 3,
+      "magicAttack": 2,
+      "magicDefense": 2,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "water-splash", "learnAtLevel": 3 },
+      { "abilityId": "rock-throw", "learnAtLevel": 5 },
+      { "abilityId": "shield-wall", "learnAtLevel": 8 },
+      { "abilityId": "tidal-wave", "learnAtLevel": 14 }
+    ],
+    "captureBaseDifficulty": 0.0,
+    "spriteKey": "coralshell",
+    "evolutionChain": null,
+    "breedingGroup": "aquatic",
+    "breedingTraits": ["thick-skin", "waterproof", "tough"]
   }
 ]
