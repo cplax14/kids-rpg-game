@@ -2,7 +2,19 @@ import Phaser from 'phaser'
 import { SCENE_KEYS, TILE_SIZE, DEPTH, GAME_WIDTH, GAME_HEIGHT, TEXT_STYLES } from '../config'
 import { Player } from '../entities/Player'
 import { InputSystem } from '../systems/InputSystem'
-import type { MonsterSpecies, Ability, BattleCombatant, ItemDrop } from '../models/types'
+import type {
+  MonsterSpecies,
+  Ability,
+  BattleCombatant,
+  ItemDrop,
+  GameAreaDefinition,
+  BossDefinition,
+  TransitionZone,
+  InteractableObject,
+  ChestObject,
+  SignObject,
+  FountainObject,
+} from '../models/types'
 import {
   loadSpeciesData,
   loadAbilityData,
@@ -25,6 +37,7 @@ import {
   updateInventory,
   updateSquad,
   updateDiscoveredSpecies,
+  updateCurrentArea,
   type GameState,
 } from '../systems/GameStateManager'
 import { createSquadCombatants } from '../systems/SquadSystem'
@@ -35,25 +48,44 @@ import { loadDialogData } from '../systems/DialogSystem'
 import { loadTraitData } from '../systems/TraitSystem'
 import { loadBreedingRecipes } from '../systems/BreedingSystem'
 import { NPC } from '../entities/NPC'
+import { Interactable } from '../entities/Interactable'
 import type { TraitDefinition, BreedingRecipe } from '../models/types'
+import {
+  loadAreaData,
+  loadBossData,
+  getArea,
+  getBoss,
+  generateAreaEncounter,
+  getUndefeatedBosses,
+  createBossEncounter,
+} from '../systems/WorldSystem'
+import {
+  openChest,
+  readSign,
+  useFountain,
+  checkTransition,
+  isChestObject,
+  isSignObject,
+  isFountainObject,
+} from '../systems/InteractableSystem'
+import { generateMap, getCollisionTiles } from '../utils/mapGenerator'
 
 interface WorldSceneData {
   readonly newGame: boolean
   readonly saveSlot?: number
+  readonly areaId?: string
+  readonly spawnPosition?: { x: number; y: number }
   readonly battleResult?: 'victory' | 'defeat' | 'fled'
   readonly rewards?: { experience: number; gold: number }
   readonly loot?: ReadonlyArray<ItemDrop>
+  readonly bossDefeated?: string
+  readonly bossRewards?: {
+    experience: number
+    gold: number
+    items: ReadonlyArray<ItemDrop>
+    unlocksArea?: string
+  }
 }
-
-// Encounter data for the area around the village
-const VILLAGE_ENCOUNTERS = [
-  { speciesId: 'flamepup', weight: 15, minLevel: 1, maxLevel: 2 },
-  { speciesId: 'bubblefin', weight: 15, minLevel: 1, maxLevel: 2 },
-  { speciesId: 'pebblit', weight: 15, minLevel: 1, maxLevel: 2 },
-  { speciesId: 'breezling', weight: 20, minLevel: 1, maxLevel: 2 },
-  { speciesId: 'mossbun', weight: 25, minLevel: 1, maxLevel: 2 },
-  { speciesId: 'glowmoth', weight: 10, minLevel: 1, maxLevel: 2 },
-]
 
 const ENCOUNTER_STEP_THRESHOLD = 20
 const ENCOUNTER_CHANCE = 0.15
@@ -61,8 +93,8 @@ const ENCOUNTER_CHANCE = 0.15
 export class WorldScene extends Phaser.Scene {
   private player!: Player
   private inputSystem!: InputSystem
-  private map!: Phaser.Tilemaps.Tilemap
-  private collisionLayer!: Phaser.Tilemaps.TilemapLayer
+  private map!: Phaser.Tilemaps.Tilemap | null
+  private collisionLayer!: Phaser.Tilemaps.TilemapLayer | null
   private areaNameText!: Phaser.GameObjects.Text
   private stepCounter: number = 0
   private lastPlayerTileX: number = -1
@@ -70,6 +102,12 @@ export class WorldScene extends Phaser.Scene {
   private inSafeZone: boolean = true
   private npcs: NPC[] = []
   private nearbyNpc: NPC | null = null
+  private currentAreaId: string = 'sunlit-village'
+  private currentArea: GameAreaDefinition | null = null
+  private interactables: Interactable[] = []
+  private nearbyInteractable: Interactable | null = null
+  private transitionZones: Phaser.GameObjects.Zone[] = []
+  private proceduralMapGraphics: Phaser.GameObjects.Graphics | null = null
 
   constructor() {
     super({ key: SCENE_KEYS.WORLD })
@@ -93,12 +131,26 @@ export class WorldScene extends Phaser.Scene {
       this.giveStarterContent()
     }
 
-    this.createMap()
-    this.createPlayer(data)
-    this.createNPCs()
+    // Apply boss defeat rewards if returning from boss battle
+    if (data.bossDefeated && data.bossRewards) {
+      this.applyBossRewards(data.bossDefeated, data.bossRewards)
+    }
+
+    // Determine which area to load
+    const gameState = getGameState(this)
+    this.currentAreaId = data.areaId ?? gameState.currentAreaId ?? 'sunlit-village'
+
+    // Update game state with current area
+    if (gameState.currentAreaId !== this.currentAreaId) {
+      setGameState(this, updateCurrentArea(gameState, this.currentAreaId))
+    }
+
+    // Load the area
+    this.loadArea(this.currentAreaId, data.spawnPosition)
+
     this.setupCamera()
     this.setupInput()
-    this.showAreaName('Sunlit Village')
+    this.showAreaName(this.currentArea?.name ?? 'Unknown Area')
 
     // Apply battle rewards if returning from victory
     if (data.battleResult === 'victory' && data.rewards) {
@@ -119,11 +171,17 @@ export class WorldScene extends Phaser.Scene {
       this.checkForEncounter()
     }
 
-    // Reset nearby NPC each frame - overlap callback will re-set if still in range
+    // Reset nearby states each frame
     const prevNpc = this.nearbyNpc
+    const prevInteractable = this.nearbyInteractable
     this.nearbyNpc = null
+    this.nearbyInteractable = null
+
     for (const npc of this.npcs) {
       npc.hidePrompt()
+    }
+    for (const interactable of this.interactables) {
+      interactable.hidePrompt()
     }
 
     // Check for NPC interaction
@@ -131,10 +189,652 @@ export class WorldScene extends Phaser.Scene {
       this.handleNpcInteraction(prevNpc)
     }
 
+    // Check for interactable interaction
+    if (input.interact && prevInteractable && !prevNpc) {
+      this.handleInteractableInteraction(prevInteractable)
+    }
+
     // Open menu on ESC
     if (input.menu) {
       this.openMenu()
     }
+  }
+
+  private loadArea(areaId: string, spawnPosition?: { x: number; y: number }): void {
+    this.currentArea = getArea(areaId) ?? null
+
+    if (!this.currentArea) {
+      this.createFallbackMap()
+      this.createPlayer({ newGame: false }, spawnPosition)
+      return
+    }
+
+    // Clear previous area content
+    this.clearAreaContent()
+
+    // Load map based on area type
+    if (this.currentArea.terrainType === 'village') {
+      this.createVillageMap()
+    } else {
+      this.createProceduralMap(this.currentArea)
+    }
+
+    // Create player (must be before NPCs for overlap detection)
+    this.createPlayer({ newGame: false }, spawnPosition)
+
+    // Create NPCs in village areas (after player for overlap detection)
+    if (this.currentArea.terrainType === 'village') {
+      this.createNPCs()
+    }
+
+    // Create transition zones
+    this.createTransitionZones(this.currentArea)
+
+    // Create interactables
+    this.createInteractables(this.currentArea)
+
+    // Check for boss encounters
+    this.setupBossEncounters(this.currentArea)
+  }
+
+  private clearAreaContent(): void {
+    // Destroy NPCs
+    for (const npc of this.npcs) {
+      npc.destroy()
+    }
+    this.npcs = []
+
+    // Destroy interactables
+    for (const interactable of this.interactables) {
+      interactable.destroy()
+    }
+    this.interactables = []
+
+    // Destroy transition zones
+    for (const zone of this.transitionZones) {
+      zone.destroy()
+    }
+    this.transitionZones = []
+
+    // Destroy procedural map graphics
+    if (this.proceduralMapGraphics) {
+      this.proceduralMapGraphics.destroy()
+      this.proceduralMapGraphics = null
+    }
+
+    // Destroy map
+    if (this.map) {
+      this.map.destroy()
+      this.map = null
+    }
+
+    this.collisionLayer = null
+  }
+
+  private createVillageMap(): void {
+    this.map = this.make.tilemap({ key: 'village-map' })
+
+    const tileset = this.map.addTilesetImage('village-tileset', 'village-tileset')
+
+    if (!tileset) {
+      this.createFallbackMap()
+      return
+    }
+
+    const groundLayer = this.map.createLayer('Ground', tileset, 0, 0)
+    if (groundLayer) {
+      groundLayer.setDepth(DEPTH.GROUND)
+    }
+
+    const objectsLayer = this.map.createLayer('Objects', tileset, 0, 0)
+    if (objectsLayer) {
+      objectsLayer.setDepth(DEPTH.BELOW_PLAYER)
+      objectsLayer.setCollisionByExclusion([-1, 18])
+      this.collisionLayer = objectsLayer
+    }
+  }
+
+  private createProceduralMap(area: GameAreaDefinition): void {
+    const mapWidth = area.mapWidth
+    const mapHeight = area.mapHeight
+
+    // Collect entry/exit/reserved positions
+    const entryPoints = area.transitions
+      .filter((t) => t.targetAreaId !== this.currentAreaId)
+      .map((t) => t.targetPosition)
+
+    const exitPoints = area.transitions.map((t) => ({
+      x: t.triggerBounds.x + t.triggerBounds.width / 2,
+      y: t.triggerBounds.y + t.triggerBounds.height / 2,
+    }))
+
+    const reservedPositions = [
+      ...area.interactables.map((i) => i.position),
+      ...this.getBossPositions(area),
+    ]
+
+    // Generate the map
+    const generatedMap = generateMap({
+      width: mapWidth,
+      height: mapHeight,
+      terrainType: area.terrainType,
+      entryPoints,
+      exitPoints,
+      reservedPositions,
+    })
+
+    // Render the map using graphics
+    this.proceduralMapGraphics = this.add.graphics()
+    this.renderProceduralMap(generatedMap, area.terrainType)
+
+    // Create collision bodies for obstacles
+    this.createProceduralCollisions(generatedMap, area.terrainType, mapWidth, mapHeight)
+
+    // Set world bounds
+    this.physics.world.setBounds(0, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE)
+  }
+
+  private getBossPositions(area: GameAreaDefinition): ReadonlyArray<{ x: number; y: number }> {
+    return area.bossIds
+      .map((id) => getBoss(id))
+      .filter((boss): boss is BossDefinition => boss !== undefined)
+      .map((boss) => boss.position)
+  }
+
+  private renderProceduralMap(
+    map: { groundLayer: ReadonlyArray<number>; objectLayer: ReadonlyArray<number>; width: number; height: number },
+    terrainType: 'village' | 'forest' | 'cave',
+  ): void {
+    if (!this.proceduralMapGraphics) return
+
+    const tileColors = this.getTileColors(terrainType)
+
+    // Render ground layer
+    for (let y = 0; y < map.height; y++) {
+      for (let x = 0; x < map.width; x++) {
+        const index = y * map.width + x
+        const tile = map.groundLayer[index]
+        const color = tileColors[tile] ?? 0x333333
+
+        this.proceduralMapGraphics.fillStyle(color, 1)
+        this.proceduralMapGraphics.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+      }
+    }
+
+    // Render object layer
+    for (let y = 0; y < map.height; y++) {
+      for (let x = 0; x < map.width; x++) {
+        const index = y * map.width + x
+        const tile = map.objectLayer[index]
+
+        if (tile >= 0) {
+          const color = tileColors[tile] ?? 0x666666
+          this.proceduralMapGraphics.fillStyle(color, 1)
+
+          // Draw different shapes for different objects
+          if (tile === 8 || tile === 9) {
+            // Trees - draw trunk and foliage
+            this.proceduralMapGraphics.fillStyle(0x3d2a1a, 1)
+            this.proceduralMapGraphics.fillRect(
+              x * TILE_SIZE + 12,
+              y * TILE_SIZE + 16,
+              8,
+              16,
+            )
+            this.proceduralMapGraphics.fillStyle(color, 1)
+            this.proceduralMapGraphics.fillCircle(
+              x * TILE_SIZE + 16,
+              y * TILE_SIZE + 12,
+              12,
+            )
+          } else if (tile === 22) {
+            // Crystal - draw with glow
+            this.proceduralMapGraphics.fillStyle(0x00bcd4, 0.8)
+            this.proceduralMapGraphics.fillTriangle(
+              x * TILE_SIZE + 16,
+              y * TILE_SIZE + 4,
+              x * TILE_SIZE + 24,
+              y * TILE_SIZE + 28,
+              x * TILE_SIZE + 8,
+              y * TILE_SIZE + 28,
+            )
+          } else {
+            // Other obstacles
+            this.proceduralMapGraphics.fillRect(
+              x * TILE_SIZE + 4,
+              y * TILE_SIZE + 4,
+              TILE_SIZE - 8,
+              TILE_SIZE - 8,
+            )
+          }
+        }
+      }
+    }
+
+    this.proceduralMapGraphics.setDepth(DEPTH.GROUND)
+  }
+
+  private getTileColors(terrainType: 'village' | 'forest' | 'cave'): Record<number, number> {
+    if (terrainType === 'forest') {
+      return {
+        0: 0x2d5a27, // dark grass
+        1: 0x3d6b37, // dark grass 2
+        7: 0x5a3d2b, // dirt
+        8: 0x1a3d14, // tree
+        9: 0x0d2b0d, // tree 2
+        10: 0x5a5a5a, // rock
+        11: 0x4a4a4a, // rock 2
+        24: 0xe91e63, // flower
+        25: 0xff9800, // flower 2
+        26: 0x9c27b0, // flower 3
+        27: 0x3d6b37, // bush
+        28: 0x4a7a44, // tall grass
+        29: 0x8b6914, // mushroom
+      }
+    } else if (terrainType === 'cave') {
+      return {
+        7: 0x3d3d3d, // stone floor
+        10: 0x5a5a5a, // rock
+        11: 0x4a4a4a, // rock 2
+        13: 0x1a1a1a, // wall
+        14: 0x0d0d0d, // wall 2
+        22: 0x00bcd4, // crystal
+        29: 0x2d2d2d, // dark stone
+        30: 0x6a6a7a, // stalagmite
+      }
+    }
+    return {
+      0: 0x4caf50, // grass
+    }
+  }
+
+  private createProceduralCollisions(
+    map: { objectLayer: ReadonlyArray<number>; width: number; height: number },
+    terrainType: 'village' | 'forest' | 'cave',
+    mapWidth: number,
+    mapHeight: number,
+  ): void {
+    const collisionTiles = getCollisionTiles(terrainType)
+
+    for (let y = 0; y < map.height; y++) {
+      for (let x = 0; x < map.width; x++) {
+        const index = y * map.width + x
+        const tile = map.objectLayer[index]
+
+        if (collisionTiles.includes(tile)) {
+          const body = this.add.zone(
+            x * TILE_SIZE + TILE_SIZE / 2,
+            y * TILE_SIZE + TILE_SIZE / 2,
+            TILE_SIZE - 4,
+            TILE_SIZE - 4,
+          )
+          this.physics.add.existing(body, true)
+
+          if (this.player?.sprite) {
+            this.physics.add.collider(this.player.sprite, body)
+          }
+        }
+      }
+    }
+  }
+
+  private createTransitionZones(area: GameAreaDefinition): void {
+    for (const transition of area.transitions) {
+      const zone = this.add.zone(
+        transition.triggerBounds.x + transition.triggerBounds.width / 2,
+        transition.triggerBounds.y + transition.triggerBounds.height / 2,
+        transition.triggerBounds.width,
+        transition.triggerBounds.height,
+      )
+
+      this.physics.add.existing(zone, true)
+      zone.setData('transition', transition)
+
+      this.physics.add.overlap(
+        this.player.sprite,
+        zone,
+        () => this.handleTransition(transition),
+        undefined,
+        this,
+      )
+
+      this.transitionZones.push(zone)
+    }
+  }
+
+  private createInteractables(area: GameAreaDefinition): void {
+    const gameState = getGameState(this)
+
+    for (const definition of area.interactables) {
+      const isUsed = gameState.openedChests.includes(definition.objectId)
+      const interactable = new Interactable(this, definition, isUsed)
+
+      this.physics.add.overlap(
+        this.player.sprite,
+        interactable.getInteractionZone(),
+        () => {
+          this.nearbyInteractable = interactable
+          interactable.showPrompt()
+        },
+      )
+
+      this.interactables.push(interactable)
+    }
+  }
+
+  private setupBossEncounters(area: GameAreaDefinition): void {
+    const gameState = getGameState(this)
+    const undefeatedBosses = getUndefeatedBosses(area.areaId, gameState)
+
+    for (const boss of undefeatedBosses) {
+      // Create a zone at the boss position
+      const zone = this.add.zone(
+        boss.position.x,
+        boss.position.y,
+        TILE_SIZE * 2,
+        TILE_SIZE * 2,
+      )
+
+      this.physics.add.existing(zone, true)
+      zone.setData('boss', boss)
+
+      // Create a visual indicator for the boss
+      const bossIndicator = this.add.graphics()
+      bossIndicator.fillStyle(0xff0000, 0.5)
+      bossIndicator.fillCircle(boss.position.x, boss.position.y, TILE_SIZE)
+      bossIndicator.setDepth(DEPTH.BELOW_PLAYER)
+
+      // Boss encounter trigger
+      this.physics.add.overlap(
+        this.player.sprite,
+        zone,
+        () => this.triggerBossEncounter(boss),
+        undefined,
+        this,
+      )
+    }
+  }
+
+  private handleTransition(transition: TransitionZone): void {
+    const gameState = getGameState(this)
+    const result = checkTransition(transition, gameState)
+
+    if (!result.allowed) {
+      // Show warning message
+      this.showWarningMessage(result.reason ?? 'Cannot enter this area.')
+      return
+    }
+
+    // Fade out and transition to new area
+    this.inputSystem.setEnabled(false)
+    this.player.update({
+      up: false,
+      down: false,
+      left: false,
+      right: false,
+      interact: false,
+      menu: false,
+      cancel: false,
+    })
+
+    this.cameras.main.fadeOut(300)
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      this.scene.start(SCENE_KEYS.WORLD, {
+        newGame: false,
+        areaId: transition.targetAreaId,
+        spawnPosition: transition.targetPosition,
+      })
+    })
+  }
+
+  private handleInteractableInteraction(interactable: Interactable): void {
+    const definition = interactable.getDefinition()
+
+    if (isChestObject(definition)) {
+      this.handleChestInteraction(definition as ChestObject, interactable)
+    } else if (isSignObject(definition)) {
+      this.handleSignInteraction(definition as SignObject)
+    } else if (isFountainObject(definition)) {
+      this.handleFountainInteraction(definition as FountainObject)
+    }
+  }
+
+  private handleChestInteraction(chest: ChestObject, interactable: Interactable): void {
+    const gameState = getGameState(this)
+    const result = openChest(chest, gameState)
+
+    if (result.alreadyOpened) {
+      this.showMessage('This chest is empty.')
+      return
+    }
+
+    setGameState(this, result.newState)
+    interactable.markAsUsed()
+
+    // Build message
+    const itemMessages = result.itemsGained.map(
+      (item) => `${item.itemId} x${item.quantity}`,
+    )
+    const goldMessage = result.goldGained > 0 ? `${result.goldGained} gold` : ''
+    const parts = [...itemMessages, goldMessage].filter((m) => m.length > 0)
+
+    this.showMessage(`Found: ${parts.join(', ')}!`)
+  }
+
+  private handleSignInteraction(sign: SignObject): void {
+    const messages = readSign(sign)
+
+    this.inputSystem.setEnabled(false)
+    this.player.update({
+      up: false,
+      down: false,
+      left: false,
+      right: false,
+      interact: false,
+      menu: false,
+      cancel: false,
+    })
+
+    this.scene.launch(SCENE_KEYS.DIALOG, {
+      dialogTreeId: null,
+      messages,
+      npcName: 'Sign',
+      npcType: 'info',
+    })
+
+    this.scene.pause()
+
+    this.events.once('resume', () => {
+      this.inputSystem.setEnabled(true)
+    })
+  }
+
+  private handleFountainInteraction(fountain: FountainObject): void {
+    const gameState = getGameState(this)
+    const result = useFountain(fountain, gameState)
+
+    if (result.healed) {
+      setGameState(this, result.newState)
+      this.showMessage(`Healed ${result.healAmount} HP!`)
+    } else {
+      this.showMessage('You are already at full health.')
+    }
+  }
+
+  private triggerBossEncounter(boss: BossDefinition): void {
+    const gameState = getGameState(this)
+
+    // Check if already defeated
+    if (gameState.defeatedBosses.includes(boss.bossId)) {
+      return
+    }
+
+    this.inputSystem.setEnabled(false)
+    this.player.update({
+      up: false,
+      down: false,
+      left: false,
+      right: false,
+      interact: false,
+      menu: false,
+      cancel: false,
+    })
+
+    // Create boss encounter
+    const encounter = createBossEncounter(boss.bossId)
+    if (!encounter) {
+      this.inputSystem.setEnabled(true)
+      return
+    }
+
+    // Show intro dialog first
+    this.scene.launch(SCENE_KEYS.DIALOG, {
+      dialogTreeId: null,
+      messages: boss.introDialog,
+      npcName: boss.name,
+      npcType: 'quest',
+    })
+
+    this.scene.pause()
+
+    this.events.once('resume', () => {
+      // Flash effect
+      this.cameras.main.flash(300, 255, 255, 255)
+
+      this.time.delayedCall(400, () => {
+        const playerAbilities = this.getPlayerAbilities()
+        const playerCombatant = createCombatantFromPlayer(
+          gameState.player.name,
+          gameState.player.stats,
+          playerAbilities,
+        )
+
+        const squadCombatants = createSquadCombatants(gameState.squad)
+
+        // Discover boss species
+        const newDiscovered = discoverMultipleSpecies(
+          gameState.discoveredSpecies,
+          [encounter.speciesId],
+        )
+        if (newDiscovered !== gameState.discoveredSpecies) {
+          setGameState(this, updateDiscoveredSpecies(gameState, newDiscovered))
+        }
+
+        this.cameras.main.fadeOut(300)
+        this.cameras.main.once('camerafadeoutcomplete', () => {
+          this.scene.start(SCENE_KEYS.BATTLE, {
+            playerCombatants: [playerCombatant, ...squadCombatants],
+            enemyCombatants: [encounter.combatant],
+            enemySpeciesIds: [encounter.speciesId],
+            isBossBattle: true,
+            bossData: boss,
+          })
+        })
+      })
+    })
+  }
+
+  private applyBossRewards(
+    bossId: string,
+    rewards: {
+      experience: number
+      gold: number
+      items: ReadonlyArray<ItemDrop>
+      unlocksArea?: string
+    },
+  ): void {
+    const state = getGameState(this)
+
+    // Apply XP and gold
+    const updatedPlayer = updatePlayerGold(
+      addExperience(state.player, rewards.experience),
+      rewards.gold,
+    )
+    let newState = updatePlayer(state, updatedPlayer)
+
+    // Add items
+    let inventory = newState.inventory
+    for (const drop of rewards.items) {
+      const result = addItem(inventory, drop.itemId, drop.quantity)
+      if (result) {
+        inventory = result
+      }
+    }
+    newState = updateInventory(newState, inventory)
+
+    setGameState(this, newState)
+
+    // Show reward notification
+    const text = this.add.text(
+      GAME_WIDTH / 2,
+      GAME_HEIGHT - 60,
+      `Boss defeated! +${rewards.experience} XP  +${rewards.gold} Gold`,
+      {
+        ...TEXT_STYLES.BODY,
+        fontSize: '18px',
+        color: '#ff9800',
+        stroke: '#000000',
+        strokeThickness: 3,
+      },
+    )
+    text.setOrigin(0.5)
+    text.setScrollFactor(0)
+    text.setDepth(DEPTH.UI)
+
+    this.tweens.add({
+      targets: text,
+      alpha: 0,
+      y: GAME_HEIGHT - 90,
+      duration: 3000,
+      ease: 'Power2',
+      onComplete: () => text.destroy(),
+    })
+  }
+
+  private showWarningMessage(message: string): void {
+    const text = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, message, {
+      ...TEXT_STYLES.BODY,
+      fontSize: '16px',
+      color: '#ef5350',
+      stroke: '#000000',
+      strokeThickness: 3,
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      padding: { x: 16, y: 8 },
+    })
+    text.setOrigin(0.5)
+    text.setScrollFactor(0)
+    text.setDepth(DEPTH.UI)
+
+    this.tweens.add({
+      targets: text,
+      alpha: 0,
+      duration: 2500,
+      delay: 1500,
+      ease: 'Power2',
+      onComplete: () => text.destroy(),
+    })
+  }
+
+  private showMessage(message: string): void {
+    const text = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 60, message, {
+      ...TEXT_STYLES.BODY,
+      fontSize: '16px',
+      color: '#ffd54f',
+      stroke: '#000000',
+      strokeThickness: 3,
+    })
+    text.setOrigin(0.5)
+    text.setScrollFactor(0)
+    text.setDepth(DEPTH.UI)
+
+    this.tweens.add({
+      targets: text,
+      alpha: 0,
+      y: GAME_HEIGHT - 90,
+      duration: 2500,
+      ease: 'Power2',
+      onComplete: () => text.destroy(),
+    })
   }
 
   private loadGameData(): void {
@@ -156,8 +856,17 @@ export class WorldScene extends Phaser.Scene {
     const traitsData = this.cache.json.get('traits-data') as TraitDefinition[] | undefined
     if (traitsData) loadTraitData(traitsData)
 
-    const breedingRecipesData = this.cache.json.get('breeding-recipes-data') as BreedingRecipe[] | undefined
+    const breedingRecipesData = this.cache.json.get('breeding-recipes-data') as
+      | BreedingRecipe[]
+      | undefined
     if (breedingRecipesData) loadBreedingRecipes(breedingRecipesData)
+
+    // Load area and boss data
+    const areasData = this.cache.json.get('areas-data') as GameAreaDefinition[] | undefined
+    if (areasData) loadAreaData(areasData)
+
+    const bossesData = this.cache.json.get('bosses-data') as BossDefinition[] | undefined
+    if (bossesData) loadBossData(bossesData)
   }
 
   private giveStarterContent(): void {
@@ -194,9 +903,14 @@ export class WorldScene extends Phaser.Scene {
     this.lastPlayerTileX = tileX
     this.lastPlayerTileY = tileY
 
-    // Check if in safe zone (on path tiles near village center)
-    const isNearCenter = tileX > 8 && tileX < 22 && tileY > 8 && tileY < 22
-    this.inSafeZone = isNearCenter
+    // Check if in safe zone based on current area
+    this.inSafeZone = this.currentArea?.isSafeZone ?? false
+
+    // For village, also check proximity to center
+    if (this.currentAreaId === 'sunlit-village') {
+      const isNearCenter = tileX > 8 && tileX < 22 && tileY > 8 && tileY < 22
+      this.inSafeZone = isNearCenter
+    }
 
     if (this.inSafeZone) {
       this.stepCounter = 0
@@ -213,13 +927,21 @@ export class WorldScene extends Phaser.Scene {
 
   private triggerRandomEncounter(): void {
     this.inputSystem.setEnabled(false)
-    this.player.update({ up: false, down: false, left: false, right: false, interact: false, menu: false, cancel: false })
+    this.player.update({
+      up: false,
+      down: false,
+      left: false,
+      right: false,
+      interact: false,
+      menu: false,
+      cancel: false,
+    })
 
     // Flash effect
     this.cameras.main.flash(300, 255, 255, 255)
 
     this.time.delayedCall(400, () => {
-      const encounter = this.generateEncounter()
+      const encounter = generateAreaEncounter(this.currentAreaId)
       if (!encounter) {
         this.inputSystem.setEnabled(true)
         return
@@ -255,38 +977,6 @@ export class WorldScene extends Phaser.Scene {
         })
       })
     })
-  }
-
-  private generateEncounter(): { readonly combatants: ReadonlyArray<BattleCombatant>; readonly speciesIds: ReadonlyArray<string> } | null {
-    // Pick 1-2 enemies
-    const enemyCount = randomChance(0.3) ? 2 : 1
-    const enemies: BattleCombatant[] = []
-    const speciesIds: string[] = []
-
-    for (let i = 0; i < enemyCount; i++) {
-      const items = VILLAGE_ENCOUNTERS.map((e) => e)
-      const weights = VILLAGE_ENCOUNTERS.map((e) => e.weight)
-      const picked = weightedRandom(items, weights)
-
-      const species = getSpecies(picked.speciesId)
-      if (!species) continue
-
-      const level = randomInt(picked.minLevel, picked.maxLevel)
-      const stats = calculateMonsterStats(species, level)
-      const abilities = getLearnedAbilitiesAtLevel(species, level)
-
-      enemies.push(
-        createCombatantFromEnemy(
-          `${species.name} Lv.${level}`,
-          stats,
-          species.element,
-          abilities,
-        ),
-      )
-      speciesIds.push(picked.speciesId)
-    }
-
-    return enemies.length > 0 ? { combatants: enemies, speciesIds } : null
   }
 
   private getPlayerAbilities(): ReadonlyArray<Ability> {
@@ -351,8 +1041,6 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private createNPCs(): void {
-    const gameState = getGameState(this)
-
     // Village shopkeeper
     const shopkeeper = new NPC(this, 13 * TILE_SIZE, 13 * TILE_SIZE, {
       npcId: 'shopkeeper',
@@ -410,7 +1098,15 @@ export class WorldScene extends Phaser.Scene {
 
   private handleNpcInteraction(npc: NPC): void {
     this.inputSystem.setEnabled(false)
-    this.player.update({ up: false, down: false, left: false, right: false, interact: false, menu: false, cancel: false })
+    this.player.update({
+      up: false,
+      down: false,
+      left: false,
+      right: false,
+      interact: false,
+      menu: false,
+      cancel: false,
+    })
 
     this.scene.launch(SCENE_KEYS.DIALOG, {
       dialogTreeId: npc.getDialogTreeId(),
@@ -428,7 +1124,15 @@ export class WorldScene extends Phaser.Scene {
 
   private openMenu(): void {
     this.inputSystem.setEnabled(false)
-    this.player.update({ up: false, down: false, left: false, right: false, interact: false, menu: false, cancel: false })
+    this.player.update({
+      up: false,
+      down: false,
+      left: false,
+      right: false,
+      interact: false,
+      menu: false,
+      cancel: false,
+    })
 
     this.scene.launch(SCENE_KEYS.MENU)
     this.scene.pause()
@@ -438,32 +1142,6 @@ export class WorldScene extends Phaser.Scene {
     })
   }
 
-  private createMap(): void {
-    this.map = this.make.tilemap({ key: 'village-map' })
-
-    const tileset = this.map.addTilesetImage('village-tileset', 'village-tileset')
-
-    if (!tileset) {
-      this.createFallbackMap()
-      return
-    }
-
-    const groundLayer = this.map.createLayer('Ground', tileset, 0, 0)
-    if (groundLayer) {
-      groundLayer.setDepth(DEPTH.GROUND)
-    }
-
-    const objectsLayer = this.map.createLayer('Objects', tileset, 0, 0)
-    if (objectsLayer) {
-      objectsLayer.setDepth(DEPTH.BELOW_PLAYER)
-      // Tiled tile IDs are 1-based, Phaser uses 0-based after subtracting firstgid
-      // Exclude: -1 (empty), door tiles (Tiled 19 = Phaser 18)
-      // Collide with: trees (8,9), rocks (10,11), fences (12), walls (13,14), houses (16,17), etc.
-      objectsLayer.setCollisionByExclusion([-1, 18])
-      this.collisionLayer = objectsLayer
-    }
-  }
-
   private createFallbackMap(): void {
     const mapWidth = 30 * TILE_SIZE
     const mapHeight = 30 * TILE_SIZE
@@ -471,11 +1149,16 @@ export class WorldScene extends Phaser.Scene {
     graphics.fillStyle(0x4caf50, 1)
     graphics.fillRect(0, 0, mapWidth, mapHeight)
     graphics.setDepth(DEPTH.GROUND)
+
+    this.physics.world.setBounds(0, 0, mapWidth, mapHeight)
   }
 
-  private createPlayer(_data: WorldSceneData): void {
-    const spawnX = 15 * TILE_SIZE
-    const spawnY = 15 * TILE_SIZE
+  private createPlayer(
+    _data: WorldSceneData,
+    spawnPosition?: { x: number; y: number },
+  ): void {
+    const spawnX = spawnPosition?.x ?? 15 * TILE_SIZE
+    const spawnY = spawnPosition?.y ?? 15 * TILE_SIZE
 
     this.player = new Player(this, spawnX, spawnY)
 
@@ -495,6 +1178,10 @@ export class WorldScene extends Phaser.Scene {
     if (this.map) {
       const mapWidth = this.map.widthInPixels
       const mapHeight = this.map.heightInPixels
+      this.cameras.main.setBounds(0, 0, mapWidth, mapHeight)
+    } else if (this.currentArea) {
+      const mapWidth = this.currentArea.mapWidth * TILE_SIZE
+      const mapHeight = this.currentArea.mapHeight * TILE_SIZE
       this.cameras.main.setBounds(0, 0, mapWidth, mapHeight)
     }
     this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1)
