@@ -96,7 +96,7 @@ export function initDebug(
     },
 
     listAreas: () => {
-      console.log('Available areas: village, verdant-woods, crystal-caves, sunfire-plains')
+      console.log('Available areas: sunlit-village, whispering-forest, crystal-caves, sunfire-plains')
     },
 
     healAll: () => {
