@@ -8,16 +8,16 @@ export interface DPadState {
   readonly right: boolean
 }
 
-// Visual sizes in screen pixels (will be adjusted for zoom)
-const SCREEN_DPAD_SIZE = 160
-const SCREEN_BUTTON_SIZE = 50
-const SCREEN_PADDING = 30
-const SCREEN_DEAD_ZONE = 15
+// Screen pixel sizes (not affected by zoom)
+const DPAD_RADIUS = 80
+const BUTTON_RADIUS = 25
+const PADDING = 100
+const DEAD_ZONE = 20
 
 /**
  * Virtual D-Pad for touch controls
  * Positioned in bottom-left corner of the screen
- * Handles camera zoom by dividing coordinates appropriately
+ * Uses scrollFactor(0) with direct screen coordinates
  */
 export class VirtualDPad {
   private scene: Phaser.Scene
@@ -25,11 +25,6 @@ export class VirtualDPad {
   private centerX: number
   private centerY: number
   private activePointer: Phaser.Input.Pointer | null = null
-
-  // Scaled sizes for world coordinates
-  private dpadSize: number
-  private buttonSize: number
-  private deadZone: number
 
   private state: DPadState = {
     up: false,
@@ -48,26 +43,17 @@ export class VirtualDPad {
   constructor(scene: Phaser.Scene) {
     this.scene = scene
 
-    // Get camera zoom to convert screen pixels to world coordinates
-    const zoom = scene.cameras.main.zoom
+    // Position in bottom-left with padding (screen coordinates)
+    // Use game dimensions directly - scrollFactor(0) will keep it fixed
+    this.centerX = PADDING
+    this.centerY = scene.scale.height - PADDING
 
-    // Convert screen sizes to world coordinates (divide by zoom)
-    this.dpadSize = SCREEN_DPAD_SIZE / zoom
-    this.buttonSize = SCREEN_BUTTON_SIZE / zoom
-    this.deadZone = SCREEN_DEAD_ZONE / zoom
-    const padding = SCREEN_PADDING / zoom
+    console.log('[VirtualDPad] Screen dimensions:', scene.scale.width, 'x', scene.scale.height)
+    console.log('[VirtualDPad] Center position (screen coords):', this.centerX, this.centerY)
 
-    // Calculate center position in world coordinates
-    // For scrollFactor(0), we need to position relative to camera viewport
-    this.centerX = padding + this.dpadSize / 2
-    this.centerY = (scene.scale.height / zoom) - padding - this.dpadSize / 2
-
-    console.log('[VirtualDPad] Zoom:', zoom)
-    console.log('[VirtualDPad] Center position:', this.centerX, this.centerY)
-    console.log('[VirtualDPad] D-pad size:', this.dpadSize)
-
-    this.container = scene.add.container(0, 0)
-    this.container.setDepth(DEPTH.UI + 50)
+    // Create container at the center position
+    this.container = scene.add.container(this.centerX, this.centerY)
+    this.container.setDepth(DEPTH.UI + 100)
     this.container.setScrollFactor(0)
 
     this.createVisuals()
@@ -75,73 +61,55 @@ export class VirtualDPad {
   }
 
   private createVisuals(): void {
-    // Semi-transparent background circle
+    // Semi-transparent background circle - draw at (0, 0) relative to container
     this.background = this.scene.add.graphics()
-    this.background.fillStyle(COLORS.DARK_BG, 0.5)
-    this.background.fillCircle(this.centerX, this.centerY, this.dpadSize / 2)
-    this.background.lineStyle(2, COLORS.PRIMARY, 0.3)
-    this.background.strokeCircle(this.centerX, this.centerY, this.dpadSize / 2)
+    this.background.fillStyle(COLORS.DARK_BG, 0.6)
+    this.background.fillCircle(0, 0, DPAD_RADIUS)
+    this.background.lineStyle(3, COLORS.PRIMARY, 0.5)
+    this.background.strokeCircle(0, 0, DPAD_RADIUS)
     this.container.add(this.background)
 
-    // Direction buttons
-    const btnOffset = this.dpadSize / 2 - this.buttonSize / 2 - (10 / this.scene.cameras.main.zoom)
+    // Direction buttons offset from center
+    const btnOffset = DPAD_RADIUS - BUTTON_RADIUS - 10
 
     // Up button
-    this.upBtn = this.createDirectionButton(
-      this.centerX,
-      this.centerY - btnOffset,
-    )
+    this.upBtn = this.createDirectionButton(0, -btnOffset)
 
     // Down button
-    this.downBtn = this.createDirectionButton(
-      this.centerX,
-      this.centerY + btnOffset,
-    )
+    this.downBtn = this.createDirectionButton(0, btnOffset)
 
     // Left button
-    this.leftBtn = this.createDirectionButton(
-      this.centerX - btnOffset,
-      this.centerY,
-    )
+    this.leftBtn = this.createDirectionButton(-btnOffset, 0)
 
     // Right button
-    this.rightBtn = this.createDirectionButton(
-      this.centerX + btnOffset,
-      this.centerY,
-    )
+    this.rightBtn = this.createDirectionButton(btnOffset, 0)
   }
 
-  private createDirectionButton(
-    x: number,
-    y: number,
-  ): Phaser.GameObjects.Graphics {
+  private createDirectionButton(x: number, y: number): Phaser.GameObjects.Graphics {
     const btn = this.scene.add.graphics()
-    btn.fillStyle(COLORS.PRIMARY, 0.4)
-    btn.fillCircle(x, y, this.buttonSize / 2)
+    btn.fillStyle(COLORS.PRIMARY, 0.5)
+    btn.fillCircle(x, y, BUTTON_RADIUS)
+    btn.lineStyle(2, COLORS.WHITE, 0.3)
+    btn.strokeCircle(x, y, BUTTON_RADIUS)
     this.container.add(btn)
     return btn
   }
 
   private setupInput(): void {
-    // Create invisible hit area covering the D-pad
-    const hitArea = this.scene.add.circle(
-      this.centerX,
-      this.centerY,
-      this.dpadSize / 2,
-    )
+    // Create invisible hit area covering the D-pad - position at (0, 0) relative to container
+    const hitArea = this.scene.add.circle(0, 0, DPAD_RADIUS + 10)
     hitArea.setInteractive()
-    hitArea.setScrollFactor(0)
     this.container.add(hitArea)
 
     // Track touch/pointer on the D-pad
     hitArea.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       this.activePointer = pointer
-      this.updateState(pointer.x, pointer.y)
+      this.updateState(pointer)
     })
 
     hitArea.on('pointermove', (pointer: Phaser.Input.Pointer) => {
       if (this.activePointer === pointer) {
-        this.updateState(pointer.x, pointer.y)
+        this.updateState(pointer)
       }
     })
 
@@ -168,21 +136,18 @@ export class VirtualDPad {
     })
   }
 
-  private updateState(pointerX: number, pointerY: number): void {
-    // Pointer coordinates need to be converted to world space for comparison
-    const zoom = this.scene.cameras.main.zoom
-    const worldX = pointerX / zoom
-    const worldY = pointerY / zoom
-
-    const dx = worldX - this.centerX
-    const dy = worldY - this.centerY
+  private updateState(pointer: Phaser.Input.Pointer): void {
+    // Get pointer position relative to the D-pad center
+    // pointer.x/y are in screen coordinates, so we compare directly with centerX/centerY
+    const dx = pointer.x - this.centerX
+    const dy = pointer.y - this.centerY
 
     // Calculate direction based on pointer position relative to center
     const newState: DPadState = {
-      up: dy < -this.deadZone,
-      down: dy > this.deadZone,
-      left: dx < -this.deadZone,
-      right: dx > this.deadZone,
+      up: dy < -DEAD_ZONE,
+      down: dy > DEAD_ZONE,
+      left: dx < -DEAD_ZONE,
+      right: dx > DEAD_ZONE,
     }
 
     this.state = newState
@@ -200,13 +165,13 @@ export class VirtualDPad {
   }
 
   private updateVisuals(): void {
-    const btnOffset = this.dpadSize / 2 - this.buttonSize / 2 - (10 / this.scene.cameras.main.zoom)
+    const btnOffset = DPAD_RADIUS - BUTTON_RADIUS - 10
 
     // Update each button's appearance based on state
-    this.drawButton(this.upBtn, this.centerX, this.centerY - btnOffset, this.state.up)
-    this.drawButton(this.downBtn, this.centerX, this.centerY + btnOffset, this.state.down)
-    this.drawButton(this.leftBtn, this.centerX - btnOffset, this.centerY, this.state.left)
-    this.drawButton(this.rightBtn, this.centerX + btnOffset, this.centerY, this.state.right)
+    this.drawButton(this.upBtn, 0, -btnOffset, this.state.up)
+    this.drawButton(this.downBtn, 0, btnOffset, this.state.down)
+    this.drawButton(this.leftBtn, -btnOffset, 0, this.state.left)
+    this.drawButton(this.rightBtn, btnOffset, 0, this.state.right)
   }
 
   private drawButton(
@@ -216,13 +181,10 @@ export class VirtualDPad {
     active: boolean,
   ): void {
     btn.clear()
-    btn.fillStyle(COLORS.PRIMARY, active ? 0.8 : 0.4)
-    btn.fillCircle(x, y, this.buttonSize / 2)
-
-    if (active) {
-      btn.lineStyle(2, COLORS.WHITE, 0.8)
-      btn.strokeCircle(x, y, this.buttonSize / 2)
-    }
+    btn.fillStyle(COLORS.PRIMARY, active ? 0.9 : 0.5)
+    btn.fillCircle(x, y, BUTTON_RADIUS)
+    btn.lineStyle(2, COLORS.WHITE, active ? 0.9 : 0.3)
+    btn.strokeCircle(x, y, BUTTON_RADIUS)
   }
 
   getState(): DPadState {

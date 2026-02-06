@@ -97,32 +97,33 @@ export class InputSystem {
   }
 
   private initTouchControls(scene: Phaser.Scene): void {
-    // Use game dimensions directly - scrollFactor(0) keeps UI fixed on screen
-    // The camera zoom affects world rendering but UI stays at screen coordinates
+    // Screen dimensions for positioning
     const width = scene.scale.width
     const height = scene.scale.height
 
-    console.log('[InputSystem] Game dimensions:', width, 'x', height)
+    console.log('[InputSystem] Screen dimensions:', width, 'x', height)
     console.log('[InputSystem] Camera zoom:', scene.cameras.main.zoom)
 
+    // D-pad in bottom-left (handles its own positioning)
     this.dpad = new VirtualDPad(scene)
+
+    // Action button (A) in bottom-right (uses default positioning)
     this.actionButton = new ActionButton(scene, { label: 'A' })
 
-    // Menu button positioned above action button
-    const padding = 40
-    const buttonSize = 70
-    const gap = 20
+    // Menu button (☰) positioned above action button
+    // A button is at (width - 60, height - 60), so menu is 80px above
     this.menuButton = new ActionButton(scene, {
       label: '☰',
-      x: width - padding - buttonSize / 2,
-      y: height - padding - buttonSize - gap - buttonSize / 2,
+      x: width - 60,
+      y: height - 140,
     })
 
-    // Cancel button positioned to the left of action button
+    // Cancel button (X) positioned to the left of action button
+    // A button is at (width - 60, height - 60), so cancel is 80px to the left
     this.cancelButton = new ActionButton(scene, {
       label: 'X',
-      x: width - padding - buttonSize - gap - buttonSize / 2,
-      y: height - padding - buttonSize / 2,
+      x: width - 140,
+      y: height - 60,
     })
   }
 

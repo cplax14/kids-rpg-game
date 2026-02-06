@@ -1,35 +1,32 @@
 import Phaser from 'phaser'
 import { DEPTH, COLORS, TEXT_STYLES } from '../../config'
 
-// Visual sizes in screen pixels (will be adjusted for zoom)
-const SCREEN_BUTTON_SIZE = 70
-const SCREEN_PADDING = 40
+// Screen pixel sizes
+const BUTTON_RADIUS = 35
+const PADDING = 60
 
 export interface ActionButtonConfig {
   readonly label?: string
-  readonly x?: number  // If provided, in screen pixels (will be converted to world coords)
-  readonly y?: number  // If provided, in screen pixels (will be converted to world coords)
+  readonly x?: number  // Screen X coordinate
+  readonly y?: number  // Screen Y coordinate
 }
 
 /**
  * Virtual action button for touch controls
  * By default positioned in bottom-right corner of the screen
- * Handles camera zoom by dividing coordinates appropriately
+ * Uses scrollFactor(0) with direct screen coordinates
  */
 export class ActionButton {
   private scene: Phaser.Scene
   private container: Phaser.GameObjects.Container
   private background!: Phaser.GameObjects.Graphics
+  private textObj!: Phaser.GameObjects.Text
   private isPressed: boolean = false
   private justPressed: boolean = false
   private label: string
-  private buttonSize: number
 
   constructor(scene: Phaser.Scene, config: ActionButtonConfig | string = 'A') {
     this.scene = scene
-
-    // Get camera zoom to convert screen pixels to world coordinates
-    const zoom = scene.cameras.main.zoom
 
     // Handle both old signature (string) and new signature (config)
     if (typeof config === 'string') {
@@ -38,38 +35,32 @@ export class ActionButton {
       this.label = config.label ?? 'A'
     }
 
-    // Convert screen sizes to world coordinates (divide by zoom)
-    this.buttonSize = SCREEN_BUTTON_SIZE / zoom
-    const padding = SCREEN_PADDING / zoom
+    // Calculate position in screen coordinates
+    const screenWidth = scene.scale.width
+    const screenHeight = scene.scale.height
 
-    // Calculate visible area in world coordinates
-    const visibleWidth = scene.scale.width / zoom
-    const visibleHeight = scene.scale.height / zoom
-
-    // Get position (convert screen coords to world coords if provided)
     let x: number
     let y: number
 
     if (typeof config === 'object' && config.x !== undefined) {
-      x = config.x / zoom
+      x = config.x
     } else {
       // Default: bottom-right corner
-      x = visibleWidth - padding - this.buttonSize / 2
+      x = screenWidth - PADDING
     }
 
     if (typeof config === 'object' && config.y !== undefined) {
-      y = config.y / zoom
+      y = config.y
     } else {
       // Default: bottom-right corner
-      y = visibleHeight - padding - this.buttonSize / 2
+      y = screenHeight - PADDING
     }
 
-    console.log('[ActionButton] Zoom:', zoom, 'Label:', this.label)
-    console.log('[ActionButton] Position:', x, y)
-    console.log('[ActionButton] Button size:', this.buttonSize)
+    console.log('[ActionButton] Label:', this.label, 'Position (screen):', x, y)
 
+    // Create container at the screen position
     this.container = scene.add.container(x, y)
-    this.container.setDepth(DEPTH.UI + 50)
+    this.container.setDepth(DEPTH.UI + 100)
     this.container.setScrollFactor(0)
 
     this.createVisuals()
@@ -77,47 +68,42 @@ export class ActionButton {
   }
 
   private createVisuals(): void {
-    // Button background
+    // Button background - draw at (0, 0) relative to container
     this.background = this.scene.add.graphics()
     this.drawButton(false)
     this.container.add(this.background)
 
-    // Button label - scale font size with button size
-    const fontSize = Math.round(this.buttonSize * 0.4)
-    const text = this.scene.add.text(0, 0, this.label, {
+    // Button label
+    this.textObj = this.scene.add.text(0, 0, this.label, {
       ...TEXT_STYLES.BUTTON,
-      fontSize: `${fontSize}px`,
+      fontSize: '24px',
       color: '#ffffff',
     })
-    text.setOrigin(0.5)
-    this.container.add(text)
+    this.textObj.setOrigin(0.5)
+    this.container.add(this.textObj)
   }
 
   private drawButton(pressed: boolean): void {
-    const zoom = this.scene.cameras.main.zoom
-    const glowExtra = 3 / zoom
-
     this.background.clear()
 
     // Outer glow when pressed
     if (pressed) {
       this.background.fillStyle(COLORS.SUCCESS, 0.3)
-      this.background.fillCircle(0, 0, this.buttonSize / 2 + glowExtra)
+      this.background.fillCircle(0, 0, BUTTON_RADIUS + 5)
     }
 
     // Main button
     this.background.fillStyle(pressed ? COLORS.SUCCESS : COLORS.PRIMARY, pressed ? 0.9 : 0.7)
-    this.background.fillCircle(0, 0, this.buttonSize / 2)
+    this.background.fillCircle(0, 0, BUTTON_RADIUS)
 
     // Border
-    this.background.lineStyle(2 / zoom, COLORS.WHITE, pressed ? 0.9 : 0.5)
-    this.background.strokeCircle(0, 0, this.buttonSize / 2)
+    this.background.lineStyle(3, COLORS.WHITE, pressed ? 0.9 : 0.5)
+    this.background.strokeCircle(0, 0, BUTTON_RADIUS)
   }
 
   private setupInput(): void {
-    const zoom = this.scene.cameras.main.zoom
-    // Create hit area (slightly larger for easier touch)
-    const hitArea = this.scene.add.circle(0, 0, this.buttonSize / 2 + (5 / zoom))
+    // Create hit area at (0, 0) relative to container
+    const hitArea = this.scene.add.circle(0, 0, BUTTON_RADIUS + 10)
     hitArea.setInteractive()
     this.container.add(hitArea)
 
@@ -158,10 +144,8 @@ export class ActionButton {
 
   setLabel(label: string): void {
     this.label = label
-    // Find and update text
-    const text = this.container.getAt(1) as Phaser.GameObjects.Text
-    if (text) {
-      text.setText(label)
+    if (this.textObj) {
+      this.textObj.setText(label)
     }
   }
 
