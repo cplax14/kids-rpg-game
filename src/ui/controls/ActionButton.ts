@@ -2,9 +2,10 @@ import Phaser from 'phaser'
 import { DEPTH, COLORS, TEXT_STYLES } from '../../config'
 
 // Base sizes (will be scaled based on screen size)
-const BASE_BUTTON_RADIUS = 30
-const BASE_PADDING = 20
-const BASE_SPACING = 70
+const BASE_BUTTON_RADIUS = 28
+const BASE_PADDING = 15
+const BASE_SPACING = 65
+const MOBILE_BOTTOM_PADDING = 25  // Extra padding for mobile browser chrome
 
 export type ButtonPosition = 'primary' | 'secondary' | 'tertiary'
 
@@ -78,13 +79,17 @@ export class ActionButton {
     const scaleFactor = Math.min(visibleWidth / 640, visibleHeight / 360)
 
     // Scale button size (with min/max bounds)
-    this.buttonRadius = Math.max(25, Math.min(35, BASE_BUTTON_RADIUS * scaleFactor))
-    this.padding = Math.max(15, Math.min(25, BASE_PADDING * scaleFactor))
-    this.spacing = Math.max(55, Math.min(80, BASE_SPACING * scaleFactor))
+    this.buttonRadius = Math.max(22, Math.min(32, BASE_BUTTON_RADIUS * scaleFactor))
+    this.padding = Math.max(10, Math.min(20, BASE_PADDING * scaleFactor))
+    this.spacing = Math.max(50, Math.min(70, BASE_SPACING * scaleFactor))
+
+    // Calculate padding (extra at bottom for mobile browser chrome)
+    const sidePadding = this.padding
+    const bottomPadding = this.padding + MOBILE_BOTTOM_PADDING
 
     // Calculate base position (bottom-right of VISIBLE area)
-    const baseX = offsetX + visibleWidth - this.padding - this.buttonRadius
-    const baseY = offsetY + visibleHeight - this.padding - this.buttonRadius
+    const baseX = offsetX + visibleWidth - sidePadding - this.buttonRadius
+    const baseY = offsetY + visibleHeight - bottomPadding - this.buttonRadius
 
     // Position based on button role
     let x: number
