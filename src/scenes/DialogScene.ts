@@ -36,6 +36,7 @@ interface DialogSceneData {
   readonly npcType: string
   readonly npcId?: string
   readonly messages?: ReadonlyArray<string>
+  readonly parentSceneKey?: string
 }
 
 const TYPEWRITER_DELAY = 30
@@ -46,6 +47,7 @@ export class DialogScene extends Phaser.Scene {
   private npcName!: string
   private npcType!: string
   private npcId: string = ''
+  private parentSceneKey: string = SCENE_KEYS.WORLD
   private dialogBox!: Phaser.GameObjects.Container
   private speakerText!: Phaser.GameObjects.Text
   private messageText!: Phaser.GameObjects.Text
@@ -63,6 +65,7 @@ export class DialogScene extends Phaser.Scene {
     this.npcName = data.npcName
     this.npcType = data.npcType
     this.npcId = data.npcId ?? ''
+    this.parentSceneKey = data.parentSceneKey ?? SCENE_KEYS.WORLD
     this.pendingCelebration = null
 
     // Track NPC talk for quest objectives
@@ -446,10 +449,10 @@ export class DialogScene extends Phaser.Scene {
     this.clearChoices()
     this.typewriterTimer?.remove()
 
-    // Resume the world scene
-    const worldScene = this.scene.get(SCENE_KEYS.WORLD)
-    if (worldScene) {
-      this.scene.resume(SCENE_KEYS.WORLD)
+    // Resume the parent scene (WorldScene or BattleScene)
+    const parentScene = this.scene.get(this.parentSceneKey)
+    if (parentScene) {
+      this.scene.resume(this.parentSceneKey)
     }
 
     this.scene.stop()

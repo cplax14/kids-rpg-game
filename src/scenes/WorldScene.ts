@@ -215,6 +215,11 @@ export class WorldScene extends Phaser.Scene {
   }
 
   update(): void {
+    // Guard against update being called before player/input are initialized
+    if (!this.player || !this.inputSystem) {
+      return
+    }
+
     const input = this.inputSystem.getState()
     this.player.update(input)
 

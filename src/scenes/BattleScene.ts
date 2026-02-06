@@ -831,6 +831,7 @@ export class BattleScene extends Phaser.Scene {
       messages: this.bossData.defeatDialog,
       npcName: this.bossData.name,
       npcType: 'quest',
+      parentSceneKey: SCENE_KEYS.BATTLE,
     })
 
     this.scene.pause()
@@ -861,22 +862,25 @@ export class BattleScene extends Phaser.Scene {
 
         this.cameras.main.fadeOut(500)
         this.cameras.main.once('camerafadeoutcomplete', () => {
+          // Store data before cleanUp() clears it
+          const returnPosition = this.playerPosition ?? undefined
+          const bossInfo = this.bossData
           this.cleanUp()
 
           // For boss battles, pass boss-specific data
-          if (isBoss) {
+          if (isBoss && bossInfo) {
             this.scene.start(SCENE_KEYS.WORLD, {
               newGame: false,
               battleResult: 'victory',
               rewards,
               loot,
-              spawnPosition: this.playerPosition ?? undefined,
-              bossDefeated: this.bossData!.bossId,
+              spawnPosition: returnPosition,
+              bossDefeated: bossInfo.bossId,
               bossRewards: {
-                experience: this.bossData!.rewards.experience,
-                gold: this.bossData!.rewards.gold,
-                items: this.bossData!.rewards.guaranteedItems,
-                unlocksArea: this.bossData!.rewards.unlocksArea,
+                experience: bossInfo.rewards.experience,
+                gold: bossInfo.rewards.gold,
+                items: bossInfo.rewards.guaranteedItems,
+                unlocksArea: bossInfo.rewards.unlocksArea,
               },
             })
           } else {
@@ -885,7 +889,7 @@ export class BattleScene extends Phaser.Scene {
               battleResult: 'victory',
               rewards,
               loot,
-              spawnPosition: this.playerPosition ?? undefined,
+              spawnPosition: returnPosition,
             })
           }
         })
@@ -922,11 +926,13 @@ export class BattleScene extends Phaser.Scene {
 
         this.cameras.main.fadeOut(300)
         this.cameras.main.once('camerafadeoutcomplete', () => {
+          // Store position before cleanUp() clears it
+          const returnPosition = this.playerPosition ?? undefined
           this.cleanUp()
           this.scene.start(SCENE_KEYS.WORLD, {
             newGame: false,
             battleResult: 'fled',
-            spawnPosition: this.playerPosition ?? undefined,
+            spawnPosition: returnPosition,
           })
         })
       })
