@@ -10,6 +10,7 @@
         "choices": [
           { "text": "Buy items", "nextNodeId": null, "action": "open_shop", "actionData": "buy" },
           { "text": "Sell items", "nextNodeId": null, "action": "open_shop", "actionData": "sell" },
+          { "text": "Any work available?", "nextNodeId": "quest-hub" },
           { "text": "Just looking", "nextNodeId": "browse" }
         ],
         "isEnd": false
@@ -18,6 +19,77 @@
         "nodeId": "browse",
         "speaker": "Shopkeeper",
         "text": "Take your time! Feel free to look around. I'll be here if you need anything.",
+        "choices": [],
+        "isEnd": true
+      },
+      {
+        "nodeId": "quest-hub",
+        "speaker": "Shopkeeper",
+        "text": "Actually, yes! I could use some help with a few things. Interested?",
+        "choices": [
+          { "text": "Fire and Water quest", "nextNodeId": "quest-fire-water-offer" },
+          { "text": "Supply Run quest", "nextNodeId": "quest-supply-offer" },
+          { "text": "Turn in a quest", "nextNodeId": "quest-turnin" },
+          { "text": "Maybe later", "nextNodeId": "browse" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "quest-fire-water-offer",
+        "speaker": "Shopkeeper",
+        "text": "I'm researching elemental monsters! If you could defeat some Flamepups and Bubblefins for me, I'd pay handsomely. 3 of each should do it.",
+        "choices": [
+          { "text": "I'll do it!", "nextNodeId": "quest-fire-water-accept", "action": "accept_quest", "actionData": "fire-and-water" },
+          { "text": "Not right now", "nextNodeId": "quest-hub" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "quest-fire-water-accept",
+        "speaker": "Shopkeeper",
+        "text": "Wonderful! Flamepups are found in warmer areas, and Bubblefins near water. Good luck!",
+        "choices": [],
+        "isEnd": true
+      },
+      {
+        "nodeId": "quest-supply-offer",
+        "speaker": "Shopkeeper",
+        "text": "I need monster bones to craft new items. If you could gather 5 Monster Bones from your adventures, I'd be grateful. This job is always available!",
+        "choices": [
+          { "text": "I'll gather some!", "nextNodeId": "quest-supply-accept", "action": "accept_quest", "actionData": "supply-run" },
+          { "text": "Not right now", "nextNodeId": "quest-hub" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "quest-supply-accept",
+        "speaker": "Shopkeeper",
+        "text": "Thank you! Monster Bones drop from various creatures you defeat. Come back when you have enough!",
+        "choices": [],
+        "isEnd": true
+      },
+      {
+        "nodeId": "quest-turnin",
+        "speaker": "Shopkeeper",
+        "text": "Let me see what you've got... Ah yes! You've completed the task. Here's your reward!",
+        "choices": [
+          { "text": "Complete Fire and Water", "nextNodeId": "quest-fire-water-complete", "action": "complete_quest", "actionData": "fire-and-water" },
+          { "text": "Complete Supply Run", "nextNodeId": "quest-supply-complete", "action": "complete_quest", "actionData": "supply-run" },
+          { "text": "Never mind", "nextNodeId": "greeting" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "quest-fire-water-complete",
+        "speaker": "Shopkeeper",
+        "text": "Fascinating! These elemental specimens will help my research greatly. Here's something special for your trouble!",
+        "choices": [],
+        "isEnd": true
+      },
+      {
+        "nodeId": "quest-supply-complete",
+        "speaker": "Shopkeeper",
+        "text": "Perfect! These bones will make excellent crafting materials. Come back anytime you have more!",
         "choices": [],
         "isEnd": true
       }
@@ -30,9 +102,10 @@
       {
         "nodeId": "greeting",
         "speaker": "Healer",
-        "text": "Hello there, young adventurer! You look like you've been through a tough battle. Would you like me to heal your party?",
+        "text": "Hello there, young adventurer! You look like you've been through a tough battle. How can I help?",
         "choices": [
-          { "text": "Yes, please!", "nextNodeId": "healing", "action": "heal_party" },
+          { "text": "Heal my party", "nextNodeId": "healing", "action": "heal_party" },
+          { "text": "Any quests?", "nextNodeId": "quest-hub" },
           { "text": "No thanks", "nextNodeId": "farewell" }
         ],
         "isEnd": false
@@ -50,6 +123,51 @@
         "text": "Alright! Come back anytime you need healing. I'm always here to help.",
         "choices": [],
         "isEnd": true
+      },
+      {
+        "nodeId": "quest-hub",
+        "speaker": "Healer",
+        "text": "Actually, I could use some help gathering ingredients for my remedies!",
+        "choices": [
+          { "text": "What do you need?", "nextNodeId": "quest-herbal-offer" },
+          { "text": "Turn in a quest", "nextNodeId": "quest-turnin" },
+          { "text": "Maybe later", "nextNodeId": "farewell" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "quest-herbal-offer",
+        "speaker": "Healer",
+        "text": "I need Soft Fur from forest creatures - it's a key ingredient in many healing potions. Could you collect 3 for me?",
+        "choices": [
+          { "text": "I'll help!", "nextNodeId": "quest-herbal-accept", "action": "accept_quest", "actionData": "herbal-helper" },
+          { "text": "Not right now", "nextNodeId": "quest-hub" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "quest-herbal-accept",
+        "speaker": "Healer",
+        "text": "Thank you so much! Soft Fur drops from furry creatures like Mossbuns. Good luck out there!",
+        "choices": [],
+        "isEnd": true
+      },
+      {
+        "nodeId": "quest-turnin",
+        "speaker": "Healer",
+        "text": "Oh wonderful! Let me see what you've brought...",
+        "choices": [
+          { "text": "Complete Herbal Helper", "nextNodeId": "quest-herbal-complete", "action": "complete_quest", "actionData": "herbal-helper" },
+          { "text": "Never mind", "nextNodeId": "greeting" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "quest-herbal-complete",
+        "speaker": "Healer",
+        "text": "These are perfect! I can make so many remedies with this. You have the heart of a true helper! Here's your reward.",
+        "choices": [],
+        "isEnd": true
       }
     ]
   },
@@ -60,12 +178,23 @@
       {
         "nodeId": "greeting",
         "speaker": "Village Guide",
-        "text": "Hey there! Welcome to Sunlit Village. Need any tips for your adventure?",
+        "text": "Hey there! Welcome to Sunlit Village. What brings you by?",
+        "choices": [
+          { "text": "Any quests for me?", "nextNodeId": "quest-hub" },
+          { "text": "I need some tips", "nextNodeId": "tips-menu" },
+          { "text": "I'm good, thanks!", "nextNodeId": "farewell" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "tips-menu",
+        "speaker": "Village Guide",
+        "text": "Sure thing! What would you like to know?",
         "choices": [
           { "text": "How do I fight?", "nextNodeId": "combat-tip" },
           { "text": "Where can I find monsters?", "nextNodeId": "monster-tip" },
           { "text": "What about equipment?", "nextNodeId": "equip-tip" },
-          { "text": "I'm good, thanks!", "nextNodeId": "farewell" }
+          { "text": "Back to main menu", "nextNodeId": "greeting" }
         ],
         "isEnd": false
       },
@@ -74,7 +203,7 @@
         "speaker": "Village Guide",
         "text": "When you encounter a monster, you can Attack, use Abilities that cost MP, use Items from your inventory, or try to Flee. Some abilities are super effective against certain elements!",
         "choices": [
-          { "text": "Tell me more", "nextNodeId": "greeting" },
+          { "text": "Tell me more", "nextNodeId": "tips-menu" },
           { "text": "Thanks!", "nextNodeId": "farewell" }
         ],
         "isEnd": false
@@ -84,7 +213,7 @@
         "speaker": "Village Guide",
         "text": "Walk into the tall grass outside the village center. Wild monsters appear as you explore! The further from the village, the tougher they get.",
         "choices": [
-          { "text": "Tell me more", "nextNodeId": "greeting" },
+          { "text": "Tell me more", "nextNodeId": "tips-menu" },
           { "text": "Thanks!", "nextNodeId": "farewell" }
         ],
         "isEnd": false
@@ -94,7 +223,7 @@
         "speaker": "Village Guide",
         "text": "Press ESC to open your menu. You can manage your inventory and equip weapons, armor, helmets, and accessories. Better equipment means stronger stats!",
         "choices": [
-          { "text": "Tell me more", "nextNodeId": "greeting" },
+          { "text": "Tell me more", "nextNodeId": "tips-menu" },
           { "text": "Thanks!", "nextNodeId": "farewell" }
         ],
         "isEnd": false
@@ -103,6 +232,155 @@
         "nodeId": "farewell",
         "speaker": "Village Guide",
         "text": "Good luck out there, adventurer! Come back if you ever need more tips.",
+        "choices": [],
+        "isEnd": true
+      },
+      {
+        "nodeId": "quest-hub",
+        "speaker": "Village Guide",
+        "text": "Ah, looking for adventure? I've got several tasks that need doing!",
+        "choices": [
+          { "text": "Slime Slayer (Lv.1)", "nextNodeId": "quest-slime-offer" },
+          { "text": "Monster Friendship (Lv.1)", "nextNodeId": "quest-friendship-offer" },
+          { "text": "Forest Explorer (Lv.3)", "nextNodeId": "quest-forest-offer" },
+          { "text": "Guardian's Challenge (Lv.5)", "nextNodeId": "quest-guardian-offer" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "quest-hub-2",
+        "speaker": "Village Guide",
+        "text": "Here are more quests available:",
+        "choices": [
+          { "text": "Crystal Depths (Lv.8)", "nextNodeId": "quest-crystal-offer" },
+          { "text": "Turn in a quest", "nextNodeId": "quest-turnin" },
+          { "text": "Back", "nextNodeId": "quest-hub" },
+          { "text": "Maybe later", "nextNodeId": "farewell" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "quest-slime-offer",
+        "speaker": "Village Guide",
+        "text": "The village has been having trouble with Mossbuns lately. They're not dangerous, but they've been eating our crops! Could you defeat 5 of them?",
+        "choices": [
+          { "text": "I'll handle it!", "nextNodeId": "quest-slime-accept", "action": "accept_quest", "actionData": "slime-slayer" },
+          { "text": "Not right now", "nextNodeId": "quest-hub" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "quest-slime-accept",
+        "speaker": "Village Guide",
+        "text": "Great! Mossbuns can be found just outside the village in the grass. Come back when you've defeated 5!",
+        "choices": [],
+        "isEnd": true
+      },
+      {
+        "nodeId": "quest-friendship-offer",
+        "speaker": "Village Guide",
+        "text": "Have you met our Monster Breeder? She's an expert on monster bonding and breeding. You should go talk to her!",
+        "choices": [
+          { "text": "I'll visit her!", "nextNodeId": "quest-friendship-accept", "action": "accept_quest", "actionData": "monster-friendship" },
+          { "text": "Not right now", "nextNodeId": "quest-hub" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "quest-friendship-accept",
+        "speaker": "Village Guide",
+        "text": "She's right here in the village - look for her near the eastern side. She'll teach you all about monster friendship!",
+        "choices": [],
+        "isEnd": true
+      },
+      {
+        "nodeId": "quest-forest-offer",
+        "speaker": "Village Guide",
+        "text": "There are reports of interesting sights in the Whispering Woods to the north. Think you could explore it and report back?",
+        "choices": [
+          { "text": "I'll explore it!", "nextNodeId": "quest-forest-accept", "action": "accept_quest", "actionData": "forest-explorer" },
+          { "text": "Not right now", "nextNodeId": "quest-hub" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "quest-forest-accept",
+        "speaker": "Village Guide",
+        "text": "The Whispering Woods is north of the village. Be careful - the monsters there are stronger than around here!",
+        "choices": [],
+        "isEnd": true
+      },
+      {
+        "nodeId": "quest-guardian-offer",
+        "speaker": "Village Guide",
+        "text": "A powerful Forest Guardian has appeared in the Whispering Woods. It's been scaring travelers! Only a strong adventurer could defeat it.",
+        "choices": [
+          { "text": "I'll challenge it!", "nextNodeId": "quest-guardian-accept", "action": "accept_quest", "actionData": "guardians-challenge" },
+          { "text": "I'm not ready yet", "nextNodeId": "quest-hub" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "quest-guardian-accept",
+        "speaker": "Village Guide",
+        "text": "Brave adventurer! The Forest Guardian dwells deep in the Whispering Woods. Make sure you're well-prepared before facing it!",
+        "choices": [],
+        "isEnd": true
+      },
+      {
+        "nodeId": "quest-crystal-offer",
+        "speaker": "Village Guide",
+        "text": "Rumors speak of mysterious Crystal Caverns beyond the forest. Few have ventured there. Would you be brave enough to explore them?",
+        "choices": [
+          { "text": "I'll find them!", "nextNodeId": "quest-crystal-accept", "action": "accept_quest", "actionData": "crystal-depths" },
+          { "text": "Not ready for that", "nextNodeId": "quest-hub-2" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "quest-crystal-accept",
+        "speaker": "Village Guide",
+        "text": "The Crystal Caverns are said to be beyond the Whispering Woods. You'll need to defeat the Forest Guardian first to access the deeper regions!",
+        "choices": [],
+        "isEnd": true
+      },
+      {
+        "nodeId": "quest-turnin",
+        "speaker": "Village Guide",
+        "text": "Back already? Let's see how you did!",
+        "choices": [
+          { "text": "Complete Slime Slayer", "nextNodeId": "quest-slime-complete", "action": "complete_quest", "actionData": "slime-slayer" },
+          { "text": "Complete Forest Explorer", "nextNodeId": "quest-forest-complete", "action": "complete_quest", "actionData": "forest-explorer" },
+          { "text": "Complete Guardian's Challenge", "nextNodeId": "quest-guardian-complete", "action": "complete_quest", "actionData": "guardians-challenge" },
+          { "text": "Complete Crystal Depths", "nextNodeId": "quest-crystal-complete", "action": "complete_quest", "actionData": "crystal-depths" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "quest-slime-complete",
+        "speaker": "Village Guide",
+        "text": "Well done, young tamer! You've proven yourself capable. The village is safer thanks to you! Here's your reward.",
+        "choices": [],
+        "isEnd": true
+      },
+      {
+        "nodeId": "quest-forest-complete",
+        "speaker": "Village Guide",
+        "text": "Wonderful! Your courage to explore is admirable. The world needs more adventurers like you! Take this reward.",
+        "choices": [],
+        "isEnd": true
+      },
+      {
+        "nodeId": "quest-guardian-complete",
+        "speaker": "Village Guide",
+        "text": "Incredible! You've defeated the Forest Guardian! Your strength is remarkable. You are truly worthy of the title Monster Tamer!",
+        "choices": [],
+        "isEnd": true
+      },
+      {
+        "nodeId": "quest-crystal-complete",
+        "speaker": "Village Guide",
+        "text": "The Crystal Caverns! Few have ventured there and returned. Your bravery is truly inspiring! Here's a special reward.",
         "choices": [],
         "isEnd": true
       }
@@ -115,10 +393,11 @@
       {
         "nodeId": "greeting",
         "speaker": "Monster Breeder",
-        "text": "Hello there! I'm the village's monster breeder. I can help you breed your monsters to create new friends with special traits!",
+        "text": "Hello there! I'm the village's monster breeder. How can I help you today?",
         "choices": [
+          { "text": "Let's breed monsters!", "nextNodeId": null, "action": "open_breeding" },
           { "text": "Tell me about breeding", "nextNodeId": "explain" },
-          { "text": "Let's breed!", "nextNodeId": null, "action": "open_breeding" },
+          { "text": "Turn in Monster Friendship quest", "nextNodeId": "quest-friendship-complete", "action": "complete_quest", "actionData": "monster-friendship" },
           { "text": "Maybe later", "nextNodeId": "farewell" }
         ],
         "isEnd": false
@@ -148,6 +427,13 @@
         "nodeId": "farewell",
         "speaker": "Monster Breeder",
         "text": "Come back anytime you want to breed your monsters. Good luck on your adventure!",
+        "choices": [],
+        "isEnd": true
+      },
+      {
+        "nodeId": "quest-friendship-complete",
+        "speaker": "Monster Breeder",
+        "text": "I'm so glad you came to visit! Here's a breeding charm to help you on your journey. Come back when you're ready to breed monsters!",
         "choices": [],
         "isEnd": true
       }
