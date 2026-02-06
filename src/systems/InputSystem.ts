@@ -97,35 +97,32 @@ export class InputSystem {
   }
 
   private initTouchControls(scene: Phaser.Scene): void {
-    // Get the camera zoom to calculate visible area
-    // With zoom 2x, visible area is half the game dimensions
-    const zoom = scene.cameras.main.zoom || 1
-    const visibleWidth = scene.scale.width / zoom
-    const visibleHeight = scene.scale.height / zoom
+    // Use game dimensions directly - scrollFactor(0) keeps UI fixed on screen
+    // The camera zoom affects world rendering but UI stays at screen coordinates
+    const width = scene.scale.width
+    const height = scene.scale.height
 
-    console.log('[InputSystem] Camera zoom:', zoom)
-    console.log('[InputSystem] Visible area:', visibleWidth, 'x', visibleHeight)
+    console.log('[InputSystem] Game dimensions:', width, 'x', height)
+    console.log('[InputSystem] Camera zoom:', scene.cameras.main.zoom)
 
-    this.dpad = new VirtualDPad(scene, zoom)
-    this.actionButton = new ActionButton(scene, { label: 'A', zoom })
+    this.dpad = new VirtualDPad(scene)
+    this.actionButton = new ActionButton(scene, { label: 'A' })
 
     // Menu button positioned above action button
-    const padding = 20 / zoom
-    const buttonSize = 35 / zoom
-    const gap = 10 / zoom
+    const padding = 40
+    const buttonSize = 70
+    const gap = 20
     this.menuButton = new ActionButton(scene, {
       label: '☰',
-      x: visibleWidth - padding - buttonSize / 2,
-      y: visibleHeight - padding - buttonSize - gap - buttonSize / 2,
-      zoom,
+      x: width - padding - buttonSize / 2,
+      y: height - padding - buttonSize - gap - buttonSize / 2,
     })
 
     // Cancel button positioned to the left of action button
     this.cancelButton = new ActionButton(scene, {
       label: 'X',
-      x: visibleWidth - padding - buttonSize - gap - buttonSize / 2,
-      y: visibleHeight - padding - buttonSize / 2,
-      zoom,
+      x: width - padding - buttonSize - gap - buttonSize / 2,
+      y: height - padding - buttonSize / 2,
     })
   }
 

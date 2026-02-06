@@ -8,14 +8,16 @@ export interface DPadState {
   readonly right: boolean
 }
 
-// Base sizes (will be adjusted for zoom)
-const BASE_DPAD_SIZE = 80
-const BASE_BUTTON_SIZE = 25
-const BASE_DEAD_ZONE = 8
+// Visual sizes in screen pixels (will be adjusted for zoom)
+const SCREEN_DPAD_SIZE = 160
+const SCREEN_BUTTON_SIZE = 50
+const SCREEN_PADDING = 30
+const SCREEN_DEAD_ZONE = 15
 
 /**
  * Virtual D-Pad for touch controls
  * Positioned in bottom-left corner of the screen
+ * Handles camera zoom by dividing coordinates appropriately
  */
 export class VirtualDPad {
   private scene: Phaser.Scene
@@ -23,6 +25,8 @@ export class VirtualDPad {
   private centerX: number
   private centerY: number
   private activePointer: Phaser.Input.Pointer | null = null
+
+  // Scaled sizes for world coordinates
   private dpadSize: number
   private buttonSize: number
   private deadZone: number
@@ -41,22 +45,26 @@ export class VirtualDPad {
   private leftBtn!: Phaser.GameObjects.Graphics
   private rightBtn!: Phaser.GameObjects.Graphics
 
-  constructor(scene: Phaser.Scene, zoom: number = 1) {
+  constructor(scene: Phaser.Scene) {
     this.scene = scene
 
-    // Adjust sizes for zoom (smaller in world coords = normal size on screen)
-    this.dpadSize = BASE_DPAD_SIZE / zoom
-    this.buttonSize = BASE_BUTTON_SIZE / zoom
-    this.deadZone = BASE_DEAD_ZONE / zoom
+    // Get camera zoom to convert screen pixels to world coordinates
+    const zoom = scene.cameras.main.zoom
 
-    // Get visible area based on zoom
-    const visibleWidth = scene.scale.width / zoom
-    const visibleHeight = scene.scale.height / zoom
+    // Convert screen sizes to world coordinates (divide by zoom)
+    this.dpadSize = SCREEN_DPAD_SIZE / zoom
+    this.buttonSize = SCREEN_BUTTON_SIZE / zoom
+    this.deadZone = SCREEN_DEAD_ZONE / zoom
+    const padding = SCREEN_PADDING / zoom
 
-    // Position in bottom-left with padding
-    const padding = 15 / zoom
+    // Calculate center position in world coordinates
+    // For scrollFactor(0), we need to position relative to camera viewport
     this.centerX = padding + this.dpadSize / 2
-    this.centerY = visibleHeight - padding - this.dpadSize / 2
+    this.centerY = (scene.scale.height / zoom) - padding - this.dpadSize / 2
+
+    console.log('[VirtualDPad] Zoom:', zoom)
+    console.log('[VirtualDPad] Center position:', this.centerX, this.centerY)
+    console.log('[VirtualDPad] D-pad size:', this.dpadSize)
 
     this.container = scene.add.container(0, 0)
     this.container.setDepth(DEPTH.UI + 50)
@@ -76,41 +84,36 @@ export class VirtualDPad {
     this.container.add(this.background)
 
     // Direction buttons
-    const btnOffset = this.dpadSize / 2 - this.buttonSize / 2 - 5
+    const btnOffset = this.dpadSize / 2 - this.buttonSize / 2 - (10 / this.scene.cameras.main.zoom)
 
     // Up button
     this.upBtn = this.createDirectionButton(
       this.centerX,
       this.centerY - btnOffset,
-      '▲',
     )
 
     // Down button
     this.downBtn = this.createDirectionButton(
       this.centerX,
       this.centerY + btnOffset,
-      '▼',
     )
 
     // Left button
     this.leftBtn = this.createDirectionButton(
       this.centerX - btnOffset,
       this.centerY,
-      '◀',
     )
 
     // Right button
     this.rightBtn = this.createDirectionButton(
       this.centerX + btnOffset,
       this.centerY,
-      '▶',
     )
   }
 
   private createDirectionButton(
     x: number,
     y: number,
-    _symbol: string,
   ): Phaser.GameObjects.Graphics {
     const btn = this.scene.add.graphics()
     btn.fillStyle(COLORS.PRIMARY, 0.4)
@@ -166,8 +169,13 @@ export class VirtualDPad {
   }
 
   private updateState(pointerX: number, pointerY: number): void {
-    const dx = pointerX - this.centerX
-    const dy = pointerY - this.centerY
+    // Pointer coordinates need to be converted to world space for comparison
+    const zoom = this.scene.cameras.main.zoom
+    const worldX = pointerX / zoom
+    const worldY = pointerY / zoom
+
+    const dx = worldX - this.centerX
+    const dy = worldY - this.centerY
 
     // Calculate direction based on pointer position relative to center
     const newState: DPadState = {
@@ -192,7 +200,7 @@ export class VirtualDPad {
   }
 
   private updateVisuals(): void {
-    const btnOffset = this.dpadSize / 2 - this.buttonSize / 2 - 5
+    const btnOffset = this.dpadSize / 2 - this.buttonSize / 2 - (10 / this.scene.cameras.main.zoom)
 
     // Update each button's appearance based on state
     this.drawButton(this.upBtn, this.centerX, this.centerY - btnOffset, this.state.up)
