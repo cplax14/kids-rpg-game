@@ -14,6 +14,18 @@ export default defineConfig({
   build: {
     target: 'es2022',
     outDir: 'dist',
-    sourcemap: true,
+    // Disable sourcemaps in production (smaller bundle, no code inspection)
+    sourcemap: false,
+    // Optimize chunk splitting for better caching
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Phaser is large (~1MB) - separate chunk for better caching
+          phaser: ['phaser'],
+        },
+      },
+    },
   },
+  // Exclude downloads folder from build (raw source assets)
+  publicDir: 'public',
 })
