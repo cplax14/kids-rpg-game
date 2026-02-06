@@ -97,11 +97,15 @@ export class InputSystem {
   }
 
   private initTouchControls(scene: Phaser.Scene): void {
-    // Screen dimensions for positioning
-    const width = scene.scale.width
-    const height = scene.scale.height
+    // With zoom 2, visible area is 640x360
+    // ActionButton expects visible-area relative coordinates
+    const visibleWidth = 640
+    const visibleHeight = 360
+    const buttonPadding = 30
+    const buttonRadius = 35
+    const buttonSpacing = 80
 
-    console.log('[InputSystem] Screen dimensions:', width, 'x', height)
+    console.log('[InputSystem] Visible area dimensions:', visibleWidth, 'x', visibleHeight)
     console.log('[InputSystem] Camera zoom:', scene.cameras.main.zoom)
 
     // D-pad in bottom-left (handles its own positioning)
@@ -110,20 +114,22 @@ export class InputSystem {
     // Action button (A) in bottom-right (uses default positioning)
     this.actionButton = new ActionButton(scene, { label: 'A' })
 
+    // Calculate bottom-right position for reference
+    const bottomRightX = visibleWidth - buttonPadding - buttonRadius
+    const bottomRightY = visibleHeight - buttonPadding - buttonRadius
+
     // Menu button (☰) positioned above action button
-    // A button is at (width - 60, height - 60), so menu is 80px above
     this.menuButton = new ActionButton(scene, {
       label: '☰',
-      x: width - 60,
-      y: height - 140,
+      x: bottomRightX,
+      y: bottomRightY - buttonSpacing,
     })
 
     // Cancel button (X) positioned to the left of action button
-    // A button is at (width - 60, height - 60), so cancel is 80px to the left
     this.cancelButton = new ActionButton(scene, {
       label: 'X',
-      x: width - 140,
-      y: height - 60,
+      x: bottomRightX - buttonSpacing,
+      y: bottomRightY,
     })
   }
 

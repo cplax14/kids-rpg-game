@@ -10,21 +10,27 @@ export interface DPadState {
 
 // Screen pixel sizes (not affected by zoom)
 const DPAD_RADIUS = 80
-const BUTTON_RADIUS = 25
-const PADDING = 100
-const DEAD_ZONE = 20
+const BUTTON_RADIUS = 30
+const PADDING = 30
+
+// With camera zoom 2, only the center 640x360 of the 1280x720 canvas is visible
+// scrollFactor(0) positions are in canvas coordinates, so we need to offset
+const GAME_WIDTH = 1280
+const GAME_HEIGHT = 720
+const ZOOM = 2
+const VISIBLE_WIDTH = GAME_WIDTH / ZOOM   // 640
+const VISIBLE_HEIGHT = GAME_HEIGHT / ZOOM // 360
+const OFFSET_X = (GAME_WIDTH - VISIBLE_WIDTH) / 2   // 320
+const OFFSET_Y = (GAME_HEIGHT - VISIBLE_HEIGHT) / 2 // 180
 
 /**
  * Virtual D-Pad for touch controls
  * Positioned in bottom-left corner of the screen
- * Uses scrollFactor(0) with direct screen coordinates
+ * Uses 4 separate hit zones for reliable direction detection
  */
 export class VirtualDPad {
   private scene: Phaser.Scene
   private container: Phaser.GameObjects.Container
-  private centerX: number
-  private centerY: number
-  private activePointer: Phaser.Input.Pointer | null = null
 
   private state: DPadState = {
     up: false,
@@ -40,29 +46,33 @@ export class VirtualDPad {
   private leftBtn!: Phaser.GameObjects.Graphics
   private rightBtn!: Phaser.GameObjects.Graphics
 
+  // Hit zones for each direction
+  private upZone!: Phaser.GameObjects.Arc
+  private downZone!: Phaser.GameObjects.Arc
+  private leftZone!: Phaser.GameObjects.Arc
+  private rightZone!: Phaser.GameObjects.Arc
+
   constructor(scene: Phaser.Scene) {
     this.scene = scene
 
-    // Position in bottom-left with padding (screen coordinates)
-    // Use game dimensions directly - scrollFactor(0) will keep it fixed
-    this.centerX = PADDING
-    this.centerY = scene.scale.height - PADDING
-
-    console.log('[VirtualDPad] Screen dimensions:', scene.scale.width, 'x', scene.scale.height)
-    console.log('[VirtualDPad] Center position (screen coords):', this.centerX, this.centerY)
+    // Canvas position for rendering (with zoom offset)
+    // D-pad center in bottom-left of visible area
+    const centerX = OFFSET_X + PADDING + DPAD_RADIUS
+    const centerY = OFFSET_Y + VISIBLE_HEIGHT - PADDING - DPAD_RADIUS
 
     // Create container at the center position
-    this.container = scene.add.container(this.centerX, this.centerY)
+    this.container = scene.add.container(centerX, centerY)
     this.container.setDepth(DEPTH.UI + 100)
     this.container.setScrollFactor(0)
 
     this.createVisuals()
-    this.setupInput()
+    this.setupDirectionZones()
   }
 
   private createVisuals(): void {
     // Semi-transparent background circle - draw at (0, 0) relative to container
     this.background = this.scene.add.graphics()
+    this.background.setScrollFactor(0)
     this.background.fillStyle(COLORS.DARK_BG, 0.6)
     this.background.fillCircle(0, 0, DPAD_RADIUS)
     this.background.lineStyle(3, COLORS.PRIMARY, 0.5)
@@ -70,7 +80,7 @@ export class VirtualDPad {
     this.container.add(this.background)
 
     // Direction buttons offset from center
-    const btnOffset = DPAD_RADIUS - BUTTON_RADIUS - 10
+    const btnOffset = DPAD_RADIUS - BUTTON_RADIUS - 5
 
     // Up button
     this.upBtn = this.createDirectionButton(0, -btnOffset)
@@ -87,6 +97,7 @@ export class VirtualDPad {
 
   private createDirectionButton(x: number, y: number): Phaser.GameObjects.Graphics {
     const btn = this.scene.add.graphics()
+    btn.setScrollFactor(0)
     btn.fillStyle(COLORS.PRIMARY, 0.5)
     btn.fillCircle(x, y, BUTTON_RADIUS)
     btn.lineStyle(2, COLORS.WHITE, 0.3)
@@ -95,77 +106,72 @@ export class VirtualDPad {
     return btn
   }
 
-  private setupInput(): void {
-    // Create invisible hit area covering the D-pad - position at (0, 0) relative to container
-    const hitArea = this.scene.add.circle(0, 0, DPAD_RADIUS + 10)
-    hitArea.setInteractive()
-    this.container.add(hitArea)
+  private setupDirectionZones(): void {
+    // Create 4 separate interactive hit zones for each direction
+    // Position them at the same offsets as the visual buttons
+    const btnOffset = DPAD_RADIUS - BUTTON_RADIUS - 5
+    const hitRadius = BUTTON_RADIUS + 10 // Slightly larger for easier touch
 
-    // Track touch/pointer on the D-pad
-    hitArea.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      this.activePointer = pointer
-      this.updateState(pointer)
+    // Up zone
+    this.upZone = this.scene.add.circle(0, -btnOffset, hitRadius, 0x000000, 0)
+    this.upZone.setScrollFactor(0)
+    this.upZone.setInteractive()
+    this.container.add(this.upZone)
+    this.setupZoneEvents(this.upZone, 'up')
+
+    // Down zone
+    this.downZone = this.scene.add.circle(0, btnOffset, hitRadius, 0x000000, 0)
+    this.downZone.setScrollFactor(0)
+    this.downZone.setInteractive()
+    this.container.add(this.downZone)
+    this.setupZoneEvents(this.downZone, 'down')
+
+    // Left zone
+    this.leftZone = this.scene.add.circle(-btnOffset, 0, hitRadius, 0x000000, 0)
+    this.leftZone.setScrollFactor(0)
+    this.leftZone.setInteractive()
+    this.container.add(this.leftZone)
+    this.setupZoneEvents(this.leftZone, 'left')
+
+    // Right zone
+    this.rightZone = this.scene.add.circle(btnOffset, 0, hitRadius, 0x000000, 0)
+    this.rightZone.setScrollFactor(0)
+    this.rightZone.setInteractive()
+    this.container.add(this.rightZone)
+    this.setupZoneEvents(this.rightZone, 'right')
+  }
+
+  private setupZoneEvents(zone: Phaser.GameObjects.Arc, direction: 'up' | 'down' | 'left' | 'right'): void {
+    zone.on('pointerdown', () => {
+      this.setDirection(direction, true)
     })
 
-    hitArea.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-      if (this.activePointer === pointer) {
-        this.updateState(pointer)
-      }
+    zone.on('pointerup', () => {
+      this.setDirection(direction, false)
     })
 
-    hitArea.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-      if (this.activePointer === pointer) {
-        this.activePointer = null
-        this.resetState()
-      }
+    zone.on('pointerout', () => {
+      this.setDirection(direction, false)
     })
 
-    hitArea.on('pointerout', (pointer: Phaser.Input.Pointer) => {
-      if (this.activePointer === pointer) {
-        this.activePointer = null
-        this.resetState()
-      }
-    })
-
-    // Also handle global pointer up in case finger moves off screen
-    this.scene.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-      if (this.activePointer === pointer) {
-        this.activePointer = null
-        this.resetState()
+    // Handle entering from another zone while pointer is down
+    zone.on('pointerover', (pointer: Phaser.Input.Pointer) => {
+      if (pointer.isDown) {
+        this.setDirection(direction, true)
       }
     })
   }
 
-  private updateState(pointer: Phaser.Input.Pointer): void {
-    // Get pointer position relative to the D-pad center
-    // pointer.x/y are in screen coordinates, so we compare directly with centerX/centerY
-    const dx = pointer.x - this.centerX
-    const dy = pointer.y - this.centerY
-
-    // Calculate direction based on pointer position relative to center
-    const newState: DPadState = {
-      up: dy < -DEAD_ZONE,
-      down: dy > DEAD_ZONE,
-      left: dx < -DEAD_ZONE,
-      right: dx > DEAD_ZONE,
-    }
-
-    this.state = newState
-    this.updateVisuals()
-  }
-
-  private resetState(): void {
+  private setDirection(direction: 'up' | 'down' | 'left' | 'right', active: boolean): void {
     this.state = {
-      up: false,
-      down: false,
-      left: false,
-      right: false,
+      ...this.state,
+      [direction]: active,
     }
     this.updateVisuals()
   }
 
   private updateVisuals(): void {
-    const btnOffset = DPAD_RADIUS - BUTTON_RADIUS - 10
+    const btnOffset = DPAD_RADIUS - BUTTON_RADIUS - 5
 
     // Update each button's appearance based on state
     this.drawButton(this.upBtn, 0, -btnOffset, this.state.up)

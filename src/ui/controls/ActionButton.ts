@@ -3,7 +3,17 @@ import { DEPTH, COLORS, TEXT_STYLES } from '../../config'
 
 // Screen pixel sizes
 const BUTTON_RADIUS = 35
-const PADDING = 60
+const PADDING = 30
+
+// With camera zoom 2, only the center 640x360 of the 1280x720 canvas is visible
+// scrollFactor(0) positions are in canvas coordinates, so we need to offset
+const GAME_WIDTH = 1280
+const GAME_HEIGHT = 720
+const ZOOM = 2
+const VISIBLE_WIDTH = GAME_WIDTH / ZOOM   // 640
+const VISIBLE_HEIGHT = GAME_HEIGHT / ZOOM // 360
+const OFFSET_X = (GAME_WIDTH - VISIBLE_WIDTH) / 2   // 320
+const OFFSET_Y = (GAME_HEIGHT - VISIBLE_HEIGHT) / 2 // 180
 
 export interface ActionButtonConfig {
   readonly label?: string
@@ -35,28 +45,29 @@ export class ActionButton {
       this.label = config.label ?? 'A'
     }
 
-    // Calculate position in screen coordinates
-    const screenWidth = scene.scale.width
-    const screenHeight = scene.scale.height
-
+    // Calculate position in CANVAS coordinates (accounting for zoom)
+    // With zoom 2, visible area is center 640x360 of 1280x720 canvas
     let x: number
     let y: number
 
     if (typeof config === 'object' && config.x !== undefined) {
-      x = config.x
+      // Custom position - assume caller is providing visible-area relative coords
+      // Convert from visible area coords to canvas coords
+      x = OFFSET_X + config.x
     } else {
-      // Default: bottom-right corner
-      x = screenWidth - PADDING
+      // Default: bottom-right corner of visible area
+      x = OFFSET_X + VISIBLE_WIDTH - PADDING - BUTTON_RADIUS
     }
 
     if (typeof config === 'object' && config.y !== undefined) {
-      y = config.y
+      // Custom position - assume caller is providing visible-area relative coords
+      y = OFFSET_Y + config.y
     } else {
-      // Default: bottom-right corner
-      y = screenHeight - PADDING
+      // Default: bottom-right corner of visible area
+      y = OFFSET_Y + VISIBLE_HEIGHT - PADDING - BUTTON_RADIUS
     }
 
-    console.log('[ActionButton] Label:', this.label, 'Position (screen):', x, y)
+    console.log('[ActionButton] Label:', this.label, 'Position (canvas):', x, y)
 
     // Create container at the screen position
     this.container = scene.add.container(x, y)
@@ -70,6 +81,7 @@ export class ActionButton {
   private createVisuals(): void {
     // Button background - draw at (0, 0) relative to container
     this.background = this.scene.add.graphics()
+    this.background.setScrollFactor(0)
     this.drawButton(false)
     this.container.add(this.background)
 
@@ -80,6 +92,7 @@ export class ActionButton {
       color: '#ffffff',
     })
     this.textObj.setOrigin(0.5)
+    this.textObj.setScrollFactor(0)
     this.container.add(this.textObj)
   }
 
@@ -104,6 +117,7 @@ export class ActionButton {
   private setupInput(): void {
     // Create hit area at (0, 0) relative to container
     const hitArea = this.scene.add.circle(0, 0, BUTTON_RADIUS + 10)
+    hitArea.setScrollFactor(0)
     hitArea.setInteractive()
     this.container.add(hitArea)
 
