@@ -29,6 +29,7 @@ import { getEquipment } from '../systems/EquipmentSystem'
 import { EventBus } from '../events/EventBus'
 import { GAME_EVENTS } from '../events/GameEvents'
 import { playSfx, SFX_KEYS } from '../systems/AudioSystem'
+import { QuestCelebration } from '../ui/overlays/QuestCelebration'
 
 interface DialogSceneData {
   readonly dialogTreeId: string
@@ -448,6 +449,23 @@ export class DialogScene extends Phaser.Scene {
   private closeDialog(): void {
     this.clearChoices()
     this.typewriterTimer?.remove()
+
+    // Check if we need to show quest celebration
+    if (this.pendingCelebration) {
+      const quest = getQuest(this.pendingCelebration.questId)
+      if (quest) {
+        // Show celebration overlay, then resume parent scene when dismissed
+        new QuestCelebration(this, quest, quest.rewards, () => {
+          const parentScene = this.scene.get(this.parentSceneKey)
+          if (parentScene) {
+            this.scene.resume(this.parentSceneKey)
+          }
+          this.scene.stop()
+        })
+        this.pendingCelebration = null
+        return
+      }
+    }
 
     // Resume the parent scene (WorldScene or BattleScene)
     const parentScene = this.scene.get(this.parentSceneKey)
