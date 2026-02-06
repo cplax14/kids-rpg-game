@@ -66,22 +66,31 @@ export class VirtualDPad {
   }
 
   private updatePosition(): void {
-    // Get the game canvas dimensions (for scrollFactor(0) positioning)
-    // Use scale.width/height which gives actual canvas size, not camera viewport
-    const canvasWidth = this.scene.scale.width
-    const canvasHeight = this.scene.scale.height
+    // Get the camera (for zoom level and viewport calculation)
+    const camera = this.scene.cameras.main
+    const zoom = camera.zoom
 
-    // Calculate scale factor based on canvas size
-    const scaleFactor = Math.min(canvasWidth / 1280, canvasHeight / 720)
+    // With scrollFactor(0), elements are positioned in canvas coordinates
+    // But with zoom > 1, only the CENTER of the canvas is visible
+    // Calculate the visible area in canvas coordinates
+    const canvasWidth = this.scene.scale.width   // 1280
+    const canvasHeight = this.scene.scale.height // 720
+    const visibleWidth = canvasWidth / zoom      // 640 with zoom 2
+    const visibleHeight = canvasHeight / zoom    // 360 with zoom 2
+    const offsetX = (canvasWidth - visibleWidth) / 2   // 320 with zoom 2
+    const offsetY = (canvasHeight - visibleHeight) / 2 // 180 with zoom 2
+
+    // Calculate scale factor based on visible size
+    const scaleFactor = Math.min(visibleWidth / 640, visibleHeight / 360)
 
     // Scale the D-pad size (with min/max bounds)
     this.dpadRadius = Math.max(50, Math.min(80, BASE_DPAD_RADIUS * scaleFactor))
     this.buttonRadius = Math.max(18, Math.min(30, BASE_BUTTON_RADIUS * scaleFactor))
     this.padding = Math.max(15, Math.min(30, BASE_PADDING * scaleFactor))
 
-    // Position in bottom-left of the canvas (scrollFactor(0) uses canvas coordinates)
-    const x = this.padding + this.dpadRadius
-    const y = canvasHeight - this.padding - this.dpadRadius
+    // Position in bottom-left of the VISIBLE area (accounting for zoom offset)
+    const x = offsetX + this.padding + this.dpadRadius
+    const y = offsetY + visibleHeight - this.padding - this.dpadRadius
 
     this.container.setPosition(x, y)
 

@@ -61,21 +61,30 @@ export class ActionButton {
   }
 
   private updatePosition(): void {
-    // Get the game canvas dimensions (for scrollFactor(0) positioning)
-    const canvasWidth = this.scene.scale.width
-    const canvasHeight = this.scene.scale.height
+    // Get the camera (for zoom level and viewport calculation)
+    const camera = this.scene.cameras.main
+    const zoom = camera.zoom
 
-    // Calculate scale factor based on canvas size
-    const scaleFactor = Math.min(canvasWidth / 1280, canvasHeight / 720)
+    // With scrollFactor(0), elements are positioned in canvas coordinates
+    // But with zoom > 1, only the CENTER of the canvas is visible
+    const canvasWidth = this.scene.scale.width   // 1280
+    const canvasHeight = this.scene.scale.height // 720
+    const visibleWidth = canvasWidth / zoom      // 640 with zoom 2
+    const visibleHeight = canvasHeight / zoom    // 360 with zoom 2
+    const offsetX = (canvasWidth - visibleWidth) / 2   // 320 with zoom 2
+    const offsetY = (canvasHeight - visibleHeight) / 2 // 180 with zoom 2
+
+    // Calculate scale factor based on visible size
+    const scaleFactor = Math.min(visibleWidth / 640, visibleHeight / 360)
 
     // Scale button size (with min/max bounds)
     this.buttonRadius = Math.max(25, Math.min(35, BASE_BUTTON_RADIUS * scaleFactor))
     this.padding = Math.max(15, Math.min(25, BASE_PADDING * scaleFactor))
     this.spacing = Math.max(55, Math.min(80, BASE_SPACING * scaleFactor))
 
-    // Calculate base position (bottom-right of canvas)
-    const baseX = canvasWidth - this.padding - this.buttonRadius
-    const baseY = canvasHeight - this.padding - this.buttonRadius
+    // Calculate base position (bottom-right of VISIBLE area)
+    const baseX = offsetX + visibleWidth - this.padding - this.buttonRadius
+    const baseY = offsetY + visibleHeight - this.padding - this.buttonRadius
 
     // Position based on button role
     let x: number
