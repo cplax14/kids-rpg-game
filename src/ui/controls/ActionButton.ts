@@ -1,39 +1,37 @@
 import Phaser from 'phaser'
 import { DEPTH, COLORS, TEXT_STYLES } from '../../config'
 
-// Screen pixel sizes
-const BUTTON_RADIUS = 35
-const PADDING = 30
+// Base sizes (will be scaled based on screen size)
+const BASE_BUTTON_RADIUS = 30
+const BASE_PADDING = 20
+const BASE_SPACING = 70
 
-// With camera zoom 2, only the center 640x360 of the 1280x720 canvas is visible
-// scrollFactor(0) positions are in canvas coordinates, so we need to offset
-const GAME_WIDTH = 1280
-const GAME_HEIGHT = 720
-const ZOOM = 2
-const VISIBLE_WIDTH = GAME_WIDTH / ZOOM   // 640
-const VISIBLE_HEIGHT = GAME_HEIGHT / ZOOM // 360
-const OFFSET_X = (GAME_WIDTH - VISIBLE_WIDTH) / 2   // 320
-const OFFSET_Y = (GAME_HEIGHT - VISIBLE_HEIGHT) / 2 // 180
+export type ButtonPosition = 'primary' | 'secondary' | 'tertiary'
 
 export interface ActionButtonConfig {
   readonly label?: string
-  readonly x?: number  // Screen X coordinate
-  readonly y?: number  // Screen Y coordinate
+  readonly position?: ButtonPosition  // primary=bottom-right, secondary=above primary, tertiary=left of primary
 }
 
 /**
  * Virtual action button for touch controls
- * By default positioned in bottom-right corner of the screen
- * Uses scrollFactor(0) with direct screen coordinates
+ * Dynamically positions based on actual viewport size
  */
 export class ActionButton {
   private scene: Phaser.Scene
   private container: Phaser.GameObjects.Container
   private background!: Phaser.GameObjects.Graphics
   private textObj!: Phaser.GameObjects.Text
+  private hitArea!: Phaser.GameObjects.Arc
   private isPressed: boolean = false
   private justPressed: boolean = false
   private label: string
+  private position: ButtonPosition
+
+  // Current sizing (scales with screen)
+  private buttonRadius: number = BASE_BUTTON_RADIUS
+  private padding: number = BASE_PADDING
+  private spacing: number = BASE_SPACING
 
   constructor(scene: Phaser.Scene, config: ActionButtonConfig | string = 'A') {
     this.scene = scene
@@ -41,59 +39,99 @@ export class ActionButton {
     // Handle both old signature (string) and new signature (config)
     if (typeof config === 'string') {
       this.label = config
+      this.position = 'primary'
     } else {
       this.label = config.label ?? 'A'
+      this.position = config.position ?? 'primary'
     }
 
-    // Calculate position in CANVAS coordinates (accounting for zoom)
-    // With zoom 2, visible area is center 640x360 of 1280x720 canvas
-    let x: number
-    let y: number
-
-    if (typeof config === 'object' && config.x !== undefined) {
-      // Custom position - assume caller is providing visible-area relative coords
-      // Convert from visible area coords to canvas coords
-      x = OFFSET_X + config.x
-    } else {
-      // Default: bottom-right corner of visible area
-      x = OFFSET_X + VISIBLE_WIDTH - PADDING - BUTTON_RADIUS
-    }
-
-    if (typeof config === 'object' && config.y !== undefined) {
-      // Custom position - assume caller is providing visible-area relative coords
-      y = OFFSET_Y + config.y
-    } else {
-      // Default: bottom-right corner of visible area
-      y = OFFSET_Y + VISIBLE_HEIGHT - PADDING - BUTTON_RADIUS
-    }
-
-    console.log('[ActionButton] Label:', this.label, 'Position (canvas):', x, y)
-
-    // Create container at the screen position
-    this.container = scene.add.container(x, y)
+    // Create container (position will be set in updatePosition)
+    this.container = scene.add.container(0, 0)
     this.container.setDepth(DEPTH.UI + 100)
     this.container.setScrollFactor(0)
 
     this.createVisuals()
     this.setupInput()
+
+    // Initial position
+    this.updatePosition()
+
+    // Listen for resize events
+    scene.scale.on('resize', this.updatePosition, this)
+  }
+
+  private updatePosition(): void {
+    // Get the camera viewport
+    const camera = this.scene.cameras.main
+    const viewWidth = camera.width
+    const viewHeight = camera.height
+
+    // Calculate scale factor
+    const scaleFactor = Math.min(viewWidth / 640, viewHeight / 360)
+
+    // Scale button size (with min/max bounds)
+    this.buttonRadius = Math.max(25, Math.min(35, BASE_BUTTON_RADIUS * scaleFactor))
+    this.padding = Math.max(15, Math.min(25, BASE_PADDING * scaleFactor))
+    this.spacing = Math.max(55, Math.min(80, BASE_SPACING * scaleFactor))
+
+    // Calculate base position (bottom-right)
+    const baseX = viewWidth - this.padding - this.buttonRadius
+    const baseY = viewHeight - this.padding - this.buttonRadius
+
+    // Position based on button role
+    let x: number
+    let y: number
+
+    switch (this.position) {
+      case 'primary':
+        // Bottom-right corner (A button)
+        x = baseX
+        y = baseY
+        break
+      case 'secondary':
+        // Above primary (Menu button)
+        x = baseX
+        y = baseY - this.spacing
+        break
+      case 'tertiary':
+        // Left of primary (X/Cancel button)
+        x = baseX - this.spacing
+        y = baseY
+        break
+      default:
+        x = baseX
+        y = baseY
+    }
+
+    this.container.setPosition(x, y)
+
+    // Update visuals with new size
+    this.drawButton(false)
+    this.updateTextSize()
+    this.updateHitArea()
   }
 
   private createVisuals(): void {
-    // Button background - draw at (0, 0) relative to container
+    // Button background
     this.background = this.scene.add.graphics()
     this.background.setScrollFactor(0)
-    this.drawButton(false)
     this.container.add(this.background)
 
     // Button label
     this.textObj = this.scene.add.text(0, 0, this.label, {
       ...TEXT_STYLES.BUTTON,
-      fontSize: '24px',
+      fontSize: '20px',
       color: '#ffffff',
     })
     this.textObj.setOrigin(0.5)
     this.textObj.setScrollFactor(0)
     this.container.add(this.textObj)
+  }
+
+  private updateTextSize(): void {
+    // Scale font size with button
+    const fontSize = Math.max(16, Math.min(24, Math.floor(this.buttonRadius * 0.7)))
+    this.textObj.setFontSize(fontSize)
   }
 
   private drawButton(pressed: boolean): void {
@@ -102,40 +140,46 @@ export class ActionButton {
     // Outer glow when pressed
     if (pressed) {
       this.background.fillStyle(COLORS.SUCCESS, 0.3)
-      this.background.fillCircle(0, 0, BUTTON_RADIUS + 5)
+      this.background.fillCircle(0, 0, this.buttonRadius + 5)
     }
 
     // Main button
     this.background.fillStyle(pressed ? COLORS.SUCCESS : COLORS.PRIMARY, pressed ? 0.9 : 0.7)
-    this.background.fillCircle(0, 0, BUTTON_RADIUS)
+    this.background.fillCircle(0, 0, this.buttonRadius)
 
     // Border
     this.background.lineStyle(3, COLORS.WHITE, pressed ? 0.9 : 0.5)
-    this.background.strokeCircle(0, 0, BUTTON_RADIUS)
+    this.background.strokeCircle(0, 0, this.buttonRadius)
   }
 
   private setupInput(): void {
-    // Create hit area at (0, 0) relative to container
-    const hitArea = this.scene.add.circle(0, 0, BUTTON_RADIUS + 10)
-    hitArea.setScrollFactor(0)
-    hitArea.setInteractive()
-    this.container.add(hitArea)
+    // Create hit area
+    this.hitArea = this.scene.add.circle(0, 0, this.buttonRadius + 10, 0x000000, 0)
+    this.hitArea.setScrollFactor(0)
+    this.hitArea.setInteractive()
+    this.container.add(this.hitArea)
 
-    hitArea.on('pointerdown', () => {
+    this.hitArea.on('pointerdown', () => {
       this.isPressed = true
       this.justPressed = true
       this.drawButton(true)
     })
 
-    hitArea.on('pointerup', () => {
+    this.hitArea.on('pointerup', () => {
       this.isPressed = false
       this.drawButton(false)
     })
 
-    hitArea.on('pointerout', () => {
+    this.hitArea.on('pointerout', () => {
       this.isPressed = false
       this.drawButton(false)
     })
+  }
+
+  private updateHitArea(): void {
+    const hitRadius = this.buttonRadius + 8
+    this.hitArea.setRadius(hitRadius)
+    this.hitArea.setInteractive(new Phaser.Geom.Circle(0, 0, hitRadius), Phaser.Geom.Circle.Contains)
   }
 
   /**
@@ -172,6 +216,7 @@ export class ActionButton {
   }
 
   destroy(): void {
+    this.scene.scale.off('resize', this.updatePosition, this)
     this.container.destroy()
   }
 }

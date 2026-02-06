@@ -97,40 +97,20 @@ export class InputSystem {
   }
 
   private initTouchControls(scene: Phaser.Scene): void {
-    // With zoom 2, visible area is 640x360
-    // ActionButton expects visible-area relative coordinates
-    const visibleWidth = 640
-    const visibleHeight = 360
-    const buttonPadding = 30
-    const buttonRadius = 35
-    const buttonSpacing = 80
+    console.log('[InputSystem] Initializing touch controls')
+    console.log('[InputSystem] Camera dimensions:', scene.cameras.main.width, 'x', scene.cameras.main.height)
 
-    console.log('[InputSystem] Visible area dimensions:', visibleWidth, 'x', visibleHeight)
-    console.log('[InputSystem] Camera zoom:', scene.cameras.main.zoom)
-
-    // D-pad in bottom-left (handles its own positioning)
+    // D-pad in bottom-left (handles its own responsive positioning)
     this.dpad = new VirtualDPad(scene)
 
-    // Action button (A) in bottom-right (uses default positioning)
-    this.actionButton = new ActionButton(scene, { label: 'A' })
+    // Action button (A) in bottom-right - primary position
+    this.actionButton = new ActionButton(scene, { label: 'A', position: 'primary' })
 
-    // Calculate bottom-right position for reference
-    const bottomRightX = visibleWidth - buttonPadding - buttonRadius
-    const bottomRightY = visibleHeight - buttonPadding - buttonRadius
+    // Menu button (☰) above action button - secondary position
+    this.menuButton = new ActionButton(scene, { label: '☰', position: 'secondary' })
 
-    // Menu button (☰) positioned above action button
-    this.menuButton = new ActionButton(scene, {
-      label: '☰',
-      x: bottomRightX,
-      y: bottomRightY - buttonSpacing,
-    })
-
-    // Cancel button (X) positioned to the left of action button
-    this.cancelButton = new ActionButton(scene, {
-      label: 'X',
-      x: bottomRightX - buttonSpacing,
-      y: bottomRightY,
-    })
+    // Cancel button (X) left of action button - tertiary position
+    this.cancelButton = new ActionButton(scene, { label: 'X', position: 'tertiary' })
   }
 
   private isGameKey(code: string): boolean {
