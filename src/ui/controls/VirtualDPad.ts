@@ -121,22 +121,27 @@ export class VirtualDPad {
 
   private setupInput(): void {
     // Create a single hit area covering the entire D-pad
-    this.hitArea = this.scene.add.circle(0, 0, this.dpadRadius + 10, 0x000000, 0)
+    // Don't add to container - position it independently for reliable hit detection
+    this.hitArea = this.scene.add.circle(0, 0, this.dpadRadius + 15, 0x000000, 0)
+    this.hitArea.setDepth(DEPTH.UI + 101)
+    this.hitArea.setScrollFactor(0)
     this.hitArea.setInteractive({ useHandCursor: false })
-    this.container.add(this.hitArea)
+    // Note: hitArea position will be synced with container in updatePosition
 
-    this.hitArea.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+    this.hitArea.on('pointerdown', (pointer: Phaser.Input.Pointer, localX: number, localY: number) => {
+      console.log('[VirtualDPad] pointerdown at local:', localX, localY)
       this.activePointer = pointer
-      this.updateDirectionFromPointer(pointer)
+      this.updateDirectionFromLocal(localX, localY)
     })
 
-    this.hitArea.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+    this.hitArea.on('pointermove', (pointer: Phaser.Input.Pointer, localX: number, localY: number) => {
       if (this.activePointer === pointer && pointer.isDown) {
-        this.updateDirectionFromPointer(pointer)
+        this.updateDirectionFromLocal(localX, localY)
       }
     })
 
     this.hitArea.on('pointerup', () => {
+      console.log('[VirtualDPad] pointerup')
       this.activePointer = null
       this.resetState()
     })
@@ -158,29 +163,24 @@ export class VirtualDPad {
   private updateHitArea(): void {
     const hitRadius = this.dpadRadius + 15
     this.hitArea.setRadius(hitRadius)
-    // Update the interactive hit area
-    this.hitArea.input?.hitArea.setTo(0, 0, hitRadius)
+
+    // Position hit area at the same location as container
+    this.hitArea.setPosition(this.container.x, this.container.y)
+
+    // Update the interactive hit area geometry
+    if (this.hitArea.input) {
+      this.hitArea.input.hitArea.setTo(0, 0, hitRadius)
+    }
   }
 
-  private updateDirectionFromPointer(pointer: Phaser.Input.Pointer): void {
-    // Get the container's world position
-    const containerX = this.container.x
-    const containerY = this.container.y
+  private updateDirectionFromLocal(localX: number, localY: number): void {
+    // localX/localY are coordinates relative to the hit area center (0,0)
+    // The hit area is centered on the D-pad, so these give us the offset from center
+    const hitRadius = this.dpadRadius + 15
 
-    // Calculate pointer position relative to container center
-    // pointer.x/y are in game coordinates, container.x/y are in canvas coordinates
-    // For scrollFactor(0) containers, we need to account for camera
-    const camera = this.scene.cameras.main
-
-    // Convert pointer world position to canvas position
-    const pointerCanvasX = pointer.x * camera.zoom + (this.scene.scale.width - this.scene.scale.width / camera.zoom * camera.zoom) / 2
-    const pointerCanvasY = pointer.y * camera.zoom + (this.scene.scale.height - this.scene.scale.height / camera.zoom * camera.zoom) / 2
-
-    // Actually, for interactive objects in a container with scrollFactor(0),
-    // the pointer coordinates should work relative to the game canvas
-    // Let's use a simpler approach - get local coordinates
-    const dx = pointer.x - containerX
-    const dy = pointer.y - containerY
+    // Convert from hit area local coords (where 0,0 is top-left) to center-relative
+    const dx = localX - hitRadius
+    const dy = localY - hitRadius
 
     // Determine direction based on position relative to center
     const newState: DPadState = {
@@ -244,6 +244,13 @@ export class VirtualDPad {
 
   setVisible(visible: boolean): void {
     this.container.setVisible(visible)
+    this.hitArea.setVisible(visible)
+    // Also enable/disable input
+    if (visible) {
+      this.hitArea.setInteractive()
+    } else {
+      this.hitArea.disableInteractive()
+    }
   }
 
   setAlpha(alpha: number): void {
@@ -253,6 +260,7 @@ export class VirtualDPad {
   destroy(): void {
     this.scene.scale.off('resize', this.updatePosition, this)
     this.scene.input.off('pointerup')
+    this.hitArea.destroy()
     this.container.destroy()
   }
 }
