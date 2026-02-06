@@ -392,3 +392,58 @@ export const QuestProgressSchema = z.object({
   acceptedAt: z.string(),
   completedAt: z.string().nullable(),
 })
+
+// ── Save Game Validation (Permissive) ──
+// These schemas validate the essential structure of save data
+// while being permissive about nested object details to handle
+// version migrations gracefully.
+
+export const SaveGameSchema = z.object({
+  version: z.string().min(1),
+  timestamp: z.string().min(1),
+  player: z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+    level: z.number().int().min(1),
+    experience: z.number().int().min(0),
+    experienceToNextLevel: z.number().int().min(1),
+    stats: CharacterStatsSchema,
+    equipment: z.object({
+      weapon: z.any().nullable(),
+      armor: z.any().nullable(),
+      helmet: z.any().nullable(),
+      accessory: z.any().nullable(),
+    }),
+    position: PositionSchema,
+    currentAreaId: z.string().min(1),
+    gold: z.number().int().min(0),
+  }),
+  inventory: z.object({
+    items: z.array(z.object({
+      item: z.any(),
+      quantity: z.number().int().min(1),
+    })),
+    maxSlots: z.number().int().min(1),
+    equipment: z.array(z.any()),
+  }),
+  squad: z.array(z.object({
+    instanceId: z.string().min(1),
+    speciesId: z.string().min(1),
+    level: z.number().int().min(1),
+  }).passthrough()),
+  monsterStorage: z.array(z.object({
+    instanceId: z.string().min(1),
+    speciesId: z.string().min(1),
+    level: z.number().int().min(1),
+  }).passthrough()),
+  discoveredSpecies: z.array(z.string()),
+  visitedAreas: z.array(z.string()),
+  defeatedBosses: z.array(z.string()),
+  openedChests: z.array(z.string()),
+  currentAreaId: z.string().min(1),
+  questFlags: z.record(z.string(), z.boolean()),
+  playTime: z.number().int().min(0),
+  settings: GameSettingsSchema,
+  activeQuests: z.array(QuestProgressSchema),
+  completedQuestIds: z.array(z.string()),
+})

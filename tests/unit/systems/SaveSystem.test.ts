@@ -29,6 +29,10 @@ import {
   gameStateFromSave,
   formatPlayTime,
   formatTimestamp,
+  validateSaveData,
+  exportSaveToJson,
+  importSaveFromJson,
+  importSaveToSlot,
 } from '../../../src/systems/SaveSystem'
 import type { GameState } from '../../../src/systems/GameStateManager'
 import type { GameSettings, SaveGame } from '../../../src/models/types'
@@ -241,6 +245,119 @@ describe('SaveSystem', () => {
 
     it('should return Unknown for invalid timestamp', () => {
       expect(formatTimestamp('invalid')).toBe('Unknown')
+    })
+  })
+
+  describe('validateSaveData', () => {
+    it('should validate a correct save game', () => {
+      const save = createSaveGame(mockGameState, mockSettings, 1800)
+      const result = validateSaveData(save)
+
+      expect(result.valid).toBe(true)
+      expect(result.save).toBeDefined()
+      expect(result.error).toBeUndefined()
+    })
+
+    it('should reject invalid save data', () => {
+      const invalidSave = { foo: 'bar' }
+      const result = validateSaveData(invalidSave)
+
+      expect(result.valid).toBe(false)
+      expect(result.error).toBeDefined()
+      expect(result.save).toBeUndefined()
+    })
+
+    it('should reject save with missing required fields', () => {
+      const incompleteSave = {
+        version: '1.0.0',
+        timestamp: new Date().toISOString(),
+        // Missing player, inventory, etc.
+      }
+      const result = validateSaveData(incompleteSave)
+
+      expect(result.valid).toBe(false)
+      expect(result.error).toBeDefined()
+    })
+  })
+
+  describe('exportSaveToJson', () => {
+    it('should export a save to JSON string', () => {
+      const save = createSaveGame(mockGameState, mockSettings, 3600)
+      saveGame(0, save)
+
+      const json = exportSaveToJson(0)
+
+      expect(json).not.toBeNull()
+      expect(typeof json).toBe('string')
+
+      const parsed = JSON.parse(json!)
+      expect(parsed.magic).toBe('MQRPG_SAVE')
+      expect(parsed.version).toBe('1.0.0')
+      expect(parsed.data.player.name).toBe('TestHero')
+    })
+
+    it('should return null for empty slot', () => {
+      const json = exportSaveToJson(1)
+      expect(json).toBeNull()
+    })
+  })
+
+  describe('importSaveFromJson', () => {
+    it('should import a valid exported save', () => {
+      const save = createSaveGame(mockGameState, mockSettings, 3600)
+      saveGame(0, save)
+
+      const json = exportSaveToJson(0)!
+      const result = importSaveFromJson(json)
+
+      expect(result.success).toBe(true)
+      expect(result.save).toBeDefined()
+      expect(result.save?.player.name).toBe('TestHero')
+    })
+
+    it('should reject invalid JSON', () => {
+      const result = importSaveFromJson('not valid json')
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('Invalid JSON format')
+    })
+
+    it('should reject invalid save structure', () => {
+      const result = importSaveFromJson('{"foo": "bar"}')
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBeDefined()
+    })
+
+    it('should import raw save data (backwards compatibility)', () => {
+      const save = createSaveGame(mockGameState, mockSettings, 1800)
+      const rawJson = JSON.stringify(save)
+
+      const result = importSaveFromJson(rawJson)
+
+      expect(result.success).toBe(true)
+      expect(result.save?.player.name).toBe('TestHero')
+    })
+  })
+
+  describe('importSaveToSlot', () => {
+    it('should import save to specified slot', () => {
+      const save = createSaveGame(mockGameState, mockSettings, 1800)
+
+      const result = importSaveToSlot(1, save)
+
+      expect(result).toBe(true)
+
+      const loaded = loadSaveGame(1)
+      expect(loaded).not.toBeNull()
+      expect(loaded?.player.name).toBe('TestHero')
+    })
+
+    it('should reject invalid slot', () => {
+      const save = createSaveGame(mockGameState, mockSettings, 1800)
+
+      expect(importSaveToSlot(-1, save)).toBe(false)
+      expect(importSaveToSlot(10, save)).toBe(false)
     })
   })
 })

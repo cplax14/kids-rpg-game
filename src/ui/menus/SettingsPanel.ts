@@ -15,9 +15,16 @@ import {
   getDefaultSettings,
 } from '../../systems/SettingsManager'
 import { playSfx, SFX_KEYS } from '../../systems/AudioSystem'
+import {
+  downloadSave,
+  readFileAsText,
+  importSaveFromJson,
+  importSaveToSlot,
+  getAllSaveSlotInfo,
+} from '../../systems/SaveSystem'
 
 const PANEL_WIDTH = 560
-const PANEL_HEIGHT = 420
+const PANEL_HEIGHT = 520
 
 export class SettingsPanel {
   private scene: Phaser.Scene
@@ -39,6 +46,7 @@ export class SettingsPanel {
     this.createBackground()
     this.createAudioSection()
     this.createGameplaySection()
+    this.createDataSection()
     this.createFooter()
   }
 
@@ -216,6 +224,321 @@ export class SettingsPanel {
     this.toggleContainer.add(hitArea)
   }
 
+  private createDataSection(): void {
+    this.createSectionHeader(400, '💾 Save Data')
+
+    // Export Save button
+    const exportBtnX = 25
+    const exportBtnY = 440
+
+    const exportBg = this.scene.add.graphics()
+    exportBg.fillStyle(COLORS.PRIMARY, 0.4)
+    exportBg.fillRoundedRect(exportBtnX, exportBtnY, 160, 36, 8)
+    this.container.add(exportBg)
+
+    const exportText = this.scene.add.text(exportBtnX + 80, exportBtnY + 18, '📥 Export Save', {
+      ...TEXT_STYLES.BODY,
+      fontSize: '13px',
+    })
+    exportText.setOrigin(0.5)
+    this.container.add(exportText)
+
+    const exportHitArea = this.scene.add.rectangle(exportBtnX + 80, exportBtnY + 18, 160, 36)
+    exportHitArea.setInteractive({ useHandCursor: true })
+    exportHitArea.on('pointerover', () => {
+      exportBg.clear()
+      exportBg.fillStyle(COLORS.PRIMARY, 0.7)
+      exportBg.fillRoundedRect(exportBtnX, exportBtnY, 160, 36, 8)
+    })
+    exportHitArea.on('pointerout', () => {
+      exportBg.clear()
+      exportBg.fillStyle(COLORS.PRIMARY, 0.4)
+      exportBg.fillRoundedRect(exportBtnX, exportBtnY, 160, 36, 8)
+    })
+    exportHitArea.on('pointerdown', () => {
+      this.showExportDialog()
+    })
+    this.container.add(exportHitArea)
+
+    // Import Save button
+    const importBtnX = 200
+    const importBtnY = 440
+
+    const importBg = this.scene.add.graphics()
+    importBg.fillStyle(COLORS.SECONDARY, 0.4)
+    importBg.fillRoundedRect(importBtnX, importBtnY, 160, 36, 8)
+    this.container.add(importBg)
+
+    const importText = this.scene.add.text(importBtnX + 80, importBtnY + 18, '📤 Import Save', {
+      ...TEXT_STYLES.BODY,
+      fontSize: '13px',
+    })
+    importText.setOrigin(0.5)
+    this.container.add(importText)
+
+    const importHitArea = this.scene.add.rectangle(importBtnX + 80, importBtnY + 18, 160, 36)
+    importHitArea.setInteractive({ useHandCursor: true })
+    importHitArea.on('pointerover', () => {
+      importBg.clear()
+      importBg.fillStyle(COLORS.SECONDARY, 0.7)
+      importBg.fillRoundedRect(importBtnX, importBtnY, 160, 36, 8)
+    })
+    importHitArea.on('pointerout', () => {
+      importBg.clear()
+      importBg.fillStyle(COLORS.SECONDARY, 0.4)
+      importBg.fillRoundedRect(importBtnX, importBtnY, 160, 36, 8)
+    })
+    importHitArea.on('pointerdown', () => {
+      this.triggerFileImport()
+    })
+    this.container.add(importHitArea)
+
+    // Hidden file input
+    this.createFileInput()
+  }
+
+  private createFileInput(): void {
+    // Create a hidden file input element for importing saves
+    const existingInput = document.getElementById('save-import-input')
+    if (existingInput) {
+      existingInput.remove()
+    }
+
+    const fileInput = document.createElement('input')
+    fileInput.type = 'file'
+    fileInput.id = 'save-import-input'
+    fileInput.accept = '.json'
+    fileInput.style.display = 'none'
+
+    fileInput.addEventListener('change', async (event) => {
+      const target = event.target as HTMLInputElement
+      const file = target.files?.[0]
+      if (!file) return
+
+      try {
+        const json = await readFileAsText(file)
+        const result = importSaveFromJson(json)
+
+        if (!result.success || !result.save) {
+          this.showNotification(result.error ?? 'Import failed', '#ef5350')
+          return
+        }
+
+        // Show slot selection for import
+        this.showImportSlotDialog(result.save)
+      } catch {
+        this.showNotification('Failed to read file', '#ef5350')
+      }
+
+      // Reset input for next use
+      target.value = ''
+    })
+
+    document.body.appendChild(fileInput)
+  }
+
+  private triggerFileImport(): void {
+    playSfx(SFX_KEYS.MENU_SELECT)
+    const fileInput = document.getElementById('save-import-input') as HTMLInputElement
+    if (fileInput) {
+      fileInput.click()
+    }
+  }
+
+  private showExportDialog(): void {
+    playSfx(SFX_KEYS.MENU_SELECT)
+
+    const slots = getAllSaveSlotInfo()
+    const occupiedSlots = slots
+      .map((s, i) => ({ info: s, index: i }))
+      .filter((s) => s.info.exists)
+
+    if (occupiedSlots.length === 0) {
+      this.showNotification('No saves to export', '#ffa726')
+      return
+    }
+
+    // Create slot selection overlay
+    const overlay = this.scene.add.container(PANEL_WIDTH / 2 - 150, 150)
+    overlay.setDepth(DEPTH.OVERLAY + 10)
+    this.container.add(overlay)
+
+    // Background
+    const bg = this.scene.add.graphics()
+    bg.fillStyle(COLORS.DARK_BG, 0.98)
+    bg.fillRoundedRect(0, 0, 300, 200, 12)
+    bg.lineStyle(2, COLORS.PRIMARY)
+    bg.strokeRoundedRect(0, 0, 300, 200, 12)
+    overlay.add(bg)
+
+    // Title
+    const title = this.scene.add.text(150, 20, 'Export Save', {
+      ...TEXT_STYLES.HEADING,
+      fontSize: '18px',
+    })
+    title.setOrigin(0.5)
+    overlay.add(title)
+
+    // Slot buttons
+    occupiedSlots.forEach((slot, idx) => {
+      const btnY = 55 + idx * 45
+      const btnBg = this.scene.add.graphics()
+      btnBg.fillStyle(COLORS.PRIMARY, 0.3)
+      btnBg.fillRoundedRect(20, btnY, 260, 38, 8)
+      overlay.add(btnBg)
+
+      const slotText = this.scene.add.text(
+        30,
+        btnY + 10,
+        `Slot ${slot.index + 1}: ${slot.info.playerName} (Lv.${slot.info.level})`,
+        {
+          ...TEXT_STYLES.BODY,
+          fontSize: '14px',
+        },
+      )
+      overlay.add(slotText)
+
+      const hitArea = this.scene.add.rectangle(150, btnY + 19, 260, 38)
+      hitArea.setInteractive({ useHandCursor: true })
+      hitArea.on('pointerover', () => {
+        btnBg.clear()
+        btnBg.fillStyle(COLORS.PRIMARY, 0.6)
+        btnBg.fillRoundedRect(20, btnY, 260, 38, 8)
+      })
+      hitArea.on('pointerout', () => {
+        btnBg.clear()
+        btnBg.fillStyle(COLORS.PRIMARY, 0.3)
+        btnBg.fillRoundedRect(20, btnY, 260, 38, 8)
+      })
+      hitArea.on('pointerdown', () => {
+        playSfx(SFX_KEYS.MENU_CONFIRM)
+        const success = downloadSave(slot.index)
+        overlay.destroy()
+        if (success) {
+          this.showNotification('Save exported!', '#66bb6a')
+        } else {
+          this.showNotification('Export failed', '#ef5350')
+        }
+      })
+      overlay.add(hitArea)
+    })
+
+    // Cancel button
+    const cancelBtn = this.scene.add.text(150, 170, 'Cancel', {
+      ...TEXT_STYLES.BODY,
+      fontSize: '14px',
+      color: '#b0bec5',
+    })
+    cancelBtn.setOrigin(0.5)
+    cancelBtn.setInteractive({ useHandCursor: true })
+    cancelBtn.on('pointerover', () => cancelBtn.setColor('#ffffff'))
+    cancelBtn.on('pointerout', () => cancelBtn.setColor('#b0bec5'))
+    cancelBtn.on('pointerdown', () => {
+      playSfx(SFX_KEYS.MENU_SELECT)
+      overlay.destroy()
+    })
+    overlay.add(cancelBtn)
+  }
+
+  private showImportSlotDialog(save: import('../../models/types').SaveGame): void {
+    const slots = getAllSaveSlotInfo()
+
+    // Create slot selection overlay
+    const overlay = this.scene.add.container(PANEL_WIDTH / 2 - 150, 120)
+    overlay.setDepth(DEPTH.OVERLAY + 10)
+    this.container.add(overlay)
+
+    // Background
+    const bg = this.scene.add.graphics()
+    bg.fillStyle(COLORS.DARK_BG, 0.98)
+    bg.fillRoundedRect(0, 0, 300, 260, 12)
+    bg.lineStyle(2, COLORS.SECONDARY)
+    bg.strokeRoundedRect(0, 0, 300, 260, 12)
+    overlay.add(bg)
+
+    // Title
+    const title = this.scene.add.text(150, 20, 'Import to Slot', {
+      ...TEXT_STYLES.HEADING,
+      fontSize: '18px',
+    })
+    title.setOrigin(0.5)
+    overlay.add(title)
+
+    // Import info
+    const infoText = this.scene.add.text(
+      150,
+      50,
+      `${save.player.name} (Lv.${save.player.level})`,
+      {
+        ...TEXT_STYLES.BODY,
+        fontSize: '13px',
+        color: '#ffd54f',
+      },
+    )
+    infoText.setOrigin(0.5)
+    overlay.add(infoText)
+
+    // Slot buttons
+    slots.forEach((slotInfo, idx) => {
+      const btnY = 80 + idx * 50
+      const btnBg = this.scene.add.graphics()
+      btnBg.fillStyle(slotInfo.exists ? COLORS.WARNING : COLORS.SECONDARY, 0.3)
+      btnBg.fillRoundedRect(20, btnY, 260, 42, 8)
+      overlay.add(btnBg)
+
+      const label = slotInfo.exists
+        ? `Slot ${idx + 1}: ${slotInfo.playerName} (Overwrite)`
+        : `Slot ${idx + 1}: Empty`
+
+      const slotText = this.scene.add.text(30, btnY + 12, label, {
+        ...TEXT_STYLES.BODY,
+        fontSize: '14px',
+        color: slotInfo.exists ? '#ffa726' : '#ffffff',
+      })
+      overlay.add(slotText)
+
+      const hitArea = this.scene.add.rectangle(150, btnY + 21, 260, 42)
+      hitArea.setInteractive({ useHandCursor: true })
+      hitArea.on('pointerover', () => {
+        btnBg.clear()
+        btnBg.fillStyle(slotInfo.exists ? COLORS.WARNING : COLORS.SECONDARY, 0.6)
+        btnBg.fillRoundedRect(20, btnY, 260, 42, 8)
+      })
+      hitArea.on('pointerout', () => {
+        btnBg.clear()
+        btnBg.fillStyle(slotInfo.exists ? COLORS.WARNING : COLORS.SECONDARY, 0.3)
+        btnBg.fillRoundedRect(20, btnY, 260, 42, 8)
+      })
+      hitArea.on('pointerdown', () => {
+        playSfx(SFX_KEYS.MENU_CONFIRM)
+        const success = importSaveToSlot(idx, save)
+        overlay.destroy()
+        if (success) {
+          this.showNotification('Save imported!', '#66bb6a')
+        } else {
+          this.showNotification('Import failed', '#ef5350')
+        }
+      })
+      overlay.add(hitArea)
+    })
+
+    // Cancel button
+    const cancelBtn = this.scene.add.text(150, 235, 'Cancel', {
+      ...TEXT_STYLES.BODY,
+      fontSize: '14px',
+      color: '#b0bec5',
+    })
+    cancelBtn.setOrigin(0.5)
+    cancelBtn.setInteractive({ useHandCursor: true })
+    cancelBtn.on('pointerover', () => cancelBtn.setColor('#ffffff'))
+    cancelBtn.on('pointerout', () => cancelBtn.setColor('#b0bec5'))
+    cancelBtn.on('pointerdown', () => {
+      playSfx(SFX_KEYS.MENU_SELECT)
+      overlay.destroy()
+    })
+    overlay.add(cancelBtn)
+  }
+
   private drawTextSpeedButton(container: Phaser.GameObjects.Container, isActive: boolean): void {
     const bg = container.getData('bg') as Phaser.GameObjects.Graphics
     const text = container.getData('text') as Phaser.GameObjects.Text
@@ -364,7 +687,7 @@ export class SettingsPanel {
   }
 
   private showNotification(message: string, color: string): void {
-    const text = this.scene.add.text(PANEL_WIDTH / 2, PANEL_HEIGHT - 90, message, {
+    const text = this.scene.add.text(PANEL_WIDTH / 2, PANEL_HEIGHT - 70, message, {
       ...TEXT_STYLES.BODY,
       fontSize: '15px',
       color,
@@ -391,5 +714,11 @@ export class SettingsPanel {
     this.musicSlider?.destroy()
     this.sfxSlider?.destroy()
     this.container.destroy()
+
+    // Clean up file input
+    const fileInput = document.getElementById('save-import-input')
+    if (fileInput) {
+      fileInput.remove()
+    }
   }
 }
