@@ -124,6 +124,7 @@ export class WorldScene extends Phaser.Scene {
   private nearbyInteractable: Interactable | null = null
   private transitionZones: Phaser.GameObjects.Zone[] = []
   private transitionInProgress: boolean = false
+  private bossEncounterInProgress: boolean = false
   private proceduralMapGraphics: Phaser.GameObjects.Graphics | null = null
   private playTime: number = 0
   private playTimeStart: number = 0
@@ -157,8 +158,9 @@ export class WorldScene extends Phaser.Scene {
     // Load game data into systems
     this.loadGameData()
 
-    // Give starter content to new players
-    if (isNewGame) {
+    // Give starter content only when explicitly starting a new game
+    // (not when loading a save - data.newGame is false when loading)
+    if (data.newGame) {
       this.giveStarterContent()
     }
 
@@ -751,6 +753,11 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private triggerBossEncounter(boss: BossDefinition): void {
+    // Prevent multiple triggers (overlap callback fires every frame)
+    if (this.bossEncounterInProgress) {
+      return
+    }
+
     const gameState = getGameState(this)
 
     // Check if already defeated
@@ -758,6 +765,7 @@ export class WorldScene extends Phaser.Scene {
       return
     }
 
+    this.bossEncounterInProgress = true
     this.inputSystem.setEnabled(false)
     this.player.update({
       up: false,
@@ -772,6 +780,7 @@ export class WorldScene extends Phaser.Scene {
     // Create boss encounter
     const encounter = createBossEncounter(boss.bossId)
     if (!encounter) {
+      this.bossEncounterInProgress = false
       this.inputSystem.setEnabled(true)
       return
     }
@@ -817,6 +826,7 @@ export class WorldScene extends Phaser.Scene {
             enemySpeciesIds: [encounter.speciesId],
             isBossBattle: true,
             bossData: boss,
+            playerPosition: this.player.getPosition(),
           })
         })
       })
@@ -1130,6 +1140,7 @@ export class WorldScene extends Phaser.Scene {
           playerCombatants: [playerCombatant, ...squadCombatants],
           enemyCombatants: encounter.combatants,
           enemySpeciesIds: encounter.speciesIds,
+          playerPosition: this.player.getPosition(),
         })
       })
     })

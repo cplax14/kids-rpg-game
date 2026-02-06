@@ -288,7 +288,11 @@ export class BattleHUD {
 
   updatePlayerStats(combatants: ReadonlyArray<BattleCombatant>): void {
     this.elements.playerPanel.removeAll(true)
-    this.buildStatPanel(this.elements.playerPanel, combatants, GAME_WIDTH - 320, GAME_HEIGHT - 160)
+    // Dynamically calculate Y position so panel always fits on screen
+    // Each entry is 50px, plus 10px padding, plus 10px margin from bottom
+    const panelHeight = combatants.length * 50 + 10
+    const startY = GAME_HEIGHT - panelHeight - 10
+    this.buildStatPanel(this.elements.playerPanel, combatants, GAME_WIDTH - 320, startY)
   }
 
   updateEnemyStats(combatants: ReadonlyArray<BattleCombatant>): void {

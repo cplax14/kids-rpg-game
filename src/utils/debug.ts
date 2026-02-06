@@ -4,6 +4,12 @@
  */
 
 import type { GameState } from '../systems/GameStateManager'
+import {
+  addExperience,
+  calculateStatsForLevel,
+  getXpToNextLevel,
+  getXpForLevel,
+} from '../systems/CharacterSystem'
 
 // Will be set by WorldScene when it initializes
 let gameSceneRef: Phaser.Scene | null = null
@@ -26,16 +32,32 @@ export function initDebug(
         console.error('Debug: Game not initialized')
         return
       }
+      const targetLevel = Math.max(1, Math.min(100, level))
       const state = getGameStateFn(gameSceneRef)
+      const newStats = calculateStatsForLevel(targetLevel)
+
+      // Set experience to match the level (at the start of that level)
+      const experience = getXpForLevel(targetLevel)
+      const experienceToNextLevel = getXpToNextLevel(targetLevel)
+
       const newState: GameState = {
         ...state,
         player: {
           ...state.player,
-          level: Math.max(1, Math.min(100, level)),
+          level: targetLevel,
+          experience,
+          experienceToNextLevel,
+          stats: {
+            ...newStats,
+            currentHp: newStats.maxHp,
+            currentMp: newStats.maxMp,
+          },
         },
       }
       setGameStateFn(gameSceneRef, newState)
-      console.log(`Debug: Player level set to ${level}`)
+      console.log(
+        `Debug: Player level set to ${targetLevel} (XP: ${experience}/${experienceToNextLevel})`,
+      )
     },
 
     addGold: (amount: number) => {
@@ -61,15 +83,18 @@ export function initDebug(
         return
       }
       const state = getGameStateFn(gameSceneRef)
+      // Use the proper addExperience function which handles level-ups
+      const updatedPlayer = addExperience(state.player, amount)
       const newState: GameState = {
         ...state,
-        player: {
-          ...state.player,
-          experience: state.player.experience + amount,
-        },
+        player: updatedPlayer,
       }
       setGameStateFn(gameSceneRef, newState)
-      console.log(`Debug: Added ${amount} XP. Total: ${newState.player.experience}`)
+      const leveledUp = updatedPlayer.level > state.player.level
+      console.log(
+        `Debug: Added ${amount} XP. Total: ${updatedPlayer.experience}/${updatedPlayer.experienceToNextLevel}` +
+          (leveledUp ? ` (Leveled up to ${updatedPlayer.level}!)` : ''),
+      )
     },
 
     getState: () => {
@@ -129,12 +154,54 @@ export function initDebug(
       console.log('Debug: All party members healed')
     },
 
+    fixLevel: () => {
+      if (!gameSceneRef || !getGameStateFn || !setGameStateFn) {
+        console.error('Debug: Game not initialized')
+        return
+      }
+      const state = getGameStateFn(gameSceneRef)
+      const currentXp = state.player.experience
+
+      // Calculate the correct level based on accumulated XP
+      let correctLevel = 1
+      while (correctLevel < 100 && currentXp >= getXpForLevel(correctLevel + 1)) {
+        correctLevel++
+      }
+
+      const newStats = calculateStatsForLevel(correctLevel)
+      const experienceToNextLevel = getXpToNextLevel(correctLevel)
+
+      // Preserve HP/MP ratios
+      const hpRatio = state.player.stats.currentHp / state.player.stats.maxHp
+      const mpRatio =
+        state.player.stats.maxMp > 0 ? state.player.stats.currentMp / state.player.stats.maxMp : 1
+
+      const newState: GameState = {
+        ...state,
+        player: {
+          ...state.player,
+          level: correctLevel,
+          experienceToNextLevel,
+          stats: {
+            ...newStats,
+            currentHp: Math.ceil(newStats.maxHp * hpRatio),
+            currentMp: Math.ceil(newStats.maxMp * mpRatio),
+          },
+        },
+      }
+      setGameStateFn(gameSceneRef, newState)
+      console.log(
+        `Debug: Fixed level to ${correctLevel} based on ${currentXp} XP (next level at ${experienceToNextLevel})`,
+      )
+    },
+
     help: () => {
       console.log(`
 Debug Commands:
-  debug.setLevel(n)    - Set player level (1-100)
+  debug.setLevel(n)    - Set player level (1-100) with correct stats
   debug.addGold(n)     - Add gold
-  debug.addXp(n)       - Add experience points
+  debug.addXp(n)       - Add experience points (triggers level-up)
+  debug.fixLevel()     - Fix level based on current XP (use if XP > 100%)
   debug.healAll()      - Heal all party members
   debug.teleport(id)   - Teleport to area
   debug.listAreas()    - List available areas

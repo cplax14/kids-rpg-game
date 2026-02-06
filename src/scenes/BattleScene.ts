@@ -51,6 +51,7 @@ interface BattleSceneData {
   readonly enemySpeciesIds?: ReadonlyArray<string>
   readonly isBossBattle?: boolean
   readonly bossData?: BossDefinition
+  readonly playerPosition?: { x: number; y: number }
 }
 
 type BattlePhase = 'intro' | 'player_input' | 'executing' | 'enemy_turn' | 'victory' | 'defeat' | 'fled'
@@ -67,6 +68,7 @@ export class BattleScene extends Phaser.Scene {
   private currentTurnIndex: number = 0
   private isBossBattle: boolean = false
   private bossData: BossDefinition | null = null
+  private playerPosition: { x: number; y: number } | null = null
 
   constructor() {
     super({ key: SCENE_KEYS.BATTLE })
@@ -77,6 +79,7 @@ export class BattleScene extends Phaser.Scene {
     this.phase = 'intro'
     this.isBossBattle = data.isBossBattle ?? false
     this.bossData = data.bossData ?? null
+    this.playerPosition = data.playerPosition ?? null
 
     // Initialize audio system
     initAudioSystem(this)
@@ -867,6 +870,7 @@ export class BattleScene extends Phaser.Scene {
               battleResult: 'victory',
               rewards,
               loot,
+              spawnPosition: this.playerPosition ?? undefined,
               bossDefeated: this.bossData!.bossId,
               bossRewards: {
                 experience: this.bossData!.rewards.experience,
@@ -881,6 +885,7 @@ export class BattleScene extends Phaser.Scene {
               battleResult: 'victory',
               rewards,
               loot,
+              spawnPosition: this.playerPosition ?? undefined,
             })
           }
         })
@@ -918,7 +923,11 @@ export class BattleScene extends Phaser.Scene {
         this.cameras.main.fadeOut(300)
         this.cameras.main.once('camerafadeoutcomplete', () => {
           this.cleanUp()
-          this.scene.start(SCENE_KEYS.WORLD, { newGame: false, battleResult: 'fled' })
+          this.scene.start(SCENE_KEYS.WORLD, {
+            newGame: false,
+            battleResult: 'fled',
+            spawnPosition: this.playerPosition ?? undefined,
+          })
         })
       })
     })
@@ -968,5 +977,6 @@ export class BattleScene extends Phaser.Scene {
     this.currentTurnIndex = 0
     this.isBossBattle = false
     this.bossData = null
+    this.playerPosition = null
   }
 }

@@ -114,8 +114,8 @@ export class Player {
   }
 
   private updateSpriteFlip(): void {
-    // Left direction uses same frames as right but flipped horizontally
-    // Right direction should not be flipped
-    this.sprite.setFlipX(this.direction === 'left')
+    // The side-facing sprite faces LEFT by default
+    // Flip horizontally when moving RIGHT to face the correct direction
+    this.sprite.setFlipX(this.direction === 'right')
   }
 }

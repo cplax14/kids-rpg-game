@@ -140,22 +140,24 @@ export class PreloaderScene extends Phaser.Scene {
 
   private createRealPlayerAnimations(): void {
     // Characters sheet is 192x128 (12x8 grid of 16x16 sprites)
-    // Tiny 16 Basic layout: Each row has different character types
-    // We'll use the first character (knight/hero) - frames in row 0-1
-    // Frame layout for hero character:
-    // Row 0: Down facing (frames 0-2), Right facing (frames 3-5)
-    // Row 1: Up facing (frames 6-8), Left facing (frames 9-11) - adjusted for sheet
+    // Layout: 4 characters per row, each character uses 3 columns for walk cycle
+    // Row 0: Front-facing (down direction) for all characters
+    // Row 1: Side-facing (facing LEFT) for all characters
+    // Row 2: Small creatures (not character sprites)
+    // Row 3: Back-facing (up direction) for all characters
+    //
+    // First character (knight/hero) is in columns 0-2:
+    // - Down/Front: row 0, cols 0-2 → frames 0, 1, 2
+    // - Side (facing left): row 1, cols 0-2 → frames 12, 13, 14
+    // - Up/Back: row 3, cols 0-2 → frames 36, 37, 38
 
-    // For Tiny 16 Basic, characters are arranged:
-    // Columns 0-2: Down walk cycle
-    // Columns 3-5: Side walk cycle (can flip for left/right)
-    // Columns 6-8: Up walk cycle
+    const COLS_PER_ROW = 12
 
     const frameMap = {
-      down: [0, 1, 2],      // First 3 frames - down facing
-      right: [3, 4, 5],     // Next 3 frames - side facing
-      left: [3, 4, 5],      // Same as right, we'll flip the sprite
-      up: [6, 7, 8],        // Up facing frames
+      down: [0, 1, 2],                                    // Row 0: Front-facing
+      left: [COLS_PER_ROW + 0, COLS_PER_ROW + 1, COLS_PER_ROW + 2],   // Row 1: Side (faces left, no flip)
+      right: [COLS_PER_ROW + 0, COLS_PER_ROW + 1, COLS_PER_ROW + 2],  // Row 1: Side (flip sprite to face right)
+      up: [COLS_PER_ROW * 3 + 0, COLS_PER_ROW * 3 + 1, COLS_PER_ROW * 3 + 2],  // Row 3: Back-facing (frames 36-38)
     } as const
 
     const directions = ['down', 'left', 'right', 'up'] as const
