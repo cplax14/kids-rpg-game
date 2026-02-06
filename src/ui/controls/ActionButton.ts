@@ -61,22 +61,21 @@ export class ActionButton {
   }
 
   private updatePosition(): void {
-    // Get the camera viewport
-    const camera = this.scene.cameras.main
-    const viewWidth = camera.width
-    const viewHeight = camera.height
+    // Get the game canvas dimensions (for scrollFactor(0) positioning)
+    const canvasWidth = this.scene.scale.width
+    const canvasHeight = this.scene.scale.height
 
-    // Calculate scale factor
-    const scaleFactor = Math.min(viewWidth / 640, viewHeight / 360)
+    // Calculate scale factor based on canvas size
+    const scaleFactor = Math.min(canvasWidth / 1280, canvasHeight / 720)
 
     // Scale button size (with min/max bounds)
     this.buttonRadius = Math.max(25, Math.min(35, BASE_BUTTON_RADIUS * scaleFactor))
     this.padding = Math.max(15, Math.min(25, BASE_PADDING * scaleFactor))
     this.spacing = Math.max(55, Math.min(80, BASE_SPACING * scaleFactor))
 
-    // Calculate base position (bottom-right)
-    const baseX = viewWidth - this.padding - this.buttonRadius
-    const baseY = viewHeight - this.padding - this.buttonRadius
+    // Calculate base position (bottom-right of canvas)
+    const baseX = canvasWidth - this.padding - this.buttonRadius
+    const baseY = canvasHeight - this.padding - this.buttonRadius
 
     // Position based on button role
     let x: number

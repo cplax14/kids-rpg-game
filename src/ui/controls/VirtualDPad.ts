@@ -66,23 +66,22 @@ export class VirtualDPad {
   }
 
   private updatePosition(): void {
-    // Get the camera viewport (this is what's actually visible)
-    const camera = this.scene.cameras.main
+    // Get the game canvas dimensions (for scrollFactor(0) positioning)
+    // Use scale.width/height which gives actual canvas size, not camera viewport
+    const canvasWidth = this.scene.scale.width
+    const canvasHeight = this.scene.scale.height
 
-    // Calculate scale factor based on smaller dimension for consistent sizing
-    const viewWidth = camera.width
-    const viewHeight = camera.height
-    const scaleFactor = Math.min(viewWidth / 640, viewHeight / 360)
+    // Calculate scale factor based on canvas size
+    const scaleFactor = Math.min(canvasWidth / 1280, canvasHeight / 720)
 
     // Scale the D-pad size (with min/max bounds)
     this.dpadRadius = Math.max(50, Math.min(80, BASE_DPAD_RADIUS * scaleFactor))
     this.buttonRadius = Math.max(18, Math.min(30, BASE_BUTTON_RADIUS * scaleFactor))
     this.padding = Math.max(15, Math.min(30, BASE_PADDING * scaleFactor))
 
-    // Position in bottom-left of the camera view
-    // Use camera scroll position for scrollFactor(0) elements
+    // Position in bottom-left of the canvas (scrollFactor(0) uses canvas coordinates)
     const x = this.padding + this.dpadRadius
-    const y = viewHeight - this.padding - this.dpadRadius
+    const y = canvasHeight - this.padding - this.dpadRadius
 
     this.container.setPosition(x, y)
 
