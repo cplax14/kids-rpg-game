@@ -97,24 +97,35 @@ export class InputSystem {
   }
 
   private initTouchControls(scene: Phaser.Scene): void {
-    this.dpad = new VirtualDPad(scene)
-    this.actionButton = new ActionButton(scene, { label: 'A' })
+    // Get the camera zoom to calculate visible area
+    // With zoom 2x, visible area is half the game dimensions
+    const zoom = scene.cameras.main.zoom || 1
+    const visibleWidth = scene.scale.width / zoom
+    const visibleHeight = scene.scale.height / zoom
+
+    console.log('[InputSystem] Camera zoom:', zoom)
+    console.log('[InputSystem] Visible area:', visibleWidth, 'x', visibleHeight)
+
+    this.dpad = new VirtualDPad(scene, zoom)
+    this.actionButton = new ActionButton(scene, { label: 'A', zoom })
 
     // Menu button positioned above action button
-    const padding = 40
-    const buttonSize = 70
-    const gap = 20
+    const padding = 20 / zoom
+    const buttonSize = 35 / zoom
+    const gap = 10 / zoom
     this.menuButton = new ActionButton(scene, {
       label: '☰',
-      x: scene.scale.width - padding - buttonSize / 2,
-      y: scene.scale.height - padding - buttonSize - gap - buttonSize / 2,
+      x: visibleWidth - padding - buttonSize / 2,
+      y: visibleHeight - padding - buttonSize - gap - buttonSize / 2,
+      zoom,
     })
 
     // Cancel button positioned to the left of action button
     this.cancelButton = new ActionButton(scene, {
       label: 'X',
-      x: scene.scale.width - padding - buttonSize - gap - buttonSize / 2,
-      y: scene.scale.height - padding - buttonSize / 2,
+      x: visibleWidth - padding - buttonSize - gap - buttonSize / 2,
+      y: visibleHeight - padding - buttonSize / 2,
+      zoom,
     })
   }
 

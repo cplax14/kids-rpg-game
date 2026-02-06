@@ -1,12 +1,14 @@
 import Phaser from 'phaser'
 import { DEPTH, COLORS, TEXT_STYLES } from '../../config'
 
-const BUTTON_SIZE = 70
+// Base button size (will be adjusted for zoom)
+const BASE_BUTTON_SIZE = 35
 
 export interface ActionButtonConfig {
   readonly label?: string
   readonly x?: number
   readonly y?: number
+  readonly zoom?: number
 }
 
 /**
@@ -20,6 +22,7 @@ export class ActionButton {
   private isPressed: boolean = false
   private justPressed: boolean = false
   private label: string
+  private buttonSize: number
 
   constructor(scene: Phaser.Scene, config: ActionButtonConfig | string = 'A') {
     this.scene = scene
@@ -27,16 +30,23 @@ export class ActionButton {
     // Handle both old signature (string) and new signature (config)
     if (typeof config === 'string') {
       this.label = config
+      this.buttonSize = BASE_BUTTON_SIZE
       // Default position in bottom-right with padding
-      const padding = 40
-      const x = scene.scale.width - padding - BUTTON_SIZE / 2
-      const y = scene.scale.height - padding - BUTTON_SIZE / 2
+      const padding = 20
+      const x = scene.scale.width - padding - this.buttonSize / 2
+      const y = scene.scale.height - padding - this.buttonSize / 2
       this.container = scene.add.container(x, y)
     } else {
+      const zoom = config.zoom ?? 1
       this.label = config.label ?? 'A'
-      const padding = 40
-      const x = config.x ?? scene.scale.width - padding - BUTTON_SIZE / 2
-      const y = config.y ?? scene.scale.height - padding - BUTTON_SIZE / 2
+      this.buttonSize = BASE_BUTTON_SIZE / zoom
+
+      const visibleWidth = scene.scale.width / zoom
+      const visibleHeight = scene.scale.height / zoom
+      const padding = 20 / zoom
+
+      const x = config.x ?? visibleWidth - padding - this.buttonSize / 2
+      const y = config.y ?? visibleHeight - padding - this.buttonSize / 2
       this.container = scene.add.container(x, y)
     }
 
@@ -53,10 +63,11 @@ export class ActionButton {
     this.drawButton(false)
     this.container.add(this.background)
 
-    // Button label
+    // Button label - scale font size with button size
+    const fontSize = Math.round(this.buttonSize * 0.5)
     const text = this.scene.add.text(0, 0, this.label, {
       ...TEXT_STYLES.BUTTON,
-      fontSize: '28px',
+      fontSize: `${fontSize}px`,
       color: '#ffffff',
     })
     text.setOrigin(0.5)
@@ -69,21 +80,21 @@ export class ActionButton {
     // Outer glow when pressed
     if (pressed) {
       this.background.fillStyle(COLORS.SUCCESS, 0.3)
-      this.background.fillCircle(0, 0, BUTTON_SIZE / 2 + 5)
+      this.background.fillCircle(0, 0, this.buttonSize / 2 + 3)
     }
 
     // Main button
     this.background.fillStyle(pressed ? COLORS.SUCCESS : COLORS.PRIMARY, pressed ? 0.9 : 0.7)
-    this.background.fillCircle(0, 0, BUTTON_SIZE / 2)
+    this.background.fillCircle(0, 0, this.buttonSize / 2)
 
     // Border
-    this.background.lineStyle(3, COLORS.WHITE, pressed ? 0.9 : 0.5)
-    this.background.strokeCircle(0, 0, BUTTON_SIZE / 2)
+    this.background.lineStyle(2, COLORS.WHITE, pressed ? 0.9 : 0.5)
+    this.background.strokeCircle(0, 0, this.buttonSize / 2)
   }
 
   private setupInput(): void {
     // Create hit area
-    const hitArea = this.scene.add.circle(0, 0, BUTTON_SIZE / 2 + 10)
+    const hitArea = this.scene.add.circle(0, 0, this.buttonSize / 2 + 5)
     hitArea.setInteractive()
     this.container.add(hitArea)
 

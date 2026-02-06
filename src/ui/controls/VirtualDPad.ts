@@ -8,9 +8,10 @@ export interface DPadState {
   readonly right: boolean
 }
 
-const DPAD_SIZE = 160
-const BUTTON_SIZE = 50
-const DEAD_ZONE = 15
+// Base sizes (will be adjusted for zoom)
+const BASE_DPAD_SIZE = 80
+const BASE_BUTTON_SIZE = 25
+const BASE_DEAD_ZONE = 8
 
 /**
  * Virtual D-Pad for touch controls
@@ -22,6 +23,9 @@ export class VirtualDPad {
   private centerX: number
   private centerY: number
   private activePointer: Phaser.Input.Pointer | null = null
+  private dpadSize: number
+  private buttonSize: number
+  private deadZone: number
 
   private state: DPadState = {
     up: false,
@@ -37,13 +41,22 @@ export class VirtualDPad {
   private leftBtn!: Phaser.GameObjects.Graphics
   private rightBtn!: Phaser.GameObjects.Graphics
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, zoom: number = 1) {
     this.scene = scene
 
+    // Adjust sizes for zoom (smaller in world coords = normal size on screen)
+    this.dpadSize = BASE_DPAD_SIZE / zoom
+    this.buttonSize = BASE_BUTTON_SIZE / zoom
+    this.deadZone = BASE_DEAD_ZONE / zoom
+
+    // Get visible area based on zoom
+    const visibleWidth = scene.scale.width / zoom
+    const visibleHeight = scene.scale.height / zoom
+
     // Position in bottom-left with padding
-    const padding = 30
-    this.centerX = padding + DPAD_SIZE / 2
-    this.centerY = scene.scale.height - padding - DPAD_SIZE / 2
+    const padding = 15 / zoom
+    this.centerX = padding + this.dpadSize / 2
+    this.centerY = visibleHeight - padding - this.dpadSize / 2
 
     this.container = scene.add.container(0, 0)
     this.container.setDepth(DEPTH.UI + 50)
@@ -57,13 +70,13 @@ export class VirtualDPad {
     // Semi-transparent background circle
     this.background = this.scene.add.graphics()
     this.background.fillStyle(COLORS.DARK_BG, 0.5)
-    this.background.fillCircle(this.centerX, this.centerY, DPAD_SIZE / 2)
+    this.background.fillCircle(this.centerX, this.centerY, this.dpadSize / 2)
     this.background.lineStyle(2, COLORS.PRIMARY, 0.3)
-    this.background.strokeCircle(this.centerX, this.centerY, DPAD_SIZE / 2)
+    this.background.strokeCircle(this.centerX, this.centerY, this.dpadSize / 2)
     this.container.add(this.background)
 
     // Direction buttons
-    const btnOffset = DPAD_SIZE / 2 - BUTTON_SIZE / 2 - 10
+    const btnOffset = this.dpadSize / 2 - this.buttonSize / 2 - 5
 
     // Up button
     this.upBtn = this.createDirectionButton(
@@ -101,7 +114,7 @@ export class VirtualDPad {
   ): Phaser.GameObjects.Graphics {
     const btn = this.scene.add.graphics()
     btn.fillStyle(COLORS.PRIMARY, 0.4)
-    btn.fillCircle(x, y, BUTTON_SIZE / 2)
+    btn.fillCircle(x, y, this.buttonSize / 2)
     this.container.add(btn)
     return btn
   }
@@ -111,7 +124,7 @@ export class VirtualDPad {
     const hitArea = this.scene.add.circle(
       this.centerX,
       this.centerY,
-      DPAD_SIZE / 2,
+      this.dpadSize / 2,
     )
     hitArea.setInteractive()
     hitArea.setScrollFactor(0)
@@ -158,10 +171,10 @@ export class VirtualDPad {
 
     // Calculate direction based on pointer position relative to center
     const newState: DPadState = {
-      up: dy < -DEAD_ZONE,
-      down: dy > DEAD_ZONE,
-      left: dx < -DEAD_ZONE,
-      right: dx > DEAD_ZONE,
+      up: dy < -this.deadZone,
+      down: dy > this.deadZone,
+      left: dx < -this.deadZone,
+      right: dx > this.deadZone,
     }
 
     this.state = newState
@@ -179,7 +192,7 @@ export class VirtualDPad {
   }
 
   private updateVisuals(): void {
-    const btnOffset = DPAD_SIZE / 2 - BUTTON_SIZE / 2 - 10
+    const btnOffset = this.dpadSize / 2 - this.buttonSize / 2 - 5
 
     // Update each button's appearance based on state
     this.drawButton(this.upBtn, this.centerX, this.centerY - btnOffset, this.state.up)
@@ -196,11 +209,11 @@ export class VirtualDPad {
   ): void {
     btn.clear()
     btn.fillStyle(COLORS.PRIMARY, active ? 0.8 : 0.4)
-    btn.fillCircle(x, y, BUTTON_SIZE / 2)
+    btn.fillCircle(x, y, this.buttonSize / 2)
 
     if (active) {
       btn.lineStyle(2, COLORS.WHITE, 0.8)
-      btn.strokeCircle(x, y, BUTTON_SIZE / 2)
+      btn.strokeCircle(x, y, this.buttonSize / 2)
     }
   }
 
