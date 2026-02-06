@@ -88,8 +88,11 @@ export class InputSystem {
 
     // Initialize touch controls if on a touch device
     this.touchEnabled = shouldShowTouchControls()
+    console.log('[InputSystem] Touch controls enabled:', this.touchEnabled)
+    console.log('[InputSystem] Scene dimensions:', scene.scale.width, 'x', scene.scale.height)
     if (this.touchEnabled) {
       this.initTouchControls(scene)
+      console.log('[InputSystem] Touch controls initialized')
     }
   }
 

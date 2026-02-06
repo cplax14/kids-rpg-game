@@ -45,10 +45,16 @@ export function shouldShowTouchControls(): boolean {
 
   // Check for debug override in URL
   const urlParams = new URLSearchParams(window.location.search)
-  if (urlParams.get('touch') === 'true') {
+  const touchParam = urlParams.get('touch')
+  console.log('[Mobile] URL search:', window.location.search)
+  console.log('[Mobile] touch param:', touchParam)
+  console.log('[Mobile] isTouchDevice:', isTouchDevice())
+
+  if (touchParam === 'true') {
+    console.log('[Mobile] Force enabling touch controls via URL param')
     return true
   }
-  if (urlParams.get('touch') === 'false') {
+  if (touchParam === 'false') {
     return false
   }
 
