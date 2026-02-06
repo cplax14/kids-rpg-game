@@ -1,4 +1,7 @@
 import Phaser from 'phaser'
+import { VirtualDPad, type DPadState } from '../ui/controls/VirtualDPad'
+import { ActionButton } from '../ui/controls/ActionButton'
+import { shouldShowTouchControls } from '../utils/mobile'
 
 export interface InputState {
   readonly up: boolean
@@ -36,12 +39,19 @@ export class InputSystem {
   private readonly justPressedKeys: Set<string> = new Set()
   private enabled: boolean = true
 
+  // Touch controls
+  private dpad: VirtualDPad | null = null
+  private actionButton: ActionButton | null = null
+  private menuButton: ActionButton | null = null
+  private cancelButton: ActionButton | null = null
+  private touchEnabled: boolean = false
+
   private readonly keydownHandler: (e: KeyboardEvent) => void
   private readonly keyupHandler: (e: KeyboardEvent) => void
   private readonly blurHandler: () => void
   private readonly visibilityHandler: () => void
 
-  constructor(_scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene) {
     // Use raw DOM events instead of Phaser's keyboard system for reliability
     this.keydownHandler = (e: KeyboardEvent) => {
       // Prevent default for game keys to avoid scrolling
@@ -75,6 +85,34 @@ export class InputSystem {
     window.addEventListener('keyup', this.keyupHandler)
     window.addEventListener('blur', this.blurHandler)
     document.addEventListener('visibilitychange', this.visibilityHandler)
+
+    // Initialize touch controls if on a touch device
+    this.touchEnabled = shouldShowTouchControls()
+    if (this.touchEnabled) {
+      this.initTouchControls(scene)
+    }
+  }
+
+  private initTouchControls(scene: Phaser.Scene): void {
+    this.dpad = new VirtualDPad(scene)
+    this.actionButton = new ActionButton(scene, { label: 'A' })
+
+    // Menu button positioned above action button
+    const padding = 40
+    const buttonSize = 70
+    const gap = 20
+    this.menuButton = new ActionButton(scene, {
+      label: '☰',
+      x: scene.scale.width - padding - buttonSize / 2,
+      y: scene.scale.height - padding - buttonSize - gap - buttonSize / 2,
+    })
+
+    // Cancel button positioned to the left of action button
+    this.cancelButton = new ActionButton(scene, {
+      label: 'X',
+      x: scene.scale.width - padding - buttonSize - gap - buttonSize / 2,
+      y: scene.scale.height - padding - buttonSize / 2,
+    })
   }
 
   private isGameKey(code: string): boolean {
@@ -94,14 +132,30 @@ export class InputSystem {
   getState(): InputState {
     if (!this.enabled) return EMPTY_INPUT
 
+    // Get keyboard state
+    const keyboardUp = this.isKeyDown(KEY_BINDINGS.up)
+    const keyboardDown = this.isKeyDown(KEY_BINDINGS.down)
+    const keyboardLeft = this.isKeyDown(KEY_BINDINGS.left)
+    const keyboardRight = this.isKeyDown(KEY_BINDINGS.right)
+    const keyboardInteract = this.isKeyJustPressed(KEY_BINDINGS.interact)
+    const keyboardMenu = this.isKeyJustPressed(KEY_BINDINGS.menu)
+    const keyboardCancel = this.isKeyJustPressed(KEY_BINDINGS.cancel)
+
+    // Get touch state
+    const dpadState: DPadState = this.dpad?.getState() ?? { up: false, down: false, left: false, right: false }
+    const touchInteract = this.actionButton?.consumePress() ?? false
+    const touchMenu = this.menuButton?.consumePress() ?? false
+    const touchCancel = this.cancelButton?.consumePress() ?? false
+
+    // Combine keyboard and touch inputs (OR logic)
     const state: InputState = {
-      up: this.isKeyDown(KEY_BINDINGS.up),
-      down: this.isKeyDown(KEY_BINDINGS.down),
-      left: this.isKeyDown(KEY_BINDINGS.left),
-      right: this.isKeyDown(KEY_BINDINGS.right),
-      interact: this.isKeyJustPressed(KEY_BINDINGS.interact),
-      menu: this.isKeyJustPressed(KEY_BINDINGS.menu),
-      cancel: this.isKeyJustPressed(KEY_BINDINGS.cancel),
+      up: keyboardUp || dpadState.up,
+      down: keyboardDown || dpadState.down,
+      left: keyboardLeft || dpadState.left,
+      right: keyboardRight || dpadState.right,
+      interact: keyboardInteract || touchInteract,
+      menu: keyboardMenu || touchMenu,
+      cancel: keyboardCancel || touchCancel,
     }
 
     // Clear just-pressed keys after reading (they only fire once per press)
@@ -123,10 +177,33 @@ export class InputSystem {
     return this.enabled
   }
 
+  /**
+   * Show or hide touch controls
+   */
+  setTouchControlsVisible(visible: boolean): void {
+    this.dpad?.setVisible(visible)
+    this.actionButton?.setVisible(visible)
+    this.menuButton?.setVisible(visible)
+    this.cancelButton?.setVisible(visible)
+  }
+
+  /**
+   * Check if touch controls are active
+   */
+  hasTouchControls(): boolean {
+    return this.touchEnabled
+  }
+
   destroy(): void {
     window.removeEventListener('keydown', this.keydownHandler)
     window.removeEventListener('keyup', this.keyupHandler)
     window.removeEventListener('blur', this.blurHandler)
     document.removeEventListener('visibilitychange', this.visibilityHandler)
+
+    // Clean up touch controls
+    this.dpad?.destroy()
+    this.actionButton?.destroy()
+    this.menuButton?.destroy()
+    this.cancelButton?.destroy()
   }
 }
