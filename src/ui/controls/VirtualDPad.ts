@@ -18,7 +18,7 @@ const DEAD_ZONE = 15
 /**
  * Virtual D-Pad for touch controls
  * Positioned in bottom-left corner of the screen
- * Uses single hit area with direction calculation for reliable touch detection
+ * Uses single hit area inside container for reliable mobile touch detection
  */
 export class VirtualDPad {
   private scene: Phaser.Scene
@@ -38,7 +38,7 @@ export class VirtualDPad {
   private leftBtn!: Phaser.GameObjects.Graphics
   private rightBtn!: Phaser.GameObjects.Graphics
 
-  // Single hit area for the entire D-pad
+  // Hit area inside container (like ActionButton)
   private hitArea!: Phaser.GameObjects.Arc
   private activePointer: Phaser.Input.Pointer | null = null
 
@@ -120,28 +120,27 @@ export class VirtualDPad {
   }
 
   private setupInput(): void {
-    // Create a single hit area covering the entire D-pad
-    // Don't add to container - position it independently for reliable hit detection
-    this.hitArea = this.scene.add.circle(0, 0, this.dpadRadius + 15, 0x000000, 0)
-    this.hitArea.setDepth(DEPTH.UI + 101)
-    this.hitArea.setScrollFactor(0)
-    this.hitArea.setInteractive({ useHandCursor: false })
-    // Note: hitArea position will be synced with container in updatePosition
+    // Create hit area INSIDE the container (like ActionButton does)
+    // This ensures reliable touch detection on mobile
+    const hitRadius = this.dpadRadius + 15
+    this.hitArea = this.scene.add.circle(0, 0, hitRadius, 0x000000, 0)
+    this.hitArea.setInteractive()
+    this.container.add(this.hitArea)
 
-    this.hitArea.on('pointerdown', (pointer: Phaser.Input.Pointer, localX: number, localY: number) => {
-      console.log('[VirtualDPad] pointerdown at local:', localX, localY)
+    // Use scene.input.on for pointer events to get world coordinates
+    // then convert to local coordinates relative to container
+    this.hitArea.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       this.activePointer = pointer
-      this.updateDirectionFromLocal(localX, localY)
+      this.updateDirectionFromPointer(pointer)
     })
 
-    this.hitArea.on('pointermove', (pointer: Phaser.Input.Pointer, localX: number, localY: number) => {
+    this.hitArea.on('pointermove', (pointer: Phaser.Input.Pointer) => {
       if (this.activePointer === pointer && pointer.isDown) {
-        this.updateDirectionFromLocal(localX, localY)
+        this.updateDirectionFromPointer(pointer)
       }
     })
 
     this.hitArea.on('pointerup', () => {
-      console.log('[VirtualDPad] pointerup')
       this.activePointer = null
       this.resetState()
     })
@@ -151,7 +150,7 @@ export class VirtualDPad {
       this.resetState()
     })
 
-    // Global pointer up handler
+    // Global pointer up handler to catch releases outside the hit area
     this.scene.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
       if (this.activePointer === pointer) {
         this.activePointer = null
@@ -163,24 +162,24 @@ export class VirtualDPad {
   private updateHitArea(): void {
     const hitRadius = this.dpadRadius + 15
     this.hitArea.setRadius(hitRadius)
-
-    // Position hit area at the same location as container
-    this.hitArea.setPosition(this.container.x, this.container.y)
-
-    // Update the interactive hit area geometry
-    if (this.hitArea.input) {
-      this.hitArea.input.hitArea.setTo(0, 0, hitRadius)
-    }
+    // Update the interactive geometry to match new radius
+    this.hitArea.setInteractive(new Phaser.Geom.Circle(0, 0, hitRadius), Phaser.Geom.Circle.Contains)
   }
 
-  private updateDirectionFromLocal(localX: number, localY: number): void {
-    // localX/localY are coordinates relative to the hit area center (0,0)
-    // The hit area is centered on the D-pad, so these give us the offset from center
-    const hitRadius = this.dpadRadius + 15
+  private updateDirectionFromPointer(pointer: Phaser.Input.Pointer): void {
+    // pointer.x/y are in WORLD coordinates
+    // container.x/y are in CANVAS coordinates (because of scrollFactor(0))
+    // We need to convert pointer position from world to canvas coordinates
+    const camera = this.scene.cameras.main
 
-    // Convert from hit area local coords (where 0,0 is top-left) to center-relative
-    const dx = localX - hitRadius
-    const dy = localY - hitRadius
+    // Convert world coordinates to canvas coordinates
+    // Canvas position = (world position - camera scroll) * zoom
+    const pointerCanvasX = (pointer.x - camera.scrollX) * camera.zoom
+    const pointerCanvasY = (pointer.y - camera.scrollY) * camera.zoom
+
+    // Now calculate offset from container center (both in canvas space)
+    const dx = pointerCanvasX - this.container.x
+    const dy = pointerCanvasY - this.container.y
 
     // Determine direction based on position relative to center
     const newState: DPadState = {
@@ -244,7 +243,6 @@ export class VirtualDPad {
 
   setVisible(visible: boolean): void {
     this.container.setVisible(visible)
-    this.hitArea.setVisible(visible)
     // Also enable/disable input
     if (visible) {
       this.hitArea.setInteractive()
@@ -260,7 +258,6 @@ export class VirtualDPad {
   destroy(): void {
     this.scene.scale.off('resize', this.updatePosition, this)
     this.scene.input.off('pointerup')
-    this.hitArea.destroy()
     this.container.destroy()
   }
 }
