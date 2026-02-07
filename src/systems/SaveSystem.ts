@@ -2,10 +2,10 @@ import type { SaveGame, GameSettings } from '../models/types'
 import { SaveGameSchema } from '../models/schemas'
 import { saveToStorage, loadFromStorage, removeFromStorage } from '../utils/storage'
 import { generateSaveId } from '../utils/id'
-import { getGameState, setGameState, type GameState } from './GameStateManager'
-import { loadSettings, getDefaultSettings } from './SettingsManager'
+import { getGameState, type GameState } from './GameStateManager'
+import { loadSettings } from './SettingsManager'
 import { logger } from '../utils/logger'
-import { SAVE_SLOTS } from '../config'
+import { SAVE_SLOTS, CLOUD_SAVE_ENABLED } from '../config'
 
 const SAVE_VERSION = '1.0.0'
 const EXPORT_MAGIC = 'MQRPG_SAVE'
@@ -160,11 +160,34 @@ export function autoSave(scene: Phaser.Scene, slot: number, playTime: number): b
     const state = getGameState(scene)
     const settings = loadSettings()
     const save = createSaveGame(state, settings, playTime)
-    return saveGame(slot, save)
+    const success = saveGame(slot, save)
+
+    // Trigger cloud sync in background if enabled
+    if (success && CLOUD_SAVE_ENABLED) {
+      triggerCloudSync(slot, save)
+    }
+
+    return success
   } catch (error) {
     logger.error('SaveSystem: Auto-save failed', { slot, error })
     return false
   }
+}
+
+// Cloud sync trigger (non-blocking)
+function triggerCloudSync(slot: number, save: SaveGame): void {
+  // Dynamic import to avoid circular dependency
+  import('./AuthSystem').then(({ isAuthenticated }) => {
+    if (!isAuthenticated()) {
+      return
+    }
+
+    import('./CloudSaveSystem').then(({ uploadSave }) => {
+      uploadSave(slot, save).catch((error) => {
+        logger.warn('SaveSystem: Background cloud sync failed', { slot, error })
+      })
+    })
+  })
 }
 
 export function formatPlayTime(totalSeconds: number): string {

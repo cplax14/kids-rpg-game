@@ -86,3 +86,23 @@ export const TEXT_SPEED_MS = {
   normal: 40,
   fast: 15,
 } as const
+
+// ── Cloud Save Configuration ──
+
+export const CLOUD_SAVE_ENABLED =
+  typeof import.meta !== 'undefined' &&
+  Boolean(import.meta.env?.VITE_SUPABASE_URL) &&
+  Boolean(import.meta.env?.VITE_SUPABASE_ANON_KEY)
+
+export const SUPABASE_CONFIG = {
+  url: (typeof import.meta !== 'undefined' ? import.meta.env?.VITE_SUPABASE_URL : '') ?? '',
+  anonKey:
+    (typeof import.meta !== 'undefined' ? import.meta.env?.VITE_SUPABASE_ANON_KEY : '') ?? '',
+} as const
+
+export const SYNC_CONFIG = {
+  conflictThresholdMs: 5 * 60 * 1000, // 5 minutes - prompt user if difference exceeds this
+  autoSyncOnAreaChange: true,
+  retryAttempts: 3,
+  retryDelayMs: 1000,
+} as const

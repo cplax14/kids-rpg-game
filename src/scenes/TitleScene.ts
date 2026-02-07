@@ -1,24 +1,44 @@
 import Phaser from 'phaser'
-import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS, TEXT_STYLES, DEPTH } from '../config'
+import {
+  SCENE_KEYS,
+  GAME_WIDTH,
+  GAME_HEIGHT,
+  COLORS,
+  TEXT_STYLES,
+  DEPTH,
+  CLOUD_SAVE_ENABLED,
+} from '../config'
 import { hasSaveData } from '../utils/storage'
 import { SaveLoadPanel } from '../ui/menus/SaveLoadPanel'
 import { SettingsPanel } from '../ui/menus/SettingsPanel'
+import { AuthPanel } from '../ui/menus/AuthPanel'
 import { loadSaveGame, gameStateFromSave } from '../systems/SaveSystem'
-import { setGameState } from '../systems/GameStateManager'
 import { loadSettings, applyAudioSettings } from '../systems/SettingsManager'
 import { initAudioSystem, playMusic, playSfx, MUSIC_KEYS, SFX_KEYS } from '../systems/AudioSystem'
+import {
+  initAuth,
+  isAuthenticated,
+  getUser,
+  getUserDisplayName,
+  onAuthStateChange,
+} from '../systems/AuthSystem'
+import { hasLocalSavesToMigrate } from '../systems/CloudSaveSystem'
 
 export class TitleScene extends Phaser.Scene {
   private saveLoadPanel: SaveLoadPanel | null = null
   private settingsPanel: SettingsPanel | null = null
+  private authPanel: AuthPanel | null = null
   private mainMenuContainer: Phaser.GameObjects.Container | null = null
+  private userInfoContainer: Phaser.GameObjects.Container | null = null
+  private loginButton: Phaser.GameObjects.Container | null = null
   private audioUnlocked = false
+  private authUnsubscribe: (() => void) | null = null
 
   constructor() {
     super({ key: SCENE_KEYS.TITLE })
   }
 
-  create(): void {
+  async create(): Promise<void> {
     // Initialize audio system
     initAudioSystem(this)
 
@@ -26,11 +46,32 @@ export class TitleScene extends Phaser.Scene {
     const settings = loadSettings()
     applyAudioSettings(settings)
 
+    // Initialize auth system
+    if (CLOUD_SAVE_ENABLED) {
+      await initAuth()
+    }
+
     this.createBackground()
     this.createTitle()
     this.createMainMenu()
     this.createFooter()
+    this.createAuthArea()
     this.createAudioPrompt()
+
+    // Listen for auth state changes
+    if (CLOUD_SAVE_ENABLED) {
+      this.authUnsubscribe = onAuthStateChange(() => {
+        this.updateAuthArea()
+        this.checkMigration()
+      })
+    }
+  }
+
+  shutdown(): void {
+    if (this.authUnsubscribe) {
+      this.authUnsubscribe()
+      this.authUnsubscribe = null
+    }
   }
 
   private createBackground(): void {
@@ -185,11 +226,168 @@ export class TitleScene extends Phaser.Scene {
   }
 
   private createFooter(): void {
-    const text = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 30, 'v0.7.0 - Phase 7', {
+    const text = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 30, 'v0.8.0 - Phase 8', {
       ...TEXT_STYLES.SMALL,
       color: '#546e7a',
     })
     text.setOrigin(0.5)
+  }
+
+  private createAuthArea(): void {
+    if (!CLOUD_SAVE_ENABLED) {
+      return
+    }
+
+    this.updateAuthArea()
+  }
+
+  private updateAuthArea(): void {
+    // Clean up existing auth UI
+    if (this.userInfoContainer) {
+      this.userInfoContainer.destroy()
+      this.userInfoContainer = null
+    }
+    if (this.loginButton) {
+      this.loginButton.destroy()
+      this.loginButton = null
+    }
+
+    if (isAuthenticated()) {
+      this.createUserInfo()
+    } else {
+      this.createLoginButton()
+    }
+  }
+
+  private createLoginButton(): void {
+    this.loginButton = this.add.container(GAME_WIDTH - 100, 25)
+
+    const bg = this.add.graphics()
+    bg.fillStyle(COLORS.PRIMARY, 0.6)
+    bg.fillRoundedRect(0, 0, 90, 30, 6)
+    this.loginButton.add(bg)
+
+    const icon = this.add.text(12, 15, '☁️', { fontSize: '14px' })
+    icon.setOrigin(0, 0.5)
+    this.loginButton.add(icon)
+
+    const text = this.add.text(55, 15, 'Sign In', {
+      ...TEXT_STYLES.SMALL,
+      fontSize: '12px',
+    })
+    text.setOrigin(0.5)
+    this.loginButton.add(text)
+
+    const hitArea = this.add.rectangle(45, 15, 90, 30)
+    hitArea.setInteractive({ useHandCursor: true })
+
+    hitArea.on('pointerover', () => {
+      bg.clear()
+      bg.fillStyle(COLORS.PRIMARY, 0.9)
+      bg.fillRoundedRect(0, 0, 90, 30, 6)
+    })
+
+    hitArea.on('pointerout', () => {
+      bg.clear()
+      bg.fillStyle(COLORS.PRIMARY, 0.6)
+      bg.fillRoundedRect(0, 0, 90, 30, 6)
+    })
+
+    hitArea.on('pointerdown', () => {
+      playSfx(SFX_KEYS.MENU_SELECT)
+      this.showAuthPanel()
+    })
+
+    this.loginButton.add(hitArea)
+  }
+
+  private createUserInfo(): void {
+    const user = getUser()
+    const displayName = getUserDisplayName()
+
+    this.userInfoContainer = this.add.container(GAME_WIDTH - 130, 25)
+
+    // Avatar circle with initial
+    const avatarBg = this.add.graphics()
+    avatarBg.fillStyle(COLORS.SUCCESS, 1)
+    avatarBg.fillCircle(15, 15, 15)
+    this.userInfoContainer.add(avatarBg)
+
+    const initial = displayName.charAt(0).toUpperCase()
+    const initialText = this.add.text(15, 15, initial, {
+      fontFamily: 'Arial Black',
+      fontSize: '14px',
+      color: '#ffffff',
+    })
+    initialText.setOrigin(0.5)
+    this.userInfoContainer.add(initialText)
+
+    // User name (truncated if needed)
+    const shortName = displayName.length > 12 ? displayName.substring(0, 12) + '...' : displayName
+    const nameText = this.add.text(38, 15, shortName, {
+      ...TEXT_STYLES.SMALL,
+      fontSize: '12px',
+      color: '#ffffff',
+    })
+    nameText.setOrigin(0, 0.5)
+    this.userInfoContainer.add(nameText)
+
+    // Cloud sync indicator
+    const cloudIcon = this.add.text(GAME_WIDTH - 30 - this.userInfoContainer.x, 15, '☁️', {
+      fontSize: '14px',
+    })
+    cloudIcon.setOrigin(0.5)
+    this.userInfoContainer.add(cloudIcon)
+
+    // Make clickable to show auth panel
+    const hitArea = this.add.rectangle(70, 15, 140, 30)
+    hitArea.setInteractive({ useHandCursor: true })
+    hitArea.on('pointerdown', () => {
+      playSfx(SFX_KEYS.MENU_SELECT)
+      this.showAuthPanel()
+    })
+    this.userInfoContainer.add(hitArea)
+  }
+
+  private showAuthPanel(): void {
+    if (this.mainMenuContainer) {
+      this.mainMenuContainer.setVisible(false)
+    }
+
+    this.authPanel = new AuthPanel(this, GAME_WIDTH / 2 - 200, GAME_HEIGHT / 2 - 160, {
+      onClose: () => {
+        this.hideAuthPanel()
+      },
+      onAuthChange: () => {
+        this.updateAuthArea()
+      },
+    })
+  }
+
+  private hideAuthPanel(): void {
+    if (this.authPanel) {
+      this.authPanel.destroy()
+      this.authPanel = null
+    }
+    if (this.mainMenuContainer) {
+      this.mainMenuContainer.setVisible(true)
+    }
+  }
+
+  private checkMigration(): void {
+    if (isAuthenticated() && hasLocalSavesToMigrate()) {
+      // Count local saves
+      let localSaveCount = 0
+      for (let i = 0; i < 3; i++) {
+        if (hasSaveData(i)) {
+          localSaveCount++
+        }
+      }
+
+      if (localSaveCount > 0 && this.authPanel) {
+        this.authPanel.showMigrationPrompt(localSaveCount)
+      }
+    }
   }
 
   private createAudioPrompt(): void {

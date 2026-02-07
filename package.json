@@ -28,6 +28,7 @@
     ]
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.95.3",
     "phaser": "3.90.0",
     "zod": "^4.3.6"
   },

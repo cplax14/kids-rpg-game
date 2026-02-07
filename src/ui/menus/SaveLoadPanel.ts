@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { COLORS, TEXT_STYLES, DEPTH, SAVE_SLOTS } from '../../config'
+import { COLORS, TEXT_STYLES, DEPTH, SAVE_SLOTS, CLOUD_SAVE_ENABLED } from '../../config'
 import {
   getAllSaveSlotInfo,
   loadSaveGame,
@@ -13,6 +13,17 @@ import {
 import { getGameState } from '../../systems/GameStateManager'
 import { loadSettings } from '../../systems/SettingsManager'
 import { playSfx, SFX_KEYS } from '../../systems/AudioSystem'
+import { isAuthenticated } from '../../systems/AuthSystem'
+import {
+  getAllCloudSaveInfo,
+  syncSlot,
+  uploadSave,
+  deleteCloudSave,
+  resolveConflict,
+} from '../../systems/CloudSaveSystem'
+import type { CloudSaveSlotInfo, SyncResult, ConflictInfo } from '../../models/auth-types'
+import { ConflictResolutionPanel } from './ConflictResolutionPanel'
+import { SyncStatusIndicator } from '../components/SyncStatusIndicator'
 
 export type SaveLoadMode = 'save' | 'load'
 
@@ -24,7 +35,7 @@ interface SaveLoadPanelOptions {
 }
 
 const PANEL_WIDTH = 600
-const PANEL_HEIGHT = 380
+const PANEL_HEIGHT = 420
 const SLOT_HEIGHT = 90
 
 export class SaveLoadPanel {
@@ -36,6 +47,10 @@ export class SaveLoadPanel {
   private playTime: number
   private selectedSlot: number = -1
   private confirmDialog: Phaser.GameObjects.Container | null = null
+  private conflictPanel: ConflictResolutionPanel | null = null
+  private syncIndicators: SyncStatusIndicator[] = []
+  private cloudSaveInfo: ReadonlyArray<CloudSaveSlotInfo> = []
+  private isSyncing = false
 
   constructor(scene: Phaser.Scene, x: number, y: number, options: SaveLoadPanelOptions) {
     this.scene = scene
@@ -50,6 +65,27 @@ export class SaveLoadPanel {
     this.createBackground()
     this.createSlots()
     this.createCancelButton()
+
+    // Load cloud save info if authenticated
+    if (CLOUD_SAVE_ENABLED && isAuthenticated()) {
+      this.loadCloudInfo()
+    }
+  }
+
+  private async loadCloudInfo(): Promise<void> {
+    this.cloudSaveInfo = await getAllCloudSaveInfo()
+    this.updateCloudIndicators()
+  }
+
+  private updateCloudIndicators(): void {
+    for (let i = 0; i < this.syncIndicators.length; i++) {
+      const cloudInfo = this.cloudSaveInfo[i]
+      if (cloudInfo?.exists) {
+        this.syncIndicators[i].setStatus('synced')
+      } else {
+        this.syncIndicators[i].setStatus('idle')
+      }
+    }
   }
 
   private createBackground(): void {
@@ -71,6 +107,20 @@ export class SaveLoadPanel {
     )
     title.setOrigin(0.5, 0)
     this.container.add(title)
+
+    // Cloud status indicator
+    if (CLOUD_SAVE_ENABLED) {
+      const cloudLabel = this.scene.add.text(
+        PANEL_WIDTH - 25,
+        25,
+        isAuthenticated() ? '☁️' : '📴',
+        {
+          fontSize: '18px',
+        },
+      )
+      cloudLabel.setOrigin(1, 0.5)
+      this.container.add(cloudLabel)
+    }
   }
 
   private createSlots(): void {
@@ -100,6 +150,19 @@ export class SaveLoadPanel {
       color: info.exists ? '#ffffff' : '#888888',
     })
     slotContainer.add(slotLabel)
+
+    // Cloud sync indicator (if authenticated)
+    if (CLOUD_SAVE_ENABLED && isAuthenticated()) {
+      const syncIndicator = new SyncStatusIndicator(this.scene, PANEL_WIDTH - 80, 15, {
+        size: 'small',
+      })
+      syncIndicator.setDepth(DEPTH.OVERLAY + 3)
+      this.syncIndicators[slotIndex] = syncIndicator
+
+      // Position relative to container
+      const indicatorContainer = this.scene.add.container(PANEL_WIDTH - 80, 15)
+      slotContainer.add(indicatorContainer)
+    }
 
     if (info.exists) {
       // Player name and level
@@ -200,7 +263,7 @@ export class SaveLoadPanel {
 
       if (this.mode === 'load') {
         if (info.exists) {
-          this.onSelect?.(slotIndex)
+          this.handleLoad(slotIndex)
         }
       } else {
         // Save mode
@@ -215,6 +278,59 @@ export class SaveLoadPanel {
     slotContainer.add(hitArea)
   }
 
+  private async handleLoad(slot: number): Promise<void> {
+    if (CLOUD_SAVE_ENABLED && isAuthenticated() && !this.isSyncing) {
+      // Check for sync/conflict before loading
+      this.isSyncing = true
+      this.syncIndicators[slot]?.setStatus('syncing')
+
+      const result = await syncSlot(slot)
+
+      this.isSyncing = false
+
+      if (result.action === 'conflict' && result.conflictInfo) {
+        this.showConflictResolution(slot, result.conflictInfo)
+        return
+      }
+
+      this.syncIndicators[slot]?.setStatus(result.success ? 'synced' : 'error')
+    }
+
+    this.onSelect?.(slot)
+  }
+
+  private showConflictResolution(slot: number, conflict: ConflictInfo): void {
+    this.conflictPanel = new ConflictResolutionPanel(
+      this.scene,
+      (PANEL_WIDTH - 500) / 2,
+      50,
+      {
+        conflict,
+        onResolve: async (resolution) => {
+          this.conflictPanel?.destroy()
+          this.conflictPanel = null
+
+          if (resolution === 'cancel') {
+            this.syncIndicators[slot]?.setStatus('idle')
+            return
+          }
+
+          this.syncIndicators[slot]?.setStatus('syncing')
+          const success = await resolveConflict(slot, resolution)
+          this.syncIndicators[slot]?.setStatus(success ? 'synced' : 'error')
+
+          if (success) {
+            this.refresh()
+            // Continue with loading if in load mode
+            if (this.mode === 'load') {
+              this.onSelect?.(slot)
+            }
+          }
+        },
+      },
+    )
+  }
+
   private confirmOverwrite(slot: number): void {
     this.showConfirmDialog('Overwrite existing save?', () => {
       this.saveToSlot(slot)
@@ -222,8 +338,14 @@ export class SaveLoadPanel {
   }
 
   private confirmDelete(slot: number): void {
-    this.showConfirmDialog('Delete this save?', () => {
+    this.showConfirmDialog('Delete this save?', async () => {
       deleteSave(slot)
+
+      // Also delete cloud save if authenticated
+      if (CLOUD_SAVE_ENABLED && isAuthenticated()) {
+        await deleteCloudSave(slot)
+      }
+
       this.refresh()
     })
   }
@@ -317,7 +439,7 @@ export class SaveLoadPanel {
     return container
   }
 
-  private saveToSlot(slot: number): void {
+  private async saveToSlot(slot: number): Promise<void> {
     try {
       const state = getGameState(this.scene)
       const settings = loadSettings()
@@ -326,10 +448,18 @@ export class SaveLoadPanel {
 
       if (success) {
         playSfx(SFX_KEYS.MENU_CONFIRM)
+
+        // Upload to cloud if authenticated
+        if (CLOUD_SAVE_ENABLED && isAuthenticated()) {
+          this.syncIndicators[slot]?.setStatus('syncing')
+          const uploaded = await uploadSave(slot, save)
+          this.syncIndicators[slot]?.setStatus(uploaded ? 'synced' : 'error')
+        }
+
         this.showSaveSuccess()
         this.refresh()
       }
-    } catch (error) {
+    } catch {
       // Game state not available
     }
   }
@@ -389,6 +519,12 @@ export class SaveLoadPanel {
   }
 
   private refresh(): void {
+    // Clean up sync indicators
+    for (const indicator of this.syncIndicators) {
+      indicator?.destroy()
+    }
+    this.syncIndicators = []
+
     // Remove old content except background
     const children = this.container.getAll()
     for (let i = children.length - 1; i >= 2; i--) {
@@ -397,11 +533,22 @@ export class SaveLoadPanel {
 
     this.createSlots()
     this.createCancelButton()
+
+    // Reload cloud info
+    if (CLOUD_SAVE_ENABLED && isAuthenticated()) {
+      this.loadCloudInfo()
+    }
   }
 
   destroy(): void {
     if (this.confirmDialog) {
       this.confirmDialog.destroy()
+    }
+    if (this.conflictPanel) {
+      this.conflictPanel.destroy()
+    }
+    for (const indicator of this.syncIndicators) {
+      indicator?.destroy()
     }
     this.container.destroy()
   }

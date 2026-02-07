@@ -4,4 +4,5 @@ coverage/
 *.local
 .env
 .env.*
+!.env.example
 public/assets/downloads/

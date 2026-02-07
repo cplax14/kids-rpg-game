@@ -2,7 +2,7 @@ import Phaser from 'phaser'
 import type { GameSettings } from '../../models/types'
 
 type TextSpeed = 'slow' | 'normal' | 'fast'
-import { COLORS, TEXT_STYLES, DEPTH } from '../../config'
+import { COLORS, TEXT_STYLES, DEPTH, CLOUD_SAVE_ENABLED } from '../../config'
 import { Slider } from '../components/Slider'
 import {
   loadSettings,
@@ -22,9 +22,15 @@ import {
   importSaveToSlot,
   getAllSaveSlotInfo,
 } from '../../systems/SaveSystem'
+import {
+  isAuthenticated,
+  getUserDisplayName,
+  getUser,
+  signOut,
+} from '../../systems/AuthSystem'
 
 const PANEL_WIDTH = 560
-const PANEL_HEIGHT = 520
+const PANEL_HEIGHT = 600
 
 export class SettingsPanel {
   private scene: Phaser.Scene
@@ -47,6 +53,9 @@ export class SettingsPanel {
     this.createAudioSection()
     this.createGameplaySection()
     this.createDataSection()
+    if (CLOUD_SAVE_ENABLED) {
+      this.createAccountSection()
+    }
     this.createFooter()
   }
 
@@ -295,6 +304,86 @@ export class SettingsPanel {
 
     // Hidden file input
     this.createFileInput()
+  }
+
+  private createAccountSection(): void {
+    this.createSectionHeader(490, '👤 Account')
+
+    if (isAuthenticated()) {
+      const user = getUser()
+      const displayName = getUserDisplayName()
+
+      // User info
+      const userText = this.scene.add.text(25, 530, `Signed in as: ${displayName}`, {
+        ...TEXT_STYLES.BODY,
+        fontSize: '14px',
+        color: '#66bb6a',
+      })
+      this.container.add(userText)
+
+      // Email (if available)
+      if (user?.email) {
+        const emailText = this.scene.add.text(25, 550, user.email, {
+          ...TEXT_STYLES.SMALL,
+          fontSize: '12px',
+          color: '#888888',
+        })
+        this.container.add(emailText)
+      }
+
+      // Sign out button
+      const signOutBtnX = PANEL_WIDTH - 130
+      const signOutBtnY = 530
+
+      const signOutBg = this.scene.add.graphics()
+      signOutBg.fillStyle(COLORS.DANGER, 0.5)
+      signOutBg.fillRoundedRect(signOutBtnX, signOutBtnY, 100, 34, 8)
+      this.container.add(signOutBg)
+
+      const signOutText = this.scene.add.text(signOutBtnX + 50, signOutBtnY + 17, 'Sign Out', {
+        ...TEXT_STYLES.BODY,
+        fontSize: '13px',
+      })
+      signOutText.setOrigin(0.5)
+      this.container.add(signOutText)
+
+      const signOutHitArea = this.scene.add.rectangle(signOutBtnX + 50, signOutBtnY + 17, 100, 34)
+      signOutHitArea.setInteractive({ useHandCursor: true })
+      signOutHitArea.on('pointerover', () => {
+        signOutBg.clear()
+        signOutBg.fillStyle(COLORS.DANGER, 0.8)
+        signOutBg.fillRoundedRect(signOutBtnX, signOutBtnY, 100, 34, 8)
+      })
+      signOutHitArea.on('pointerout', () => {
+        signOutBg.clear()
+        signOutBg.fillStyle(COLORS.DANGER, 0.5)
+        signOutBg.fillRoundedRect(signOutBtnX, signOutBtnY, 100, 34, 8)
+      })
+      signOutHitArea.on('pointerdown', async () => {
+        playSfx(SFX_KEYS.MENU_CONFIRM)
+        const success = await signOut()
+        if (success) {
+          this.showNotification('Signed out', '#66bb6a')
+          // Refresh would need a full panel rebuild
+        }
+      })
+      this.container.add(signOutHitArea)
+    } else {
+      // Not signed in message
+      const guestText = this.scene.add.text(25, 530, 'Playing as guest', {
+        ...TEXT_STYLES.BODY,
+        fontSize: '14px',
+        color: '#888888',
+      })
+      this.container.add(guestText)
+
+      const hintText = this.scene.add.text(25, 550, 'Sign in from the title screen to enable cloud saves', {
+        ...TEXT_STYLES.SMALL,
+        fontSize: '12px',
+        color: '#666666',
+      })
+      this.container.add(hintText)
+    }
   }
 
   private createFileInput(): void {
