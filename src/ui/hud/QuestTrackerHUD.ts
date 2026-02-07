@@ -1,19 +1,37 @@
 import Phaser from 'phaser'
-import type { QuestProgress, QuestDefinition } from '../../models/types'
+import type { QuestProgress, QuestDefinition, QuestType } from '../../models/types'
 import { COLORS, DEPTH, TEXT_STYLES } from '../../config'
-import { getQuest, getObjectiveProgress } from '../../systems/QuestSystem'
+import { getQuest, getObjectiveProgress, getQuestProgressPercent } from '../../systems/QuestSystem'
 import { EventBus } from '../../events/EventBus'
 import { GAME_EVENTS } from '../../events/GameEvents'
+import { ProgressRing } from '../components/ProgressRing'
 
-const TRACKER_WIDTH = 220
+const TRACKER_WIDTH = 240
 const TRACKER_X = 10
 const TRACKER_Y = 10
 const MAX_DISPLAYED_QUESTS = 3
+
+const QUEST_TYPE_ICONS: Record<QuestType, string> = {
+  defeat: '⚔️',
+  collect: '🎒',
+  boss: '👑',
+  explore: '🗺️',
+  talk: '💬',
+}
+
+const QUEST_TYPE_COLORS: Record<QuestType, number> = {
+  defeat: 0xef5350,
+  collect: 0x66bb6a,
+  boss: 0xffd54f,
+  explore: 0x42a5f5,
+  talk: 0x7e57c2,
+}
 
 interface QuestEntry {
   readonly container: Phaser.GameObjects.Container
   readonly progressBars: Phaser.GameObjects.Graphics[]
   readonly progressTexts: Phaser.GameObjects.Text[]
+  readonly progressRing: ProgressRing | null
 }
 
 export class QuestTrackerHUD {
@@ -97,40 +115,85 @@ export class QuestTrackerHUD {
     this.container.add(entryContainer)
 
     const entryHeight = this.getEntryHeight(quest)
+    const isReadyToTurnIn = progress.status === 'completed'
 
-    // Background panel
+    // Get quest type from first objective
+    const primaryType: QuestType = quest.objectives[0]?.type ?? 'defeat'
+    const typeIcon = QUEST_TYPE_ICONS[primaryType]
+    const typeColor = QUEST_TYPE_COLORS[primaryType]
+
+    // Background panel with type-colored left border
     const bg = this.scene.add.graphics()
-    bg.fillStyle(COLORS.DARK_BG, 0.85)
-    bg.fillRoundedRect(0, 0, TRACKER_WIDTH, entryHeight, 6)
-    bg.lineStyle(1, COLORS.PRIMARY, 0.5)
-    bg.strokeRoundedRect(0, 0, TRACKER_WIDTH, entryHeight, 6)
+    bg.fillStyle(COLORS.DARK_BG, 0.9)
+    bg.fillRoundedRect(0, 0, TRACKER_WIDTH, entryHeight, 8)
+    bg.lineStyle(1, isReadyToTurnIn ? COLORS.SUCCESS : typeColor, 0.7)
+    bg.strokeRoundedRect(0, 0, TRACKER_WIDTH, entryHeight, 8)
     entryContainer.add(bg)
 
-    // Quest name
-    const nameText = this.scene.add.text(8, 6, quest.name, {
+    // Type color accent bar on left
+    const accentBar = this.scene.add.graphics()
+    accentBar.fillStyle(isReadyToTurnIn ? COLORS.SUCCESS : typeColor, 0.8)
+    accentBar.fillRoundedRect(0, 0, 4, entryHeight, { tl: 8, bl: 8, tr: 0, br: 0 })
+    entryContainer.add(accentBar)
+
+    // Quest type icon
+    const iconText = this.scene.add.text(14, 8, typeIcon, {
+      fontSize: '14px',
+    })
+    entryContainer.add(iconText)
+
+    // Quest name (next to icon)
+    const displayName = quest.name.length > 18 ? quest.name.substring(0, 16) + '..' : quest.name
+    const nameText = this.scene.add.text(34, 7, displayName, {
       ...TEXT_STYLES.SMALL,
       fontSize: '12px',
-      color: '#ffd54f',
+      color: isReadyToTurnIn ? '#66bb6a' : '#ffd54f',
       fontStyle: 'bold',
     })
     entryContainer.add(nameText)
+
+    // Progress ring on the right
+    const percent = getQuestProgressPercent(progress, quest)
+    const ringColor = isReadyToTurnIn ? COLORS.SUCCESS : typeColor
+    const ring = new ProgressRing(this.scene, TRACKER_WIDTH - 22, entryHeight / 2, percent, {
+      radius: 14,
+      thickness: 3,
+      fillColor: ringColor,
+      showPercent: true,
+      animate: false,
+    })
+    entryContainer.add(ring.getContainer())
+
+    // Pulsing animation if ready to turn in
+    if (isReadyToTurnIn) {
+      this.scene.tweens.add({
+        targets: ring.getContainer(),
+        scaleX: 1.15,
+        scaleY: 1.15,
+        duration: 500,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      })
+    }
 
     // Objectives
     const progressBars: Phaser.GameObjects.Graphics[] = []
     const progressTexts: Phaser.GameObjects.Text[] = []
 
-    let objY = 24
+    let objY = 26
     for (const objective of quest.objectives) {
       const current = getObjectiveProgress(progress, objective.objectiveId)
       const required = objective.requiredCount
       const isComplete = current >= required
+      const objIcon = QUEST_TYPE_ICONS[objective.type] ?? '📌'
 
-      // Objective description (truncated)
-      const objDesc = objective.description.length > 28
-        ? objective.description.substring(0, 25) + '...'
+      // Objective with icon (truncated)
+      const objDesc = objective.description.length > 22
+        ? objective.description.substring(0, 19) + '...'
         : objective.description
 
-      const objText = this.scene.add.text(8, objY, objDesc, {
+      const objText = this.scene.add.text(10, objY, `${objIcon} ${objDesc}`, {
         ...TEXT_STYLES.SMALL,
         fontSize: '10px',
         color: isComplete ? '#66bb6a' : '#cccccc',
@@ -138,10 +201,10 @@ export class QuestTrackerHUD {
       entryContainer.add(objText)
       progressTexts.push(objText)
 
-      // Progress bar
+      // Progress bar (narrower to make room for ring)
       const barBg = this.scene.add.graphics()
       barBg.fillStyle(0x333333, 1)
-      barBg.fillRoundedRect(8, objY + 14, TRACKER_WIDTH - 50, 6, 3)
+      barBg.fillRoundedRect(10, objY + 14, TRACKER_WIDTH - 70, 5, 2)
       entryContainer.add(barBg)
 
       const barFill = this.scene.add.graphics()
@@ -151,12 +214,12 @@ export class QuestTrackerHUD {
 
       // Count text
       const countText = this.scene.add.text(
-        TRACKER_WIDTH - 8,
-        objY + 10,
+        TRACKER_WIDTH - 50,
+        objY + 11,
         `${current}/${required}`,
         {
           ...TEXT_STYLES.SMALL,
-          fontSize: '10px',
+          fontSize: '9px',
           color: isComplete ? '#66bb6a' : '#b0bec5',
         },
       )
@@ -164,26 +227,26 @@ export class QuestTrackerHUD {
       entryContainer.add(countText)
       progressTexts.push(countText)
 
-      objY += 26
+      objY += 24
     }
 
-    return { container: entryContainer, progressBars, progressTexts }
+    return { container: entryContainer, progressBars, progressTexts, progressRing: ring }
   }
 
   private drawProgressBar(graphics: Phaser.GameObjects.Graphics, current: number, required: number): void {
     const progress = Math.min(current / required, 1)
-    const barWidth = (TRACKER_WIDTH - 50) * progress
+    const barWidth = (TRACKER_WIDTH - 70) * progress
     const color = progress >= 1 ? COLORS.SUCCESS : COLORS.PRIMARY
 
     graphics.clear()
     if (barWidth > 0) {
       graphics.fillStyle(color, 1)
-      graphics.fillRoundedRect(8, 14, barWidth, 6, 3)
+      graphics.fillRoundedRect(10, 14, barWidth, 5, 2)
     }
   }
 
   private getEntryHeight(quest: QuestDefinition): number {
-    return 24 + quest.objectives.length * 26 + 4
+    return 26 + quest.objectives.length * 24 + 6
   }
 
   private updateProgress(quests: ReadonlyArray<QuestProgress>): void {
@@ -194,6 +257,12 @@ export class QuestTrackerHUD {
       const quest = getQuest(progress.questId)
       if (!quest) continue
 
+      // Update progress ring
+      if (entry.progressRing) {
+        const percent = getQuestProgressPercent(progress, quest)
+        entry.progressRing.setProgress(percent)
+      }
+
       quest.objectives.forEach((objective, index) => {
         const current = getObjectiveProgress(progress, objective.objectiveId)
         const required = objective.requiredCount
@@ -203,7 +272,7 @@ export class QuestTrackerHUD {
         const bar = entry.progressBars[index]
         if (bar) {
           this.drawProgressBar(bar, current, required)
-          bar.y = 24 + index * 26
+          bar.y = 26 + index * 24
         }
 
         // Update texts
@@ -285,6 +354,9 @@ export class QuestTrackerHUD {
 
   private clearEntries(): void {
     for (const [, entry] of this.questEntries) {
+      if (entry.progressRing) {
+        entry.progressRing.destroy()
+      }
       entry.container.destroy()
     }
     this.questEntries.clear()
