@@ -18,7 +18,7 @@ const DEAD_ZONE = 15
 /**
  * Virtual D-Pad for touch controls
  * Positioned in bottom-left corner of the screen
- * Uses scene-level pointer events with manual bounds checking for reliable mobile touch
+ * Uses DOM-level touch events for accurate mobile touch detection
  */
 export class VirtualDPad {
   private scene: Phaser.Scene
@@ -38,17 +38,22 @@ export class VirtualDPad {
   private leftBtn!: Phaser.GameObjects.Graphics
   private rightBtn!: Phaser.GameObjects.Graphics
 
-  private activePointer: Phaser.Input.Pointer | null = null
+  private activeTouchId: number | null = null
   private enabled: boolean = true
 
   // Current sizing (scales with screen)
   private dpadRadius: number = BASE_DPAD_RADIUS
   private buttonRadius: number = BASE_BUTTON_RADIUS
 
-  // Canvas position of D-pad center (for hit detection)
-  private canvasCenterX: number = 0
-  private canvasCenterY: number = 0
-  private hitRadius: number = BASE_DPAD_RADIUS + 15
+  // Screen position of D-pad center (percentage of canvas, for DOM touch handling)
+  private dpadScreenXPercent: number = 0
+  private dpadScreenYPercent: number = 0
+  private hitRadiusPercent: number = 0
+
+  // Bound event handlers (for cleanup)
+  private boundTouchStart: (e: TouchEvent) => void
+  private boundTouchMove: (e: TouchEvent) => void
+  private boundTouchEnd: (e: TouchEvent) => void
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene
@@ -59,6 +64,12 @@ export class VirtualDPad {
     this.container.setScrollFactor(0)
 
     this.createVisuals()
+
+    // Bind event handlers
+    this.boundTouchStart = this.handleTouchStart.bind(this)
+    this.boundTouchMove = this.handleTouchMove.bind(this)
+    this.boundTouchEnd = this.handleTouchEnd.bind(this)
+
     this.setupInput()
 
     // Initial position
@@ -88,21 +99,23 @@ export class VirtualDPad {
     // Scale the D-pad size (with min/max bounds)
     this.dpadRadius = Math.max(45, Math.min(70, BASE_DPAD_RADIUS * scaleFactor))
     this.buttonRadius = Math.max(15, Math.min(25, BASE_BUTTON_RADIUS * scaleFactor))
-    this.hitRadius = this.dpadRadius + 15
 
     // Calculate padding (extra at bottom for mobile browser chrome)
     const sidePadding = Math.max(10, BASE_PADDING * scaleFactor)
     const bottomPadding = sidePadding + MOBILE_BOTTOM_PADDING
 
-    // Position in bottom-left of the VISIBLE area
+    // Position in bottom-left of the VISIBLE area (canvas coordinates)
     const x = offsetX + sidePadding + this.dpadRadius
     const y = offsetY + visibleHeight - bottomPadding - this.dpadRadius
 
-    // Store canvas position for hit detection
-    this.canvasCenterX = x
-    this.canvasCenterY = y
-
     this.container.setPosition(x, y)
+
+    // Store position as percentage for DOM touch handling
+    // scrollFactor(0) objects are positioned relative to the VISIBLE area (after zoom)
+    // So we need to calculate percentage relative to visible dimensions
+    this.dpadScreenXPercent = (x - offsetX) / visibleWidth
+    this.dpadScreenYPercent = (y - offsetY) / visibleHeight
+    this.hitRadiusPercent = (this.dpadRadius + 15) / Math.min(visibleWidth, visibleHeight)
 
     // Update visuals with new sizes
     this.updateVisuals()
@@ -128,74 +141,102 @@ export class VirtualDPad {
   }
 
   private setupInput(): void {
-    // Use scene-level pointer events instead of object-level interactive
-    // This bypasses Phaser's coordinate system issues with scrollFactor(0)
+    // Use DOM-level touch events for accurate position detection
+    // This bypasses Phaser's coordinate transformation issues
+    const canvas = this.scene.game.canvas
 
-    this.scene.input.on('pointerdown', this.handlePointerDown, this)
-    this.scene.input.on('pointermove', this.handlePointerMove, this)
-    this.scene.input.on('pointerup', this.handlePointerUp, this)
+    canvas.addEventListener('touchstart', this.boundTouchStart, { passive: false })
+    canvas.addEventListener('touchmove', this.boundTouchMove, { passive: false })
+    canvas.addEventListener('touchend', this.boundTouchEnd, { passive: false })
+    canvas.addEventListener('touchcancel', this.boundTouchEnd, { passive: false })
   }
 
-  private handlePointerDown(pointer: Phaser.Input.Pointer): void {
+  private handleTouchStart(e: TouchEvent): void {
     if (!this.enabled) return
 
-    // Convert pointer position to canvas coordinates
-    const canvasPos = this.getPointerCanvasPosition(pointer)
+    // Check each new touch
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i]
+      const pos = this.getTouchPosition(touch)
 
-    // Check if pointer is within D-pad hit area
-    if (this.isWithinDPad(canvasPos.x, canvasPos.y)) {
-      this.activePointer = pointer
-      this.updateDirectionFromCanvas(canvasPos.x, canvasPos.y)
+      if (this.isWithinDPad(pos.xPercent, pos.yPercent)) {
+        // Only capture if we don't already have an active touch
+        if (this.activeTouchId === null) {
+          this.activeTouchId = touch.identifier
+          this.updateDirectionFromPosition(pos.xPercent, pos.yPercent)
+          e.preventDefault() // Prevent scrolling when touching D-pad
+        }
+      }
     }
   }
 
-  private handlePointerMove(pointer: Phaser.Input.Pointer): void {
-    if (!this.enabled) return
+  private handleTouchMove(e: TouchEvent): void {
+    if (!this.enabled || this.activeTouchId === null) return
 
-    // Only process if this is our active pointer and it's down
-    if (this.activePointer === pointer && pointer.isDown) {
-      const canvasPos = this.getPointerCanvasPosition(pointer)
-      this.updateDirectionFromCanvas(canvasPos.x, canvasPos.y)
+    // Find our active touch
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i]
+      if (touch.identifier === this.activeTouchId) {
+        const pos = this.getTouchPosition(touch)
+        this.updateDirectionFromPosition(pos.xPercent, pos.yPercent)
+        e.preventDefault()
+        break
+      }
     }
   }
 
-  private handlePointerUp(pointer: Phaser.Input.Pointer): void {
-    if (this.activePointer === pointer) {
-      this.activePointer = null
-      this.resetState()
+  private handleTouchEnd(e: TouchEvent): void {
+    // Check if our active touch ended
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i]
+      if (touch.identifier === this.activeTouchId) {
+        this.activeTouchId = null
+        this.resetState()
+        break
+      }
     }
   }
 
-  private getPointerCanvasPosition(pointer: Phaser.Input.Pointer): { x: number; y: number } {
-    // pointer.x/y are in WORLD coordinates
-    // We need to convert to CANVAS coordinates (where the visual is rendered)
-    const camera = this.scene.cameras.main
+  private getTouchPosition(touch: Touch): { xPercent: number; yPercent: number } {
+    const canvas = this.scene.game.canvas
+    const rect = canvas.getBoundingClientRect()
 
-    // Canvas position = (world position - camera scroll) * zoom
-    const canvasX = (pointer.x - camera.scrollX) * camera.zoom
-    const canvasY = (pointer.y - camera.scrollY) * camera.zoom
+    // Get touch position as percentage of canvas element
+    const xPercent = (touch.clientX - rect.left) / rect.width
+    const yPercent = (touch.clientY - rect.top) / rect.height
 
-    return { x: canvasX, y: canvasY }
+    return { xPercent, yPercent }
   }
 
-  private isWithinDPad(canvasX: number, canvasY: number): boolean {
-    const dx = canvasX - this.canvasCenterX
-    const dy = canvasY - this.canvasCenterY
-    const distance = Math.sqrt(dx * dx + dy * dy)
-    return distance <= this.hitRadius
+  private isWithinDPad(xPercent: number, yPercent: number): boolean {
+    const dx = xPercent - this.dpadScreenXPercent
+    const dy = yPercent - this.dpadScreenYPercent
+
+    // Scale dx by aspect ratio to make hit area circular
+    const canvas = this.scene.game.canvas
+    const aspectRatio = canvas.width / canvas.height
+    const adjustedDx = dx * aspectRatio
+
+    const distance = Math.sqrt(adjustedDx * adjustedDx + dy * dy)
+    return distance <= this.hitRadiusPercent * aspectRatio
   }
 
-  private updateDirectionFromCanvas(canvasX: number, canvasY: number): void {
-    // Calculate offset from D-pad center (both in canvas space)
-    const dx = canvasX - this.canvasCenterX
-    const dy = canvasY - this.canvasCenterY
+  private updateDirectionFromPosition(xPercent: number, yPercent: number): void {
+    // Calculate offset from D-pad center (in percentage units)
+    const dx = xPercent - this.dpadScreenXPercent
+    const dy = yPercent - this.dpadScreenYPercent
+
+    // Convert percentage offset to approximate pixel offset for dead zone comparison
+    const canvas = this.scene.game.canvas
+    const pxOffsetX = dx * canvas.width
+    const pxOffsetY = dy * canvas.height
 
     // Determine direction based on position relative to center
     const newState: DPadState = {
-      up: dy < -DEAD_ZONE,
-      down: dy > DEAD_ZONE,
-      left: dx < -DEAD_ZONE,
-      right: dx > DEAD_ZONE,
+      up: pxOffsetY < -DEAD_ZONE,
+      down: pxOffsetY > DEAD_ZONE,
+      left: pxOffsetX < -DEAD_ZONE,
+      right: pxOffsetX > DEAD_ZONE,
     }
 
     // Only update if state changed
@@ -254,7 +295,7 @@ export class VirtualDPad {
     this.container.setVisible(visible)
     this.enabled = visible
     if (!visible) {
-      this.activePointer = null
+      this.activeTouchId = null
       this.resetState()
     }
   }
@@ -265,9 +306,14 @@ export class VirtualDPad {
 
   destroy(): void {
     this.scene.scale.off('resize', this.updatePosition, this)
-    this.scene.input.off('pointerdown', this.handlePointerDown, this)
-    this.scene.input.off('pointermove', this.handlePointerMove, this)
-    this.scene.input.off('pointerup', this.handlePointerUp, this)
+
+    // Clean up DOM event listeners
+    const canvas = this.scene.game.canvas
+    canvas.removeEventListener('touchstart', this.boundTouchStart)
+    canvas.removeEventListener('touchmove', this.boundTouchMove)
+    canvas.removeEventListener('touchend', this.boundTouchEnd)
+    canvas.removeEventListener('touchcancel', this.boundTouchEnd)
+
     this.container.destroy()
   }
 }

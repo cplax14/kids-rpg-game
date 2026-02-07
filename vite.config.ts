@@ -10,6 +10,7 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    host: true,  // Listen on all interfaces (0.0.0.0)
   },
   build: {
     target: 'es2022',
