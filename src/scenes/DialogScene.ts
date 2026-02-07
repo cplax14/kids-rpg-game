@@ -119,10 +119,10 @@ export class DialogScene extends Phaser.Scene {
   }
 
   private createDialogBox(): void {
-    const boxWidth = 700
-    const boxHeight = 180
+    const boxWidth = 750
+    const boxHeight = 300  // Much taller for mobile-friendly buttons
     const boxX = (GAME_WIDTH - boxWidth) / 2
-    const boxY = GAME_HEIGHT - boxHeight - 40
+    const boxY = (GAME_HEIGHT - boxHeight) / 2  // Center vertically
 
     this.dialogBox = this.add.container(boxX, boxY)
     this.dialogBox.setDepth(DEPTH.OVERLAY + 1)
@@ -130,26 +130,26 @@ export class DialogScene extends Phaser.Scene {
     // Background
     const bg = this.add.graphics()
     bg.fillStyle(COLORS.PANEL_BG, 0.95)
-    bg.fillRoundedRect(0, 0, boxWidth, boxHeight, 12)
-    bg.lineStyle(2, COLORS.PRIMARY)
-    bg.strokeRoundedRect(0, 0, boxWidth, boxHeight, 12)
+    bg.fillRoundedRect(0, 0, boxWidth, boxHeight, 14)
+    bg.lineStyle(3, COLORS.PRIMARY)
+    bg.strokeRoundedRect(0, 0, boxWidth, boxHeight, 14)
     this.dialogBox.add(bg)
 
     // Speaker name
-    this.speakerText = this.add.text(20, 12, '', {
+    this.speakerText = this.add.text(24, 16, '', {
       ...TEXT_STYLES.BODY,
-      fontSize: '16px',
+      fontSize: '22px',
       color: '#ffd54f',
       fontStyle: 'bold',
     })
     this.dialogBox.add(this.speakerText)
 
     // Message text
-    this.messageText = this.add.text(20, 38, '', {
+    this.messageText = this.add.text(24, 48, '', {
       ...TEXT_STYLES.BODY,
-      fontSize: '16px',
-      wordWrap: { width: boxWidth - 40 },
-      lineSpacing: 4,
+      fontSize: '20px',
+      wordWrap: { width: boxWidth - 48 },
+      lineSpacing: 6,
     })
     this.dialogBox.add(this.messageText)
   }
@@ -200,10 +200,10 @@ export class DialogScene extends Phaser.Scene {
 
   private showChoicesOrContinue(): void {
     if (this.currentNode.choices.length === 0 || isEndNode(this.currentNode)) {
-      // Show "click to continue" hint
-      const hint = this.add.text(680, 160, 'Click to continue...', {
+      // Show "tap to continue" hint
+      const hint = this.add.text(726, 280, 'Tap to continue...', {
         ...TEXT_STYLES.SMALL,
-        fontSize: '12px',
+        fontSize: '16px',
         color: '#b0bec5',
       })
       hint.setOrigin(1, 1)
@@ -218,23 +218,25 @@ export class DialogScene extends Phaser.Scene {
     this.clearChoices()
 
     choices.forEach((choice, index) => {
-      const btnWidth = 320
-      const btnHeight = 36
+      const btnWidth = 345
+      const btnHeight = 60  // Much taller for easy mobile tapping
       const col = index % 2
       const row = Math.floor(index / 2)
-      const btnX = 20 + col * (btnWidth + 20)
-      const btnY = 100 + row * (btnHeight + 8)
+      const btnX = 24 + col * (btnWidth + 16)
+      const btnY = 140 + row * (btnHeight + 16)  // More vertical spacing
 
       const container = this.add.container(btnX, btnY)
 
       const bg = this.add.graphics()
-      bg.fillStyle(COLORS.SECONDARY, 0.4)
-      bg.fillRoundedRect(0, 0, btnWidth, btnHeight, 8)
+      bg.fillStyle(COLORS.SECONDARY, 0.5)
+      bg.fillRoundedRect(0, 0, btnWidth, btnHeight, 12)
+      bg.lineStyle(2, COLORS.PRIMARY, 0.6)
+      bg.strokeRoundedRect(0, 0, btnWidth, btnHeight, 12)
       container.add(bg)
 
       const text = this.add.text(btnWidth / 2, btnHeight / 2, choice.text, {
         ...TEXT_STYLES.BODY,
-        fontSize: '14px',
+        fontSize: '18px',
       })
       text.setOrigin(0.5)
       container.add(text)
@@ -243,13 +245,17 @@ export class DialogScene extends Phaser.Scene {
       hitArea.setInteractive({ useHandCursor: true })
       hitArea.on('pointerover', () => {
         bg.clear()
-        bg.fillStyle(COLORS.SECONDARY, 0.7)
-        bg.fillRoundedRect(0, 0, btnWidth, btnHeight, 8)
+        bg.fillStyle(COLORS.SECONDARY, 0.8)
+        bg.fillRoundedRect(0, 0, btnWidth, btnHeight, 12)
+        bg.lineStyle(2, COLORS.PRIMARY, 0.9)
+        bg.strokeRoundedRect(0, 0, btnWidth, btnHeight, 12)
       })
       hitArea.on('pointerout', () => {
         bg.clear()
-        bg.fillStyle(COLORS.SECONDARY, 0.4)
-        bg.fillRoundedRect(0, 0, btnWidth, btnHeight, 8)
+        bg.fillStyle(COLORS.SECONDARY, 0.5)
+        bg.fillRoundedRect(0, 0, btnWidth, btnHeight, 12)
+        bg.lineStyle(2, COLORS.PRIMARY, 0.6)
+        bg.strokeRoundedRect(0, 0, btnWidth, btnHeight, 12)
       })
       hitArea.on('pointerdown', () => this.handleChoice(choice))
       container.add(hitArea)
