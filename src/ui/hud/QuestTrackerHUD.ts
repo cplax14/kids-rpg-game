@@ -7,8 +7,7 @@ import { GAME_EVENTS } from '../../events/GameEvents'
 import { ProgressRing } from '../components/ProgressRing'
 
 const TRACKER_WIDTH = 240
-const TRACKER_X = 10
-const TRACKER_Y = 10
+const TRACKER_PADDING = 10  // Padding from visible area edge
 const MAX_DISPLAYED_QUESTS = 3
 
 const QUEST_TYPE_ICONS: Record<QuestType, string> = {
@@ -40,14 +39,55 @@ export class QuestTrackerHUD {
   private questEntries: Map<string, QuestEntry> = new Map()
   private currentQuests: ReadonlyArray<QuestProgress> = []
   private flashTweens: Map<string, Phaser.Tweens.Tween> = new Map()
+  private emptyStateText: Phaser.GameObjects.Text | null = null
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene
-    this.container = scene.add.container(TRACKER_X, TRACKER_Y)
+    this.container = scene.add.container(0, 0)
     this.container.setScrollFactor(0)
     this.container.setDepth(DEPTH.UI)
 
+    this.updatePosition()
+    this.createEmptyState()
     this.setupEventListeners()
+
+    // Listen for resize events
+    scene.scale.on('resize', this.updatePosition, this)
+  }
+
+  /**
+   * Update container position based on camera zoom.
+   * With zoom > 1, only the center of the canvas is visible,
+   * so we need to offset the position to appear in the top-left of the visible area.
+   */
+  private updatePosition(): void {
+    const camera = this.scene.cameras.main
+    const zoom = camera.zoom
+
+    // Calculate visible area within canvas coordinates
+    const canvasWidth = this.scene.scale.width
+    const canvasHeight = this.scene.scale.height
+    const visibleWidth = canvasWidth / zoom
+    const visibleHeight = canvasHeight / zoom
+    const offsetX = (canvasWidth - visibleWidth) / 2
+    const offsetY = (canvasHeight - visibleHeight) / 2
+
+    // Position in top-left of the VISIBLE area
+    const x = offsetX + TRACKER_PADDING
+    const y = offsetY + TRACKER_PADDING
+
+    this.container.setPosition(x, y)
+  }
+
+  private createEmptyState(): void {
+    // Show empty state when no quests are active
+    this.emptyStateText = this.scene.add.text(0, 0, '📋 No active quests', {
+      ...TEXT_STYLES.SMALL,
+      fontSize: '11px',
+      color: '#888888',
+    })
+    this.emptyStateText.setAlpha(0.7)
+    this.container.add(this.emptyStateText)
   }
 
   private setupEventListeners(): void {
@@ -75,6 +115,11 @@ export class QuestTrackerHUD {
 
     // Take only the first MAX_DISPLAYED_QUESTS
     const displayedQuests = activeOnly.slice(0, MAX_DISPLAYED_QUESTS)
+
+    // Show/hide empty state based on quest count
+    if (this.emptyStateText) {
+      this.emptyStateText.setVisible(displayedQuests.length === 0)
+    }
 
     // Check if quests changed
     const currentIds = this.currentQuests.map((q) => q.questId).join(',')
@@ -208,7 +253,7 @@ export class QuestTrackerHUD {
       entryContainer.add(barBg)
 
       const barFill = this.scene.add.graphics()
-      this.drawProgressBar(barFill, current, required)
+      this.drawProgressBar(barFill, current, required, objY + 14)
       entryContainer.add(barFill)
       progressBars.push(barFill)
 
@@ -233,7 +278,7 @@ export class QuestTrackerHUD {
     return { container: entryContainer, progressBars, progressTexts, progressRing: ring }
   }
 
-  private drawProgressBar(graphics: Phaser.GameObjects.Graphics, current: number, required: number): void {
+  private drawProgressBar(graphics: Phaser.GameObjects.Graphics, current: number, required: number, yPos: number): void {
     const progress = Math.min(current / required, 1)
     const barWidth = (TRACKER_WIDTH - 70) * progress
     const color = progress >= 1 ? COLORS.SUCCESS : COLORS.PRIMARY
@@ -241,7 +286,7 @@ export class QuestTrackerHUD {
     graphics.clear()
     if (barWidth > 0) {
       graphics.fillStyle(color, 1)
-      graphics.fillRoundedRect(10, 14, barWidth, 5, 2)
+      graphics.fillRoundedRect(10, yPos, barWidth, 5, 2)
     }
   }
 
@@ -269,10 +314,11 @@ export class QuestTrackerHUD {
         const isComplete = current >= required
 
         // Update progress bar
+        // objY for this objective = 26 + index * 24, bar is at objY + 14
+        const barYPos = 26 + index * 24 + 14
         const bar = entry.progressBars[index]
         if (bar) {
-          this.drawProgressBar(bar, current, required)
-          bar.y = 26 + index * 24
+          this.drawProgressBar(bar, current, required, barYPos)
         }
 
         // Update texts
@@ -372,6 +418,7 @@ export class QuestTrackerHUD {
   }
 
   destroy(): void {
+    this.scene.scale.off('resize', this.updatePosition, this)
     EventBus.off(GAME_EVENTS.QUEST_PROGRESS_UPDATED)
     EventBus.off(GAME_EVENTS.QUEST_READY_TO_TURN_IN)
 

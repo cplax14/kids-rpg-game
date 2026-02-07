@@ -242,20 +242,20 @@
         "choices": [
           { "text": "Slime Slayer (Lv.1)", "nextNodeId": "quest-slime-offer" },
           { "text": "Monster Friendship (Lv.1)", "nextNodeId": "quest-friendship-offer" },
-          { "text": "Forest Explorer (Lv.3)", "nextNodeId": "quest-forest-offer" },
-          { "text": "Guardian's Challenge (Lv.5)", "nextNodeId": "quest-guardian-offer" }
+          { "text": "More quests...", "nextNodeId": "quest-hub-2" },
+          { "text": "Turn in a quest", "nextNodeId": "quest-turnin" }
         ],
         "isEnd": false
       },
       {
         "nodeId": "quest-hub-2",
         "speaker": "Village Guide",
-        "text": "Here are more quests available:",
+        "text": "Here are some tougher quests for experienced adventurers:",
         "choices": [
+          { "text": "Forest Explorer (Lv.3)", "nextNodeId": "quest-forest-offer" },
+          { "text": "Guardian's Challenge (Lv.5)", "nextNodeId": "quest-guardian-offer" },
           { "text": "Crystal Depths (Lv.8)", "nextNodeId": "quest-crystal-offer" },
-          { "text": "Turn in a quest", "nextNodeId": "quest-turnin" },
-          { "text": "Back", "nextNodeId": "quest-hub" },
-          { "text": "Maybe later", "nextNodeId": "farewell" }
+          { "text": "Back", "nextNodeId": "quest-hub" }
         ],
         "isEnd": false
       },

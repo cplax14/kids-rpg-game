@@ -211,7 +211,86 @@ export class DialogScene extends Phaser.Scene {
       return
     }
 
-    this.showChoices(this.currentNode.choices)
+    // Filter choices based on quest completion status
+    const filteredChoices = this.filterQuestChoices(this.currentNode.choices)
+    this.showChoices(filteredChoices)
+  }
+
+  /**
+   * Filter dialog choices to only show quests the player can actually interact with.
+   * - complete_quest actions: Only show if quest is ready to turn in (status === 'completed')
+   * - accept_quest actions: Only show if quest hasn't been accepted or completed yet
+   */
+  private filterQuestChoices(choices: ReadonlyArray<DialogChoice>): ReadonlyArray<DialogChoice> {
+    // Check if this node has quest-related choices
+    const hasCompleteQuestChoices = choices.some((c) => c.action === 'complete_quest')
+    const hasAcceptQuestChoices = choices.some((c) => c.action === 'accept_quest')
+
+    if (!hasCompleteQuestChoices && !hasAcceptQuestChoices) {
+      return choices
+    }
+
+    try {
+      const state = getGameState(this)
+
+      // Filter choices based on quest status
+      const filtered = choices.filter((choice) => {
+        // Keep non-quest choices (like "Never mind" / "Back")
+        if (choice.action !== 'complete_quest' && choice.action !== 'accept_quest') {
+          return true
+        }
+
+        const questId = choice.actionData
+        if (!questId) return false
+
+        if (choice.action === 'complete_quest') {
+          // Only show if quest is ready to turn in
+          const progress = state.activeQuests.find((q) => q.questId === questId)
+          return progress?.status === 'completed'
+        }
+
+        if (choice.action === 'accept_quest') {
+          // Only show if quest hasn't been accepted or completed
+          const isActive = state.activeQuests.some((q) => q.questId === questId)
+          const isCompleted = state.completedQuestIds.includes(questId)
+          return !isActive && !isCompleted
+        }
+
+        return true
+      })
+
+      // Handle empty quest turn-in list
+      if (hasCompleteQuestChoices) {
+        const completableQuests = filtered.filter((c) => c.action === 'complete_quest')
+        if (completableQuests.length === 0) {
+          // Find the "back" or "never mind" choice from original choices
+          const backChoice = choices.find((c) =>
+            c.action !== 'complete_quest' &&
+            (c.text.toLowerCase().includes('back') ||
+             c.text.toLowerCase().includes('never mind') ||
+             c.nextNodeId === 'greeting' ||
+             c.nextNodeId === 'quest-hub')
+          )
+
+          // Return only non-complete_quest choices plus a "no quests" message
+          const nonCompleteChoices = filtered.filter((c) => c.action !== 'complete_quest')
+          return [
+            {
+              text: 'No quests ready to turn in',
+              nextNodeId: backChoice?.nextNodeId ?? null,
+              action: undefined,
+              actionData: undefined,
+            },
+            ...nonCompleteChoices,
+          ]
+        }
+      }
+
+      return filtered
+    } catch {
+      // No game state, return original choices
+      return choices
+    }
   }
 
   private showChoices(choices: ReadonlyArray<DialogChoice>): void {
