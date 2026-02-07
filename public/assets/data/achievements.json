@@ -1,0 +1,360 @@
+[
+  {
+    "achievementId": "first-victory",
+    "name": "First Victory",
+    "description": "Win your first battle!",
+    "category": "combat",
+    "rarity": "bronze",
+    "iconKey": "badge-sword",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "battlesWon", "requiredValue": 1 }
+    ],
+    "rewardGold": 50,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "battle-veteran",
+    "name": "Battle Veteran",
+    "description": "Win 10 battles.",
+    "category": "combat",
+    "rarity": "silver",
+    "iconKey": "badge-sword",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "battlesWon", "requiredValue": 10 }
+    ],
+    "rewardGold": 200,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "battle-master",
+    "name": "Battle Master",
+    "description": "Win 50 battles!",
+    "category": "combat",
+    "rarity": "gold",
+    "iconKey": "badge-sword",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "battlesWon", "requiredValue": 50 }
+    ],
+    "rewardGold": 500,
+    "rewardItems": [
+      { "itemId": "potion", "quantity": 5 }
+    ],
+    "isSecret": false
+  },
+  {
+    "achievementId": "monster-slayer",
+    "name": "Monster Slayer",
+    "description": "Defeat 25 monsters in battle.",
+    "category": "combat",
+    "rarity": "silver",
+    "iconKey": "badge-skull",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "monstersDefeated", "requiredValue": 25 }
+    ],
+    "rewardGold": 150,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "first-capture",
+    "name": "Monster Tamer",
+    "description": "Capture your first monster!",
+    "category": "collection",
+    "rarity": "bronze",
+    "iconKey": "badge-pokeball",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "monstersCaptured", "requiredValue": 1 }
+    ],
+    "rewardGold": 50,
+    "rewardItems": [
+      { "itemId": "capture-sphere", "quantity": 3 }
+    ],
+    "isSecret": false
+  },
+  {
+    "achievementId": "collector",
+    "name": "Collector",
+    "description": "Capture 10 monsters.",
+    "category": "collection",
+    "rarity": "silver",
+    "iconKey": "badge-pokeball",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "monstersCaptured", "requiredValue": 10 }
+    ],
+    "rewardGold": 300,
+    "rewardItems": [
+      { "itemId": "super-sphere", "quantity": 5 }
+    ],
+    "isSecret": false
+  },
+  {
+    "achievementId": "master-collector",
+    "name": "Master Collector",
+    "description": "Capture 25 monsters!",
+    "category": "collection",
+    "rarity": "gold",
+    "iconKey": "badge-pokeball",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "monstersCaptured", "requiredValue": 25 }
+    ],
+    "rewardGold": 750,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "species-hunter",
+    "name": "Species Hunter",
+    "description": "Discover 5 different monster species.",
+    "category": "collection",
+    "rarity": "bronze",
+    "iconKey": "badge-book",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "speciesDiscovered", "requiredValue": 5 }
+    ],
+    "rewardGold": 100,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "bestiary-scholar",
+    "name": "Bestiary Scholar",
+    "description": "Discover 15 different monster species.",
+    "category": "collection",
+    "rarity": "silver",
+    "iconKey": "badge-book",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "speciesDiscovered", "requiredValue": 15 }
+    ],
+    "rewardGold": 400,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "first-explorer",
+    "name": "First Steps",
+    "description": "Visit a new area for the first time.",
+    "category": "exploration",
+    "rarity": "bronze",
+    "iconKey": "badge-compass",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "areasVisited", "requiredValue": 1 }
+    ],
+    "rewardGold": 25,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "adventurer",
+    "name": "Adventurer",
+    "description": "Visit 3 different areas.",
+    "category": "exploration",
+    "rarity": "silver",
+    "iconKey": "badge-compass",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "areasVisited", "requiredValue": 3 }
+    ],
+    "rewardGold": 200,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "world-traveler",
+    "name": "World Traveler",
+    "description": "Visit 5 different areas.",
+    "category": "exploration",
+    "rarity": "gold",
+    "iconKey": "badge-compass",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "areasVisited", "requiredValue": 5 }
+    ],
+    "rewardGold": 500,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "boss-hunter",
+    "name": "Boss Hunter",
+    "description": "Defeat your first boss!",
+    "category": "combat",
+    "rarity": "silver",
+    "iconKey": "badge-crown",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "bossesDefeated", "requiredValue": 1 }
+    ],
+    "rewardGold": 300,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "boss-slayer",
+    "name": "Boss Slayer",
+    "description": "Defeat 3 bosses.",
+    "category": "combat",
+    "rarity": "gold",
+    "iconKey": "badge-crown",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "bossesDefeated", "requiredValue": 3 }
+    ],
+    "rewardGold": 750,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "quest-starter",
+    "name": "Quest Starter",
+    "description": "Complete your first quest!",
+    "category": "social",
+    "rarity": "bronze",
+    "iconKey": "badge-scroll",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "questsCompleted", "requiredValue": 1 }
+    ],
+    "rewardGold": 75,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "quest-hero",
+    "name": "Quest Hero",
+    "description": "Complete 5 quests.",
+    "category": "social",
+    "rarity": "silver",
+    "iconKey": "badge-scroll",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "questsCompleted", "requiredValue": 5 }
+    ],
+    "rewardGold": 350,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "quest-champion",
+    "name": "Quest Champion",
+    "description": "Complete 15 quests!",
+    "category": "social",
+    "rarity": "gold",
+    "iconKey": "badge-scroll",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "questsCompleted", "requiredValue": 15 }
+    ],
+    "rewardGold": 1000,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "first-breed",
+    "name": "Monster Breeder",
+    "description": "Successfully breed your first monster!",
+    "category": "mastery",
+    "rarity": "silver",
+    "iconKey": "badge-heart",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "monstersBreed", "requiredValue": 1 }
+    ],
+    "rewardGold": 200,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "breeding-master",
+    "name": "Breeding Master",
+    "description": "Breed 5 monsters.",
+    "category": "mastery",
+    "rarity": "gold",
+    "iconKey": "badge-heart",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "monstersBreed", "requiredValue": 5 }
+    ],
+    "rewardGold": 600,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "level-5",
+    "name": "Rising Star",
+    "description": "Reach level 5.",
+    "category": "mastery",
+    "rarity": "bronze",
+    "iconKey": "badge-star",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "highestPlayerLevel", "requiredValue": 5 }
+    ],
+    "rewardGold": 100,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "level-10",
+    "name": "Seasoned Hero",
+    "description": "Reach level 10.",
+    "category": "mastery",
+    "rarity": "silver",
+    "iconKey": "badge-star",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "highestPlayerLevel", "requiredValue": 10 }
+    ],
+    "rewardGold": 300,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "level-20",
+    "name": "Legendary Hero",
+    "description": "Reach level 20!",
+    "category": "mastery",
+    "rarity": "gold",
+    "iconKey": "badge-star",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "highestPlayerLevel", "requiredValue": 20 }
+    ],
+    "rewardGold": 1000,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "treasure-hunter",
+    "name": "Treasure Hunter",
+    "description": "Earn 1000 gold total.",
+    "category": "exploration",
+    "rarity": "silver",
+    "iconKey": "badge-coin",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "goldEarned", "requiredValue": 1000 }
+    ],
+    "rewardGold": 250,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "wealthy-adventurer",
+    "name": "Wealthy Adventurer",
+    "description": "Earn 5000 gold total!",
+    "category": "exploration",
+    "rarity": "gold",
+    "iconKey": "badge-coin",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "goldEarned", "requiredValue": 5000 }
+    ],
+    "rewardGold": 500,
+    "rewardItems": [],
+    "isSecret": false
+  },
+  {
+    "achievementId": "ultimate-champion",
+    "name": "Ultimate Champion",
+    "description": "A true master of all skills!",
+    "category": "mastery",
+    "rarity": "platinum",
+    "iconKey": "badge-trophy",
+    "conditions": [
+      { "type": "stat_threshold", "statKey": "battlesWon", "requiredValue": 100 },
+      { "type": "stat_threshold", "statKey": "monstersCaptured", "requiredValue": 50 },
+      { "type": "stat_threshold", "statKey": "questsCompleted", "requiredValue": 25 }
+    ],
+    "rewardGold": 5000,
+    "rewardItems": [],
+    "isSecret": true
+  }
+]

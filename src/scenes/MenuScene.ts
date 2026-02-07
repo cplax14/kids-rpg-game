@@ -7,11 +7,12 @@ import { BestiaryPanel } from '../ui/menus/BestiaryPanel'
 import { SettingsPanel } from '../ui/menus/SettingsPanel'
 import { SaveLoadPanel } from '../ui/menus/SaveLoadPanel'
 import { QuestLogPanel } from '../ui/menus/QuestLogPanel'
+import { AchievementPanel } from '../ui/menus/AchievementPanel'
 import { PlayerHeader } from '../ui/menus/PlayerHeader'
 
-type MenuTab = 'inventory' | 'equipment' | 'squad' | 'bestiary' | 'quests' | 'settings' | 'save'
+type MenuTab = 'inventory' | 'equipment' | 'squad' | 'bestiary' | 'quests' | 'badges' | 'settings' | 'save'
 
-const TAB_WIDTH = 95
+const TAB_WIDTH = 88
 const TAB_HEIGHT = 36
 const TAB_GAP = 8
 const PANEL_START_Y = 175
@@ -25,6 +26,7 @@ export class MenuScene extends Phaser.Scene {
   private settingsPanel: SettingsPanel | null = null
   private saveLoadPanel: SaveLoadPanel | null = null
   private questLogPanel: QuestLogPanel | null = null
+  private achievementPanel: AchievementPanel | null = null
   private playerHeader: PlayerHeader | null = null
   private tabButtons: Phaser.GameObjects.Container[] = []
   private playTime: number = 0
@@ -100,6 +102,7 @@ export class MenuScene extends Phaser.Scene {
       { label: 'Squad', tab: 'squad' },
       { label: 'Bestiary', tab: 'bestiary' },
       { label: 'Quests', tab: 'quests' },
+      { label: 'Badges', tab: 'badges' },
       { label: 'Settings', tab: 'settings' },
       { label: 'Save', tab: 'save' },
     ]
@@ -211,6 +214,8 @@ export class MenuScene extends Phaser.Scene {
       this.bestiaryPanel = new BestiaryPanel(this, 70, PANEL_START_Y)
     } else if (tab === 'quests') {
       this.questLogPanel = new QuestLogPanel(this, 70, PANEL_START_Y)
+    } else if (tab === 'badges') {
+      this.achievementPanel = new AchievementPanel(this, 70, PANEL_START_Y)
     } else if (tab === 'settings') {
       this.settingsPanel = new SettingsPanel(this, 70, PANEL_START_Y)
     } else if (tab === 'save') {
@@ -254,6 +259,10 @@ export class MenuScene extends Phaser.Scene {
     if (this.questLogPanel) {
       this.questLogPanel.destroy()
       this.questLogPanel = null
+    }
+    if (this.achievementPanel) {
+      this.achievementPanel.destroy()
+      this.achievementPanel = null
     }
   }
 

@@ -393,6 +393,64 @@ export const QuestProgressSchema = z.object({
   completedAt: z.string().nullable(),
 })
 
+// ── Achievement System ──
+
+export const AchievementCategorySchema = z.enum([
+  'combat',
+  'collection',
+  'exploration',
+  'social',
+  'mastery',
+])
+
+export const AchievementRaritySchema = z.enum(['bronze', 'silver', 'gold', 'platinum'])
+
+export const AchievementConditionTypeSchema = z.enum(['stat_threshold', 'count', 'flag'])
+
+export const AchievementConditionSchema = z.object({
+  type: AchievementConditionTypeSchema,
+  statKey: z.string().min(1),
+  requiredValue: z.number().int().min(0),
+})
+
+export const AchievementRewardItemSchema = z.object({
+  itemId: z.string().min(1),
+  quantity: z.number().int().min(1),
+})
+
+export const AchievementDefinitionSchema = z.object({
+  achievementId: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string(),
+  category: AchievementCategorySchema,
+  rarity: AchievementRaritySchema,
+  iconKey: z.string().min(1),
+  conditions: z.array(AchievementConditionSchema),
+  rewardGold: z.number().int().min(0),
+  rewardItems: z.array(AchievementRewardItemSchema),
+  isSecret: z.boolean(),
+})
+
+export const AchievementProgressSchema = z.object({
+  achievementId: z.string().min(1),
+  isUnlocked: z.boolean(),
+  unlockedAt: z.string().nullable(),
+  currentProgress: z.record(z.string(), z.number().int().min(0)),
+})
+
+export const AchievementStatsSchema = z.object({
+  battlesWon: z.number().int().min(0),
+  monstersDefeated: z.number().int().min(0),
+  monstersCaptured: z.number().int().min(0),
+  goldEarned: z.number().int().min(0),
+  questsCompleted: z.number().int().min(0),
+  bossesDefeated: z.number().int().min(0),
+  areasVisited: z.number().int().min(0),
+  speciesDiscovered: z.number().int().min(0),
+  monstersBreed: z.number().int().min(0),
+  highestPlayerLevel: z.number().int().min(1),
+})
+
 // ── Save Game Validation (Permissive) ──
 // These schemas validate the essential structure of save data
 // while being permissive about nested object details to handle
@@ -446,4 +504,17 @@ export const SaveGameSchema = z.object({
   settings: GameSettingsSchema,
   activeQuests: z.array(QuestProgressSchema),
   completedQuestIds: z.array(z.string()),
+  achievements: z.array(AchievementProgressSchema).optional().default([]),
+  achievementStats: AchievementStatsSchema.optional().default({
+    battlesWon: 0,
+    monstersDefeated: 0,
+    monstersCaptured: 0,
+    goldEarned: 0,
+    questsCompleted: 0,
+    bossesDefeated: 0,
+    areasVisited: 0,
+    speciesDiscovered: 0,
+    monstersBreed: 0,
+    highestPlayerLevel: 1,
+  }),
 })

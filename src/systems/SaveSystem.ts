@@ -4,6 +4,7 @@ import { saveToStorage, loadFromStorage, removeFromStorage } from '../utils/stor
 import { generateSaveId } from '../utils/id'
 import { getGameState, type GameState } from './GameStateManager'
 import { loadSettings } from './SettingsManager'
+import { createInitialAchievementStats } from './AchievementSystem'
 import { logger } from '../utils/logger'
 import { SAVE_SLOTS, CLOUD_SAVE_ENABLED } from '../config'
 
@@ -37,6 +38,8 @@ export function createSaveGame(state: GameState, settings: GameSettings, playTim
     settings,
     activeQuests: [...state.activeQuests],
     completedQuestIds: [...state.completedQuestIds],
+    achievements: [...state.achievements],
+    achievementStats: state.achievementStats,
   }
 }
 
@@ -152,6 +155,8 @@ export function gameStateFromSave(save: SaveGame): GameState {
     openedChests: [...save.openedChests],
     activeQuests: [...(save.activeQuests ?? [])],
     completedQuestIds: [...(save.completedQuestIds ?? [])],
+    achievements: [...(save.achievements ?? [])],
+    achievementStats: save.achievementStats ?? createInitialAchievementStats(),
   }
 }
 

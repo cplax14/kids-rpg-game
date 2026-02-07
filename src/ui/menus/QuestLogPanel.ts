@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import type { QuestProgress, QuestDefinition } from '../../models/types'
+import type { QuestProgress, QuestDefinition, QuestType } from '../../models/types'
 import { COLORS, TEXT_STYLES, DEPTH } from '../../config'
 import { getGameState, setGameState, updateActiveQuests } from '../../systems/GameStateManager'
 import {
@@ -8,12 +8,29 @@ import {
   getObjectiveProgress,
   abandonQuest,
 } from '../../systems/QuestSystem'
+import { ProgressRing } from '../components/ProgressRing'
 
 const PANEL_WIDTH = 540
 const DETAIL_WIDTH = 500
 const LIST_HEIGHT = 400
 
 type QuestTab = 'active' | 'completed'
+
+const QUEST_TYPE_ICONS: Record<QuestType, string> = {
+  defeat: '⚔️',
+  collect: '🎒',
+  boss: '👑',
+  explore: '🗺️',
+  talk: '💬',
+}
+
+const QUEST_TYPE_COLORS: Record<QuestType, number> = {
+  defeat: 0xef5350,
+  collect: 0x66bb6a,
+  boss: 0xffd54f,
+  explore: 0x42a5f5,
+  talk: 0x7e57c2,
+}
 
 export class QuestLogPanel {
   private scene: Phaser.Scene
@@ -23,6 +40,7 @@ export class QuestLogPanel {
   private activeTab: QuestTab = 'active'
   private selectedQuestId: string | null = null
   private tabButtons: Phaser.GameObjects.Container[] = []
+  private progressRings: ProgressRing[] = []
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.scene = scene
@@ -93,8 +111,12 @@ export class QuestLogPanel {
   }
 
   private refreshList(): void {
-    // Clear list container
+    // Clear list container and progress rings
     this.listContainer.removeAll(true)
+    for (const ring of this.progressRings) {
+      ring.destroy()
+    }
+    this.progressRings = []
 
     const state = getGameState(this.scene)
     const quests =
@@ -133,7 +155,7 @@ export class QuestLogPanel {
       const entry = this.createQuestListEntry(quest, progress, yOffset)
       this.listContainer.add(entry)
 
-      yOffset += 70
+      yOffset += 78
     }
   }
 
@@ -145,19 +167,37 @@ export class QuestLogPanel {
     const container = this.scene.add.container(0, yOffset)
     const isSelected = this.selectedQuestId === quest.questId
     const isCompleted = this.activeTab === 'completed' || progress?.status === 'completed'
+    const isReadyToTurnIn = progress?.status === 'completed'
+
+    // Get primary quest type from first objective
+    const primaryType: QuestType = quest.objectives[0]?.type ?? 'defeat'
+    const typeIcon = QUEST_TYPE_ICONS[primaryType]
+    const typeColor = QUEST_TYPE_COLORS[primaryType]
 
     // Background
     const bg = this.scene.add.graphics()
     bg.fillStyle(isSelected ? COLORS.PRIMARY : COLORS.PANEL_BG, isSelected ? 0.5 : 0.3)
-    bg.fillRoundedRect(0, 0, PANEL_WIDTH, 60, 8)
+    bg.fillRoundedRect(0, 0, PANEL_WIDTH, 70, 8)
     if (isSelected) {
       bg.lineStyle(2, COLORS.PRIMARY)
-      bg.strokeRoundedRect(0, 0, PANEL_WIDTH, 60, 8)
+      bg.strokeRoundedRect(0, 0, PANEL_WIDTH, 70, 8)
     }
     container.add(bg)
 
+    // Type icon badge
+    const iconBg = this.scene.add.graphics()
+    iconBg.fillStyle(typeColor, 0.3)
+    iconBg.fillRoundedRect(8, 8, 36, 36, 8)
+    container.add(iconBg)
+
+    const iconText = this.scene.add.text(26, 26, typeIcon, {
+      fontSize: '20px',
+    })
+    iconText.setOrigin(0.5)
+    container.add(iconText)
+
     // Quest name
-    const nameText = this.scene.add.text(12, 10, quest.name, {
+    const nameText = this.scene.add.text(52, 10, quest.name, {
       ...TEXT_STYLES.BODY,
       fontSize: '15px',
       color: isCompleted ? '#66bb6a' : '#ffffff',
@@ -166,7 +206,7 @@ export class QuestLogPanel {
     container.add(nameText)
 
     // Level recommendation
-    const levelText = this.scene.add.text(PANEL_WIDTH - 12, 10, `Lv ${quest.recommendedLevel}`, {
+    const levelText = this.scene.add.text(PANEL_WIDTH - 50, 10, `Lv ${quest.recommendedLevel}`, {
       ...TEXT_STYLES.SMALL,
       fontSize: '12px',
       color: '#b0bec5',
@@ -174,14 +214,42 @@ export class QuestLogPanel {
     levelText.setOrigin(1, 0)
     container.add(levelText)
 
-    // Progress or status
-    if (progress) {
+    // Progress ring (for active quests)
+    if (progress && this.activeTab === 'active') {
       const percent = getQuestProgressPercent(progress, quest)
-      const statusColor = progress.status === 'completed' ? '#66bb6a' : '#ffd54f'
-      const statusText =
-        progress.status === 'completed' ? 'Ready to turn in!' : `${percent}% complete`
+      const ringColor = isReadyToTurnIn ? COLORS.SUCCESS : typeColor
 
-      const progText = this.scene.add.text(12, 34, statusText, {
+      const ring = new ProgressRing(this.scene, PANEL_WIDTH - 30, 35, percent, {
+        radius: 18,
+        thickness: 4,
+        fillColor: ringColor,
+        showPercent: true,
+        animate: false,
+      })
+      this.listContainer.add(ring.getContainer())
+      ring.getContainer().setPosition(PANEL_WIDTH - 30, yOffset + 35)
+      this.progressRings.push(ring)
+
+      // Pulsing animation if ready to turn in
+      if (isReadyToTurnIn) {
+        this.scene.tweens.add({
+          targets: ring.getContainer(),
+          scaleX: 1.1,
+          scaleY: 1.1,
+          duration: 600,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+        })
+      }
+    }
+
+    // Progress or status text
+    if (progress) {
+      const statusColor = isReadyToTurnIn ? '#66bb6a' : '#ffd54f'
+      const statusText = isReadyToTurnIn ? '✓ Ready to turn in!' : `In Progress`
+
+      const progText = this.scene.add.text(52, 32, statusText, {
         ...TEXT_STYLES.SMALL,
         fontSize: '12px',
         color: statusColor,
@@ -190,18 +258,19 @@ export class QuestLogPanel {
 
       // Progress bar for active quests
       if (progress.status === 'active') {
+        const percent = getQuestProgressPercent(progress, quest)
         const barBg = this.scene.add.graphics()
         barBg.fillStyle(0x333333, 1)
-        barBg.fillRoundedRect(180, 38, 200, 8, 4)
+        barBg.fillRoundedRect(52, 50, 380, 8, 4)
         container.add(barBg)
 
         const barFill = this.scene.add.graphics()
-        barFill.fillStyle(COLORS.PRIMARY, 1)
-        barFill.fillRoundedRect(180, 38, 200 * (percent / 100), 8, 4)
+        barFill.fillStyle(typeColor, 1)
+        barFill.fillRoundedRect(52, 50, 380 * (percent / 100), 8, 4)
         container.add(barFill)
       }
     } else if (this.activeTab === 'completed') {
-      const completedText = this.scene.add.text(12, 34, 'Completed', {
+      const completedText = this.scene.add.text(52, 32, '✓ Completed', {
         ...TEXT_STYLES.SMALL,
         fontSize: '12px',
         color: '#66bb6a',
@@ -210,7 +279,7 @@ export class QuestLogPanel {
     }
 
     // Hit area for selection
-    const hitArea = this.scene.add.rectangle(PANEL_WIDTH / 2, 30, PANEL_WIDTH, 60)
+    const hitArea = this.scene.add.rectangle(PANEL_WIDTH / 2 - 25, 35, PANEL_WIDTH - 50, 70)
     hitArea.setInteractive({ useHandCursor: true })
     hitArea.on('pointerdown', () => {
       this.selectedQuestId = quest.questId
@@ -278,12 +347,13 @@ export class QuestLogPanel {
       const current = progress ? getObjectiveProgress(progress, objective.objectiveId) : 0
       const required = objective.requiredCount
       const objComplete = current >= required || isCompleted
+      const objIcon = QUEST_TYPE_ICONS[objective.type] ?? '📌'
 
-      const checkmark = objComplete ? '[X]' : '[ ]'
+      const checkmark = objComplete ? '✓' : '○'
       const objText = this.scene.add.text(
         0,
         yOffset,
-        `${checkmark} ${objective.description} (${objComplete ? required : current}/${required})`,
+        `${checkmark} ${objIcon} ${objective.description} (${objComplete ? required : current}/${required})`,
         {
           ...TEXT_STYLES.BODY,
           fontSize: '13px',
@@ -291,7 +361,7 @@ export class QuestLogPanel {
         },
       )
       this.detailContainer.add(objText)
-      yOffset += 20
+      yOffset += 22
     }
 
     yOffset += 15
@@ -399,6 +469,10 @@ export class QuestLogPanel {
   }
 
   destroy(): void {
+    for (const ring of this.progressRings) {
+      ring.destroy()
+    }
+    this.progressRings = []
     this.container.destroy()
   }
 }

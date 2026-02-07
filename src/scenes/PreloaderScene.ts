@@ -75,6 +75,9 @@ export class PreloaderScene extends Phaser.Scene {
     // Load quest data
     this.load.json('quests-data', 'assets/data/quests.json')
 
+    // Load achievement data
+    this.load.json('achievements-data', 'assets/data/achievements.json')
+
     // Load real sprite sheets (16x16 pixel art)
     this.load.spritesheet('characters-sheet', 'assets/sprites/characters/characters.png', {
       frameWidth: 16,

@@ -80,7 +80,8 @@ import {
   trackAreaExploration,
   getQuestsForNpc,
 } from '../systems/QuestSystem'
-import type { QuestDefinition } from '../models/types'
+import { loadAchievementData } from '../systems/AchievementSystem'
+import type { QuestDefinition, AchievementDefinition } from '../models/types'
 import { QuestTrackerHUD } from '../ui/hud/QuestTrackerHUD'
 import type { QuestIndicatorType } from '../entities/NPC'
 
@@ -979,6 +980,10 @@ export class WorldScene extends Phaser.Scene {
     // Load quest data
     const questsData = this.cache.json.get('quests-data') as QuestDefinition[] | undefined
     if (questsData) loadQuestData(questsData)
+
+    // Load achievement data
+    const achievementsData = this.cache.json.get('achievements-data') as AchievementDefinition[] | undefined
+    if (achievementsData) loadAchievementData(achievementsData)
   }
 
   private updateQuestTracker(): void {

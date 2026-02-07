@@ -97,6 +97,19 @@ describe('SaveSystem', () => {
     openedChests: ['chest-1'],
     activeQuests: [],
     completedQuestIds: [],
+    achievements: [],
+    achievementStats: {
+      battlesWon: 0,
+      monstersDefeated: 0,
+      monstersCaptured: 0,
+      goldEarned: 0,
+      questsCompleted: 0,
+      bossesDefeated: 0,
+      areasVisited: 0,
+      speciesDiscovered: 0,
+      monstersBreed: 0,
+      highestPlayerLevel: 1,
+    },
   }
 
   const mockSettings: GameSettings = {

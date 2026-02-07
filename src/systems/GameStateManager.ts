@@ -1,4 +1,11 @@
-import type { PlayerCharacter, Inventory, MonsterInstance, QuestProgress } from '../models/types'
+import type {
+  PlayerCharacter,
+  Inventory,
+  MonsterInstance,
+  QuestProgress,
+  AchievementProgress,
+  AchievementStats,
+} from '../models/types'
 import { createNewPlayer } from './CharacterSystem'
 import { MAX_INVENTORY_SLOTS } from '../config'
 
@@ -15,6 +22,8 @@ export interface GameState {
   readonly openedChests: ReadonlyArray<string>
   readonly activeQuests: ReadonlyArray<QuestProgress>
   readonly completedQuestIds: ReadonlyArray<string>
+  readonly achievements: ReadonlyArray<AchievementProgress>
+  readonly achievementStats: AchievementStats
 }
 
 const REGISTRY_KEY = 'gameState'
@@ -37,6 +46,19 @@ export function createInitialGameState(playerName: string): GameState {
     openedChests: [],
     activeQuests: [],
     completedQuestIds: [],
+    achievements: [],
+    achievementStats: {
+      battlesWon: 0,
+      monstersDefeated: 0,
+      monstersCaptured: 0,
+      goldEarned: 0,
+      questsCompleted: 0,
+      bossesDefeated: 0,
+      areasVisited: 0,
+      speciesDiscovered: 0,
+      monstersBreed: 0,
+      highestPlayerLevel: 1,
+    },
   }
 }
 
@@ -119,4 +141,18 @@ export function updateCompletedQuests(
   completedQuestIds: ReadonlyArray<string>,
 ): GameState {
   return { ...state, completedQuestIds }
+}
+
+export function updateAchievements(
+  state: GameState,
+  achievements: ReadonlyArray<AchievementProgress>,
+): GameState {
+  return { ...state, achievements }
+}
+
+export function updateAchievementStats(
+  state: GameState,
+  achievementStats: AchievementStats,
+): GameState {
+  return { ...state, achievementStats }
 }

@@ -525,6 +525,8 @@ export interface SaveGame {
   readonly settings: GameSettings
   readonly activeQuests: ReadonlyArray<QuestProgress>
   readonly completedQuestIds: ReadonlyArray<string>
+  readonly achievements: ReadonlyArray<AchievementProgress>
+  readonly achievementStats: AchievementStats
 }
 
 // ── Quest System ──
@@ -575,4 +577,61 @@ export interface QuestProgress {
   readonly objectiveProgress: Record<string, number>
   readonly acceptedAt: string
   readonly completedAt: string | null
+}
+
+// ── Achievement System ──
+
+export type AchievementCategory =
+  | 'combat'
+  | 'collection'
+  | 'exploration'
+  | 'social'
+  | 'mastery'
+
+export type AchievementRarity = 'bronze' | 'silver' | 'gold' | 'platinum'
+
+export type AchievementConditionType = 'stat_threshold' | 'count' | 'flag'
+
+export interface AchievementCondition {
+  readonly type: AchievementConditionType
+  readonly statKey: string
+  readonly requiredValue: number
+}
+
+export interface AchievementRewardItem {
+  readonly itemId: string
+  readonly quantity: number
+}
+
+export interface AchievementDefinition {
+  readonly achievementId: string
+  readonly name: string
+  readonly description: string
+  readonly category: AchievementCategory
+  readonly rarity: AchievementRarity
+  readonly iconKey: string
+  readonly conditions: ReadonlyArray<AchievementCondition>
+  readonly rewardGold: number
+  readonly rewardItems: ReadonlyArray<AchievementRewardItem>
+  readonly isSecret: boolean
+}
+
+export interface AchievementProgress {
+  readonly achievementId: string
+  readonly isUnlocked: boolean
+  readonly unlockedAt: string | null
+  readonly currentProgress: Record<string, number>
+}
+
+export interface AchievementStats {
+  readonly battlesWon: number
+  readonly monstersDefeated: number
+  readonly monstersCaptured: number
+  readonly goldEarned: number
+  readonly questsCompleted: number
+  readonly bossesDefeated: number
+  readonly areasVisited: number
+  readonly speciesDiscovered: number
+  readonly monstersBreed: number
+  readonly highestPlayerLevel: number
 }

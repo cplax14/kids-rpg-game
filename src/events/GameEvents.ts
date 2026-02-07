@@ -8,6 +8,8 @@ import type {
   QuestDefinition,
   QuestProgress,
   QuestRewards,
+  AchievementDefinition,
+  AchievementProgress,
 } from '../models/types'
 
 export const GAME_EVENTS = {
@@ -87,6 +89,10 @@ export const GAME_EVENTS = {
   // Audio
   MUSIC_PLAY: 'audio:music_play',
   SFX_PLAY: 'audio:sfx_play',
+
+  // Achievement
+  ACHIEVEMENT_UNLOCKED: 'achievement:unlocked',
+  ACHIEVEMENT_PROGRESS: 'achievement:progress',
 } as const
 
 export type GameEventName = (typeof GAME_EVENTS)[keyof typeof GAME_EVENTS]
@@ -132,4 +138,8 @@ export interface GameEventPayloads {
   [GAME_EVENTS.QUEST_OBJECTIVE_COMPLETE]: { questId: string; objectiveId: string }
   [GAME_EVENTS.QUEST_READY_TO_TURN_IN]: { quest: QuestDefinition; progress: QuestProgress }
   [GAME_EVENTS.QUEST_COMPLETED]: { quest: QuestDefinition; rewards: QuestRewards }
+
+  // Achievement events
+  [GAME_EVENTS.ACHIEVEMENT_UNLOCKED]: { achievement: AchievementDefinition; progress: AchievementProgress }
+  [GAME_EVENTS.ACHIEVEMENT_PROGRESS]: { achievementId: string; progress: Record<string, number> }
 }
