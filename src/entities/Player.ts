@@ -4,8 +4,9 @@ import type { InputState } from '../systems/InputSystem'
 
 export type PlayerDirection = 'up' | 'down' | 'left' | 'right'
 
-// Scale factor for 16x16 sprites to make them visible
-const PLAYER_SCALE = 3
+// Scale factors for different sprite sizes
+const SCALE_32x32 = 1.5 // 32x32 sprites look good at 1.5x
+const SCALE_16x16 = 3   // 16x16 sprites need 3x to be visible
 
 export class Player {
   readonly sprite: Phaser.Physics.Arcade.Sprite
@@ -13,22 +14,46 @@ export class Player {
   private isMoving: boolean = false
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    // Check if we have the real character sheet, otherwise fall back to procedural texture
-    const hasCharacterSheet = scene.textures.exists('characters-sheet')
-    const textureKey = hasCharacterSheet ? 'characters-sheet' : 'player'
-    const initialFrame = hasCharacterSheet ? 1 : 'down-1' // Frame 1 is down-facing idle
+    // Prefer 32x32 character sheet, fall back to 16x16, then procedural
+    const has32Sheet = scene.textures.exists('characters-32')
+    const has16Sheet = scene.textures.exists('characters-sheet')
+
+    let textureKey: string
+    let initialFrame: number | string
+    let scale: number
+
+    if (has32Sheet) {
+      // Use new 32x32 character sprites
+      // Player is row 2, idle down is frame 25 (row 2 * 12 cols + col 1)
+      textureKey = 'characters-32'
+      initialFrame = 25 // Row 2, column 1 (down-facing idle)
+      scale = SCALE_32x32
+    } else if (has16Sheet) {
+      // Fall back to 16x16 sprites
+      textureKey = 'characters-sheet'
+      initialFrame = 1
+      scale = SCALE_16x16
+    } else {
+      // Fall back to procedural texture
+      textureKey = 'player'
+      initialFrame = 'down-1'
+      scale = 1
+    }
 
     this.sprite = scene.physics.add.sprite(x, y, textureKey, initialFrame)
+    this.sprite.setScale(scale)
 
-    if (hasCharacterSheet) {
-      // Scale up the 16x16 sprite
-      this.sprite.setScale(PLAYER_SCALE)
-      // Collision body for scaled 16x16 sprite (centered, smaller for tile navigation)
-      const scaledSize = 16 * PLAYER_SCALE
+    // Set collision body based on sprite type
+    if (has32Sheet) {
+      // 32x32 sprite collision body
+      this.sprite.setSize(20, 20)
+      this.sprite.setOffset(6, 10)
+    } else if (has16Sheet) {
+      // 16x16 sprite collision body
       this.sprite.setSize(10, 10)
       this.sprite.setOffset(3, 5)
     } else {
-      // Fallback collision settings for procedural texture
+      // Procedural texture collision body
       this.sprite.setSize(12, 12)
       this.sprite.setOffset(10, 34)
     }
@@ -114,8 +139,8 @@ export class Player {
   }
 
   private updateSpriteFlip(): void {
-    // The side-facing sprite faces LEFT by default
-    // Flip horizontally when moving RIGHT to face the correct direction
-    this.sprite.setFlipX(this.direction === 'right')
+    // The side-facing sprite faces RIGHT by default
+    // Flip horizontally when moving LEFT to face the correct direction
+    this.sprite.setFlipX(this.direction === 'left')
   }
 }
