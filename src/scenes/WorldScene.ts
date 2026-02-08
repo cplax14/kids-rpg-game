@@ -354,7 +354,8 @@ export class WorldScene extends Phaser.Scene {
   private createVillageMap(): void {
     this.map = this.make.tilemap({ key: 'village-map' })
 
-    const tileset = this.map.addTilesetImage('village-tileset', 'village-tileset')
+    // Use the Mixel ground tileset (32x32)
+    const tileset = this.map.addTilesetImage('ground-tileset', 'tileset-ground')
 
     if (!tileset) {
       this.createFallbackMap()
@@ -369,7 +370,7 @@ export class WorldScene extends Phaser.Scene {
     const objectsLayer = this.map.createLayer('Objects', tileset, 0, 0)
     if (objectsLayer) {
       objectsLayer.setDepth(DEPTH.BELOW_PLAYER)
-      objectsLayer.setCollisionByExclusion([-1, 18])
+      // No collision tiles in the current map - NPCs provide collision
       this.collisionLayer = objectsLayer
     }
   }
@@ -1373,7 +1374,8 @@ export class WorldScene extends Phaser.Scene {
       this.cameras.main.setBounds(0, 0, mapWidth, mapHeight)
     }
     this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1)
-    this.cameras.main.setZoom(2)
+    // Zoom 1.5 for 32x32 tiles (was 2 for 16x16 scaled to 32)
+    this.cameras.main.setZoom(1.5)
   }
 
   private setupInput(): void {

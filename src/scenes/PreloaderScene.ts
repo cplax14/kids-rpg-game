@@ -54,8 +54,8 @@ export class PreloaderScene extends Phaser.Scene {
   }
 
   private loadAssets(): void {
-    // Load the village tilemap JSON
-    this.load.tilemapTiledJSON('village-map', 'assets/tilemaps/village.json')
+    // Load the village tilemap JSON (32x32 version with Mixel tilesets)
+    this.load.tilemapTiledJSON('village-map', 'assets/tilemaps/village-32.json')
 
     // Load game data
     this.load.json('monsters-data', 'assets/data/monsters.json')
