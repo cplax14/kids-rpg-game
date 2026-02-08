@@ -11,17 +11,37 @@ const NPC_COLORS: Readonly<Record<NpcType, number>> = {
   quest: 0x42a5f5,
 }
 
-// Frame indices from characters-sheet for each NPC type (12 cols per row)
-// Using idle frame (index 1) from different character rows
-const NPC_FRAMES: Readonly<Record<NpcType, number>> = {
-  shop: 13,     // Row 1, idle frame
-  healer: 25,   // Row 2, idle frame
-  info: 37,     // Row 3, idle frame
-  breeder: 49,  // Row 4, idle frame
-  quest: 61,    // Row 5, idle frame
+// Frame indices for 32x32 character sheet (characters-32)
+// Each row has 12 frames: cols 0-2 down, 3-5 up, 6-8 left, 9-11 right
+// Down-facing idle is at row * 12 + 1
+const NPC_FRAMES_32: Readonly<Record<NpcType, number>> = {
+  shop: 14 * 12 + 1,     // Row 14 (tan merchant) = 169
+  healer: 8 * 12 + 1,    // Row 8 (white robed) = 97
+  info: 10 * 12 + 1,     // Row 10 (brown clothed guide) = 121
+  breeder: 16 * 12 + 1,  // Row 16 (orange clothed) = 193
+  quest: 4 * 12 + 1,     // Row 4 (red mage) = 49
 }
 
-const NPC_SCALE = 3
+// Legacy frame indices for 16x16 character sheet (characters-sheet)
+const NPC_FRAMES_16: Readonly<Record<NpcType, number>> = {
+  shop: 13,
+  healer: 25,
+  info: 37,
+  breeder: 49,
+  quest: 61,
+}
+
+// Animation keys for NPCs (created in PreloaderScene)
+const NPC_ANIM_KEYS: Readonly<Record<NpcType, string>> = {
+  shop: 'shopkeeper',
+  healer: 'healer',
+  info: 'village-guide',
+  breeder: 'breeder',
+  quest: 'village-guide', // Use guide animations for quest NPCs
+}
+
+const NPC_SCALE_32 = 1.5
+const NPC_SCALE_16 = 3
 const INTERACTION_RADIUS = 2 * TILE_SIZE
 
 export type QuestIndicatorType = 'available' | 'ready' | 'in_progress' | 'none'
@@ -33,6 +53,7 @@ export class NPC {
   private readonly promptText: Phaser.GameObjects.Text
   private readonly interactionZone: Phaser.GameObjects.Zone
   private readonly definition: NpcDefinition
+  private readonly questIndicatorOffsetY: number
   private questIndicator: Phaser.GameObjects.Text | null = null
   private questIndicatorTween: Phaser.Tweens.Tween | null = null
   private currentIndicatorType: QuestIndicatorType = 'none'
@@ -41,23 +62,42 @@ export class NPC {
     this.scene = scene
     this.definition = definition
 
-    const hasCharacterSheet = scene.textures.exists('characters-sheet')
+    // Prefer 32x32 sprites, fall back to 16x16, then colored rectangle
+    const has32Sheet = scene.textures.exists('characters-32')
+    const has16Sheet = scene.textures.exists('characters-sheet')
 
-    if (hasCharacterSheet) {
-      // Use real sprite from character sheet
-      const frameIndex = NPC_FRAMES[definition.type]
+    let labelOffsetY: number
+    let promptOffsetY: number
+
+    if (has32Sheet) {
+      // Use new 32x32 character sprites
+      const frameIndex = NPC_FRAMES_32[definition.type]
+      this.sprite = scene.add.sprite(x, y, 'characters-32', frameIndex)
+      this.sprite.setScale(NPC_SCALE_32)
+      labelOffsetY = -32
+      promptOffsetY = -46
+      this.questIndicatorOffsetY = -48
+    } else if (has16Sheet) {
+      // Fall back to 16x16 sprites
+      const frameIndex = NPC_FRAMES_16[definition.type]
       this.sprite = scene.add.sprite(x, y, 'characters-sheet', frameIndex)
-      this.sprite.setScale(NPC_SCALE)
+      this.sprite.setScale(NPC_SCALE_16)
+      labelOffsetY = -24
+      promptOffsetY = -38
+      this.questIndicatorOffsetY = -40
     } else {
       // Fallback to colored rectangle
       const color = NPC_COLORS[definition.type]
       this.sprite = scene.add.rectangle(x, y, 28, 28, color)
       ;(this.sprite as Phaser.GameObjects.Rectangle).setStrokeStyle(2, 0xffffff, 0.8)
+      labelOffsetY = -24
+      promptOffsetY = -38
+      this.questIndicatorOffsetY = -40
     }
     this.sprite.setDepth(DEPTH.PLAYER)
 
     // Name label above
-    this.nameLabel = scene.add.text(x, y - 24, definition.name, {
+    this.nameLabel = scene.add.text(x, y + labelOffsetY, definition.name, {
       ...TEXT_STYLES.SMALL,
       fontSize: '11px',
       color: '#ffffff',
@@ -68,7 +108,7 @@ export class NPC {
     this.nameLabel.setDepth(DEPTH.ABOVE_PLAYER)
 
     // "Press E" prompt (hidden by default)
-    this.promptText = scene.add.text(x, y - 38, 'Press E', {
+    this.promptText = scene.add.text(x, y + promptOffsetY, 'Press E', {
       ...TEXT_STYLES.SMALL,
       fontSize: '10px',
       color: '#ffd54f',
@@ -136,7 +176,7 @@ export class NPC {
     if (type === 'none') return
 
     const x = this.sprite.x
-    const y = this.sprite.y - 40
+    const y = this.sprite.y + this.questIndicatorOffsetY
 
     // Create indicator text
     const symbol = type === 'available' ? '!' : '?'

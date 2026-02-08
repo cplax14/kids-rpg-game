@@ -53,7 +53,7 @@ export const MONSTER_SPRITE_FRAMES: Readonly<Record<string, number>> = {
   crystallix: 80, // Cave boss - crystal creature
 }
 
-// NPC type to character sheet frame index
+// NPC type to 16x16 character sheet frame index (legacy)
 export const NPC_SPRITE_FRAMES: Readonly<Record<string, number>> = {
   shopkeeper: 0,
   healer: 12, // Row 1
@@ -62,6 +62,20 @@ export const NPC_SPRITE_FRAMES: Readonly<Record<string, number>> = {
   guide: 48, // Row 4
   guard: 60, // Row 5
   villager: 72, // Row 6
+}
+
+// NPC type to 32x32 character sheet frame index (new)
+// Characters-32 sheet: 12 cols × 21 rows, each row is one character
+// Down-facing idle is at row * 12 + 1 (col 1 of down direction)
+export const NPC_SPRITE_FRAMES_32: Readonly<Record<string, number>> = {
+  shopkeeper: 14 * 12 + 1,   // Row 14: tan merchant = 169
+  healer: 8 * 12 + 1,        // Row 8: white robed = 97
+  breeder: 16 * 12 + 1,      // Row 16: orange clothed = 193
+  quest: 4 * 12 + 1,         // Row 4: red mage = 49
+  guide: 10 * 12 + 1,        // Row 10: brown clothed = 121
+  guard: 6 * 12 + 1,         // Row 6: gray armored = 73
+  villager: 12 * 12 + 1,     // Row 12: blue clothed = 145
+  skeleton: 0 * 12 + 1,      // Row 0: skeleton = 1
 }
 
 // Player character frames in the character sheet
@@ -119,10 +133,17 @@ export function getMonsterFrame(speciesId: string): number {
 }
 
 /**
- * Get the frame index for an NPC type
+ * Get the frame index for an NPC type (16x16 legacy)
  */
 export function getNpcFrame(npcType: string): number {
   return NPC_SPRITE_FRAMES[npcType] ?? 72 // Default to villager
+}
+
+/**
+ * Get the frame index for an NPC type (32x32 new)
+ */
+export function getNpcFrame32(npcType: string): number {
+  return NPC_SPRITE_FRAMES_32[npcType] ?? NPC_SPRITE_FRAMES_32.villager
 }
 
 /**
