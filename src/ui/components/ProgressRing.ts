@@ -57,6 +57,7 @@ export class ProgressRing {
         fontSize: this.options.radius < 20 ? '9px' : '11px',
         color: '#ffffff',
       })
+      this.percentText.setResolution(2) // Crisp text at zoom levels
       this.percentText.setOrigin(0.5)
       this.container.add(this.percentText)
     }

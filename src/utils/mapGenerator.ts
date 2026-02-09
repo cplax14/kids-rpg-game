@@ -151,6 +151,7 @@ function placeForestObstacles(
   reservedPositions: ReadonlyArray<Position>,
   tileSize: number,
 ): void {
+  // First pass: place trees with clustering (scaled sprites will overlap nicely)
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const index = getTileIndex(x, y, width)
@@ -162,20 +163,74 @@ function placeForestObstacles(
       if (isReservedTile(x, y, reservedPositions, tileSize)) continue
 
       // Skip edges for cleaner borders
-      if (x === 0 || x === width - 1 || y === 0 || y === height - 1) continue
+      // Large trees (64x96) need more clearance: 2 tiles from edges
+      // y <= 2 ensures the 96px tall tree canopy doesn't go off-screen
+      if (x <= 1 || x >= width - 2 || y <= 2 || y >= height - 1) continue
 
-      // Random obstacle placement
+      // Check for nearby trees to create clustering
+      // With large 64x96 trees, we need to space them out more
+      const hasNearbyTree = checkNearbyTile(objectLayer, x, y, width, height, [FOREST_TILES.TREE_1, FOREST_TILES.TREE_2])
+
+      // Lower tree density for large sprites: 12% base, +10% if clustering
+      // Large trees (64x96) overlap naturally, so fewer tiles needed
+      const treeProbability = hasNearbyTree ? 0.22 : 0.12
       const roll = Math.random()
 
-      if (roll < 0.15) {
+      if (roll < treeProbability) {
         objectLayer[index] = randomChance(0.5) ? FOREST_TILES.TREE_1 : FOREST_TILES.TREE_2
-      } else if (roll < 0.20) {
+      }
+    }
+  }
+
+  // Second pass: place rocks and bushes (bushes near trees for cohesion)
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const index = getTileIndex(x, y, width)
+
+      // Skip if already has obstacle
+      if (objectLayer[index] !== EMPTY_TILE) continue
+
+      // Skip reserved positions
+      if (isReservedTile(x, y, reservedPositions, tileSize)) continue
+
+      // Skip edges
+      if (x === 0 || x === width - 1 || y === 0 || y === height - 1) continue
+
+      const hasNearbyTree = checkNearbyTile(objectLayer, x, y, width, height, [FOREST_TILES.TREE_1, FOREST_TILES.TREE_2])
+
+      const roll = Math.random()
+
+      if (roll < 0.04) {
+        // Rocks scattered throughout (less frequent)
         objectLayer[index] = randomChance(0.5) ? FOREST_TILES.ROCK_1 : FOREST_TILES.ROCK_2
-      } else if (roll < 0.25) {
+      } else if (hasNearbyTree && roll < 0.15) {
+        // Bushes only near trees for cohesive forest feel
         objectLayer[index] = FOREST_TILES.BUSH
       }
     }
   }
+}
+
+function checkNearbyTile(
+  layer: number[],
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  tileTypes: readonly number[],
+): boolean {
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      if (dx === 0 && dy === 0) continue
+      const nx = x + dx
+      const ny = y + dy
+      if (isValidPosition(nx, ny, width, height)) {
+        const idx = getTileIndex(nx, ny, width)
+        if (tileTypes.includes(layer[idx])) return true
+      }
+    }
+  }
+  return false
 }
 
 function placeCaveObstacles(
@@ -216,7 +271,7 @@ function placeCaveObstacles(
 }
 
 function addDecorations(
-  groundLayer: number[],
+  _groundLayer: number[],
   objectLayer: number[],
   width: number,
   height: number,
@@ -228,19 +283,31 @@ function addDecorations(
     for (let x = 0; x < width; x++) {
       const index = getTileIndex(x, y, width)
 
-      // Only add decorations on grass tiles with no obstacles
+      // Only add decorations on empty tiles (no obstacles)
       if (objectLayer[index] !== EMPTY_TILE) continue
 
+      // Skip edges
+      if (x === 0 || x === width - 1 || y === 0 || y === height - 1) continue
+
+      // Place decorations in objectLayer so they render as sprites
       const roll = Math.random()
 
-      if (roll < 0.03) {
-        groundLayer[index] = FOREST_TILES.FLOWER_1
-      } else if (roll < 0.06) {
-        groundLayer[index] = FOREST_TILES.FLOWER_2
-      } else if (roll < 0.08) {
-        groundLayer[index] = FOREST_TILES.FLOWER_3
+      if (roll < 0.08) {
+        // Tall grass is more common in forest clearings
+        objectLayer[index] = FOREST_TILES.TALL_GRASS
       } else if (roll < 0.12) {
-        groundLayer[index] = FOREST_TILES.TALL_GRASS
+        // Mushrooms scattered around
+        objectLayer[index] = FOREST_TILES.MUSHROOM
+      } else if (roll < 0.15) {
+        // Small flowers occasionally (rendered as sprites, not colored squares)
+        const flowerRoll = Math.random()
+        if (flowerRoll < 0.33) {
+          objectLayer[index] = FOREST_TILES.FLOWER_1
+        } else if (flowerRoll < 0.66) {
+          objectLayer[index] = FOREST_TILES.FLOWER_2
+        } else {
+          objectLayer[index] = FOREST_TILES.FLOWER_3
+        }
       }
     }
   }

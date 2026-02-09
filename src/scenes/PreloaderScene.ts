@@ -54,8 +54,8 @@ export class PreloaderScene extends Phaser.Scene {
   }
 
   private loadAssets(): void {
-    // Load the village tilemap JSON (32x32 version with Mixel tilesets)
-    this.load.tilemapTiledJSON('village-map', 'assets/tilemaps/village-32.json')
+    // Load the village tilemap JSON
+    this.load.tilemapTiledJSON('village-map', 'assets/tilemaps/village.json')
 
     // Load game data
     this.load.json('monsters-data', 'assets/data/monsters.json')
@@ -95,15 +95,46 @@ export class PreloaderScene extends Phaser.Scene {
       this.load.image(`monster-icon-${i}`, `assets/sprites/monsters/Icon${i}.png`)
     }
 
-    // Load Mixel 32x32 tilesets
-    this.load.image('tileset-ground', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Ground Tileset.png')
-    this.load.image('tileset-trees', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Trees.PNG')
-    this.load.image('tileset-bushes', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Bushes.PNG')
-    this.load.image('tileset-rocks', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Rocks.PNG')
-    this.load.image('tileset-mushrooms', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Mushrooms.png')
-    this.load.image('tileset-stumps', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Tree Stumps and Logs.png')
-    this.load.image('tileset-nature', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Nature Details.png')
-    this.load.image('tileset-ruins', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Ruins.PNG')
+    // Load Mixel 32x32 tilesets as spritesheets for decoration sprites
+    this.load.spritesheet('tileset-ground', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Ground Tileset.png', {
+      frameWidth: 32,
+      frameHeight: 32,
+    })
+    // Load trees at 32x32 for small elements (shadows, leaves)
+    this.load.spritesheet('tileset-trees', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Trees.PNG', {
+      frameWidth: 32,
+      frameHeight: 32,
+    })
+    // Load trees at 64x96 for full tree sprites (2 tiles wide, 3 tiles tall)
+    // The tileset is 384x320, so 64x96 gives us 6 columns x 3 rows of full trees
+    this.load.spritesheet('tileset-trees-large', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Trees.PNG', {
+      frameWidth: 64,
+      frameHeight: 96,
+    })
+    this.load.spritesheet('tileset-bushes', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Bushes.PNG', {
+      frameWidth: 32,
+      frameHeight: 32,
+    })
+    this.load.spritesheet('tileset-rocks', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Rocks.PNG', {
+      frameWidth: 32,
+      frameHeight: 32,
+    })
+    this.load.spritesheet('tileset-mushrooms', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Mushrooms.png', {
+      frameWidth: 32,
+      frameHeight: 32,
+    })
+    this.load.spritesheet('tileset-stumps', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Tree Stumps and Logs.png', {
+      frameWidth: 32,
+      frameHeight: 32,
+    })
+    this.load.spritesheet('tileset-nature', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Nature Details.png', {
+      frameWidth: 32,
+      frameHeight: 32,
+    })
+    this.load.spritesheet('tileset-ruins', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Ruins.PNG', {
+      frameWidth: 32,
+      frameHeight: 32,
+    })
 
     // ===========================================
     // LEGACY 16x16 ASSETS (kept for backwards compatibility)

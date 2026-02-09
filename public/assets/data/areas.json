@@ -19,9 +19,9 @@
       {
         "zoneId": "village-to-forest",
         "targetAreaId": "whispering-forest",
-        "targetPosition": { "x": 480, "y": 64 },
-        "triggerBounds": { "x": 416, "y": 928, "width": 128, "height": 32 },
-        "requiredLevel": 3
+        "targetPosition": { "x": 480, "y": 200 },
+        "triggerBounds": { "x": 352, "y": 800, "width": 256, "height": 160 },
+        "requiredLevel": 1
       }
     ],
     "interactables": [
@@ -61,14 +61,14 @@
       {
         "zoneId": "forest-to-village",
         "targetAreaId": "sunlit-village",
-        "targetPosition": { "x": 480, "y": 864 },
-        "triggerBounds": { "x": 416, "y": 0, "width": 128, "height": 32 }
+        "targetPosition": { "x": 480, "y": 700 },
+        "triggerBounds": { "x": 384, "y": 0, "width": 192, "height": 128 }
       },
       {
         "zoneId": "forest-to-caves",
         "targetAreaId": "crystal-caves",
-        "targetPosition": { "x": 64, "y": 640 },
-        "triggerBounds": { "x": 1216, "y": 576, "width": 32, "height": 128 },
+        "targetPosition": { "x": 200, "y": 640 },
+        "triggerBounds": { "x": 1152, "y": 512, "width": 128, "height": 192 },
         "requiredLevel": 7,
         "requiredBossDefeated": "elderwood"
       }
@@ -140,8 +140,8 @@
       {
         "zoneId": "caves-to-forest",
         "targetAreaId": "whispering-forest",
-        "targetPosition": { "x": 1152, "y": 640 },
-        "triggerBounds": { "x": 0, "y": 576, "width": 32, "height": 128 }
+        "targetPosition": { "x": 1100, "y": 640 },
+        "triggerBounds": { "x": 0, "y": 512, "width": 128, "height": 192 }
       }
     ],
     "interactables": [

@@ -2,55 +2,102 @@
  * Sprite frame mappings for creature and character sprites
  * Maps game entity IDs to frame indices in sprite sheets
  *
- * Creatures sheet: 160x288 (10x18 grid = 180 sprites, 16x16 each)
- * Characters sheet: 192x128 (12x8 grid = 96 sprites, 16x16 each)
+ * 32x32 Monster Icons: Individual files (Icon1.png - Icon50.png)
+ * Characters-32 sheet: 12 cols × 21 rows, each character has 12 frames
  */
 
-// Monster species ID to creature sheet frame index
-// The Tiny Creatures pack has various fantasy creatures - we map our monsters to similar sprites
-export const MONSTER_SPRITE_FRAMES: Readonly<Record<string, number>> = {
+// Monster species ID to 32x32 icon number (monster-icon-X)
+// Maps our monsters to the 50 available 32x32 monster portraits
+export const MONSTER_ICON_NUMBERS: Readonly<Record<string, number>> = {
   // Fire element monsters
-  flamepup: 0, // Row 0, col 0 - use a dog-like creature
-  emberfox: 10, // Row 1, col 0 - fox-like
-  cinderbat: 20, // Row 2, col 0 - bat
+  flamepup: 1,      // Red/orange puppy creature
+  blazefox: 2,      // Fox-like fire creature
+  volcanix: 3,      // Dragon/volcanic creature
 
   // Water element monsters
-  aquaslime: 1, // Row 0, col 1 - slime
-  bubblefin: 11, // Row 1, col 1 - fish
-  waveling: 21, // Row 2, col 1
+  bubblefin: 4,     // Blue fish/aquatic
+  tidecrab: 5,      // Crab creature
+  serpentide: 6,    // Sea serpent
+  coralshell: 7,    // Shell creature
 
   // Earth element monsters
-  leafling: 2, // Row 0, col 2 - plant creature
-  mossbun: 12, // Row 1, col 2 - bunny
-  thornsprout: 22, // Row 2, col 2 - spiky plant
-  rockshell: 32, // Row 3, col 2 - turtle/shell
+  pebblit: 8,       // Rock creature
+  thornback: 9,     // Spiky plant/earth
+  crystalgolem: 10, // Crystal rock creature
+  mossbun: 11,      // Green bunny
+  ironshell: 12,    // Metal shell creature
 
   // Wind element monsters
-  zephyrbird: 3, // Row 0, col 3 - bird
-  gustling: 13, // Row 1, col 3 - cloud creature
-  breezepuff: 23, // Row 2, col 3 - dandelion puff
+  breezling: 13,    // Airy/light creature
+  stormowl: 14,     // Bird/owl
+  tempestdrake: 15, // Dragon/wind
 
   // Light element monsters
-  sparkbug: 4, // Row 0, col 4 - beetle
-  sunmote: 14, // Row 1, col 4 - sun spirit
+  glowmoth: 16,     // Moth/butterfly
+  sunstag: 17,      // Deer/stag with light
+  prismbug: 18,     // Rainbow insect
 
   // Dark element monsters
-  shadowmouse: 5, // Row 0, col 5 - mouse
-  nightcrawler: 15, // Row 1, col 5 - worm
-  gloomcat: 25, // Row 2, col 5 - cat
+  shadowpup: 19,    // Dark puppy
+  nightstalker: 20, // Shadowy predator
+  duskfox: 21,      // Dark fox
 
   // Breeding exclusives
-  emberbun: 6, // Fire + Earth hybrid
-  steampup: 7, // Fire + Water hybrid
-  magmawyrm: 16, // Fire + Dragon
-  frostfin: 17, // Water + Ice
-  crystalshell: 26, // Earth + Crystal
-  stormpuff: 27, // Wind + Electric
-  duskling: 36, // Dark + Normal
+  emberbun: 22,     // Fire + Earth bunny
+  steampup: 23,     // Fire + Water puppy
+  magmawyrm: 24,    // Fire dragon
+  magnetite: 25,    // Magnetic creature
 
-  // Boss monsters - use larger/more impressive sprites
-  elderwood: 70, // Forest boss - tree creature
-  crystallix: 80, // Cave boss - crystal creature
+  // Boss monsters
+  thornwarden: 26,  // Forest miniboss - thorny guardian
+  elderwood: 27,    // Forest boss - tree creature
+  crystallix: 28,   // Cave boss - crystal creature
+}
+
+// Legacy: Monster species ID to creature sheet frame index (16x16)
+export const MONSTER_SPRITE_FRAMES: Readonly<Record<string, number>> = {
+  // Fire element monsters
+  flamepup: 0,
+  emberfox: 10,
+  cinderbat: 20,
+
+  // Water element monsters
+  aquaslime: 1,
+  bubblefin: 11,
+  waveling: 21,
+
+  // Earth element monsters
+  leafling: 2,
+  mossbun: 12,
+  thornsprout: 22,
+  rockshell: 32,
+
+  // Wind element monsters
+  zephyrbird: 3,
+  gustling: 13,
+  breezepuff: 23,
+
+  // Light element monsters
+  sparkbug: 4,
+  sunmote: 14,
+
+  // Dark element monsters
+  shadowmouse: 5,
+  nightcrawler: 15,
+  gloomcat: 25,
+
+  // Breeding exclusives
+  emberbun: 6,
+  steampup: 7,
+  magmawyrm: 16,
+  frostfin: 17,
+  crystalshell: 26,
+  stormpuff: 27,
+  duskling: 36,
+
+  // Boss monsters
+  elderwood: 70,
+  crystallix: 80,
 }
 
 // NPC type to 16x16 character sheet frame index (legacy)
@@ -126,7 +173,16 @@ export const ELEMENT_COLORS: Readonly<Record<string, number>> = {
 }
 
 /**
- * Get the frame index for a monster species
+ * Get the 32x32 monster icon key for a species
+ * Returns the texture key like 'monster-icon-1'
+ */
+export function getMonsterIconKey(speciesId: string): string {
+  const iconNumber = MONSTER_ICON_NUMBERS[speciesId] ?? 1
+  return `monster-icon-${iconNumber}`
+}
+
+/**
+ * Get the frame index for a monster species (legacy 16x16)
  */
 export function getMonsterFrame(speciesId: string): number {
   return MONSTER_SPRITE_FRAMES[speciesId] ?? 0
