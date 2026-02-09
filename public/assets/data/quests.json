@@ -72,10 +72,10 @@
       {
         "objectiveId": "explore-forest",
         "type": "explore",
-        "targetId": "whispering-woods",
-        "targetName": "Whispering Woods",
+        "targetId": "whispering-forest",
+        "targetName": "Whispering Forest",
         "requiredCount": 1,
-        "description": "Visit the Whispering Woods"
+        "description": "Visit the Whispering Forest"
       }
     ],
     "rewards": {
@@ -134,10 +134,10 @@
       {
         "objectiveId": "defeat-guardian",
         "type": "boss",
-        "targetId": "forest-guardian",
-        "targetName": "Forest Guardian",
+        "targetId": "elderwood",
+        "targetName": "Elderwood",
         "requiredCount": 1,
-        "description": "Defeat the Forest Guardian"
+        "description": "Defeat the Elderwood"
       }
     ],
     "rewards": {
@@ -206,10 +206,10 @@
       {
         "objectiveId": "explore-caverns",
         "type": "explore",
-        "targetId": "crystal-caverns",
-        "targetName": "Crystal Caverns",
+        "targetId": "crystal-caves",
+        "targetName": "Crystal Caves",
         "requiredCount": 1,
-        "description": "Visit the Crystal Caverns"
+        "description": "Visit the Crystal Caves"
       }
     ],
     "rewards": {

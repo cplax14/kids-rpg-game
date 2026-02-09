@@ -6,7 +6,7 @@ import { EventBus } from '../../events/EventBus'
 import { GAME_EVENTS } from '../../events/GameEvents'
 import { ProgressRing } from '../components/ProgressRing'
 
-const TRACKER_WIDTH = 240
+const TRACKER_WIDTH = 320
 const TRACKER_PADDING = 10  // Padding from visible area edge
 const MAX_DISPLAYED_QUESTS = 3
 
@@ -86,6 +86,7 @@ export class QuestTrackerHUD {
       fontSize: '11px',
       color: '#888888',
     })
+    this.emptyStateText.setResolution(2) // Crisp text at zoom levels
     this.emptyStateText.setAlpha(0.7)
     this.container.add(this.emptyStateText)
   }
@@ -185,16 +186,18 @@ export class QuestTrackerHUD {
     const iconText = this.scene.add.text(14, 8, typeIcon, {
       fontSize: '14px',
     })
+    iconText.setResolution(2)
     entryContainer.add(iconText)
 
     // Quest name (next to icon)
-    const displayName = quest.name.length > 18 ? quest.name.substring(0, 16) + '..' : quest.name
+    const displayName = quest.name.length > 28 ? quest.name.substring(0, 26) + '..' : quest.name
     const nameText = this.scene.add.text(34, 7, displayName, {
       ...TEXT_STYLES.SMALL,
       fontSize: '12px',
       color: isReadyToTurnIn ? '#66bb6a' : '#ffd54f',
       fontStyle: 'bold',
     })
+    nameText.setResolution(2)
     entryContainer.add(nameText)
 
     // Progress ring on the right
@@ -234,8 +237,8 @@ export class QuestTrackerHUD {
       const objIcon = QUEST_TYPE_ICONS[objective.type] ?? '📌'
 
       // Objective with icon (truncated)
-      const objDesc = objective.description.length > 22
-        ? objective.description.substring(0, 19) + '...'
+      const objDesc = objective.description.length > 35
+        ? objective.description.substring(0, 32) + '...'
         : objective.description
 
       const objText = this.scene.add.text(10, objY, `${objIcon} ${objDesc}`, {
@@ -243,6 +246,7 @@ export class QuestTrackerHUD {
         fontSize: '10px',
         color: isComplete ? '#66bb6a' : '#cccccc',
       })
+      objText.setResolution(2)
       entryContainer.add(objText)
       progressTexts.push(objText)
 
@@ -268,6 +272,7 @@ export class QuestTrackerHUD {
           color: isComplete ? '#66bb6a' : '#b0bec5',
         },
       )
+      countText.setResolution(2)
       countText.setOrigin(1, 0)
       entryContainer.add(countText)
       progressTexts.push(countText)

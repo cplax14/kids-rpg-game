@@ -207,7 +207,24 @@ export class ShopScene extends Phaser.Scene {
       })
       this.itemListContainer.add(priceText)
 
-      // Buy/Sell button
+      // Row hover hit area (added BEFORE button so button is on top)
+      const hitArea = this.add.rectangle(220, y + 19, 440, 38)
+      hitArea.setInteractive()
+      hitArea.on('pointerover', () => {
+        this.selectedIndex = index
+        bg.clear()
+        bg.fillStyle(COLORS.PRIMARY, 0.4)
+        bg.fillRoundedRect(0, y, 560, 38, 6)
+        this.showDetail(entry)
+      })
+      hitArea.on('pointerout', () => {
+        bg.clear()
+        bg.fillStyle(COLORS.PANEL_BG, 0.3)
+        bg.fillRoundedRect(0, y, 560, 38, 6)
+      })
+      this.itemListContainer.add(hitArea)
+
+      // Buy/Sell button (added AFTER hitArea so it's on top and receives clicks)
       const actionLabel = this.mode === 'buy' ? 'Buy' : 'Sell'
       const actionBtn = this.add.text(500, y + 9, actionLabel, {
         ...TEXT_STYLES.BODY,
@@ -223,23 +240,6 @@ export class ShopScene extends Phaser.Scene {
         }
       })
       this.itemListContainer.add(actionBtn)
-
-      // Row hover
-      const hitArea = this.add.rectangle(280, y + 19, 560, 38)
-      hitArea.setInteractive()
-      hitArea.on('pointerover', () => {
-        this.selectedIndex = index
-        bg.clear()
-        bg.fillStyle(COLORS.PRIMARY, 0.4)
-        bg.fillRoundedRect(0, y, 560, 38, 6)
-        this.showDetail(entry)
-      })
-      hitArea.on('pointerout', () => {
-        bg.clear()
-        bg.fillStyle(COLORS.PANEL_BG, 0.3)
-        bg.fillRoundedRect(0, y, 560, 38, 6)
-      })
-      this.itemListContainer.add(hitArea)
     })
   }
 

@@ -1,6 +1,5 @@
 import Phaser from 'phaser'
-import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS, TEXT_STYLES, TILE_SIZE } from '../config'
-import { MUSIC_KEYS, SFX_KEYS } from '../systems/AudioSystem'
+import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS, TEXT_STYLES } from '../config'
 
 export class PreloaderScene extends Phaser.Scene {
   constructor() {
@@ -15,6 +14,7 @@ export class PreloaderScene extends Phaser.Scene {
 
   create(): void {
     this.createPlayerAnimations()
+    this.createNPCAnimations()
     this.scene.start(SCENE_KEYS.TITLE)
   }
 
@@ -78,7 +78,68 @@ export class PreloaderScene extends Phaser.Scene {
     // Load achievement data
     this.load.json('achievements-data', 'assets/data/achievements.json')
 
-    // Load real sprite sheets (16x16 pixel art)
+    // ===========================================
+    // NEW 32x32 ASSETS
+    // ===========================================
+
+    // Load 32x32 character sprite sheet (transparent background)
+    // Layout: 12 columns × 21 rows, each character has 12 frames
+    // Cols 0-2: Down, Cols 3-5: Left, Cols 6-8: Right, Cols 9-11: Up
+    this.load.spritesheet('characters-32', 'assets/sprites/characters/rpg-characters-32x32-transparent.png', {
+      frameWidth: 32,
+      frameHeight: 32,
+    })
+
+    // Load monster portrait icons (32x32, transparent)
+    for (let i = 1; i <= 50; i++) {
+      this.load.image(`monster-icon-${i}`, `assets/sprites/monsters/Icon${i}.png`)
+    }
+
+    // Load Mixel 32x32 tilesets as spritesheets for decoration sprites
+    this.load.spritesheet('tileset-ground', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Ground Tileset.png', {
+      frameWidth: 32,
+      frameHeight: 32,
+    })
+    // Load trees at 32x32 for small elements (shadows, leaves)
+    this.load.spritesheet('tileset-trees', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Trees.PNG', {
+      frameWidth: 32,
+      frameHeight: 32,
+    })
+    // Load trees at 64x96 for full tree sprites (2 tiles wide, 3 tiles tall)
+    // The tileset is 384x320, so 64x96 gives us 6 columns x 3 rows of full trees
+    this.load.spritesheet('tileset-trees-large', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Trees.PNG', {
+      frameWidth: 64,
+      frameHeight: 96,
+    })
+    this.load.spritesheet('tileset-bushes', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Bushes.PNG', {
+      frameWidth: 32,
+      frameHeight: 32,
+    })
+    this.load.spritesheet('tileset-rocks', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Rocks.PNG', {
+      frameWidth: 32,
+      frameHeight: 32,
+    })
+    this.load.spritesheet('tileset-mushrooms', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Mushrooms.png', {
+      frameWidth: 32,
+      frameHeight: 32,
+    })
+    this.load.spritesheet('tileset-stumps', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Tree Stumps and Logs.png', {
+      frameWidth: 32,
+      frameHeight: 32,
+    })
+    this.load.spritesheet('tileset-nature', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Nature Details.png', {
+      frameWidth: 32,
+      frameHeight: 32,
+    })
+    this.load.spritesheet('tileset-ruins', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Ruins.PNG', {
+      frameWidth: 32,
+      frameHeight: 32,
+    })
+
+    // ===========================================
+    // LEGACY 16x16 ASSETS (kept for backwards compatibility)
+    // ===========================================
+
     this.load.spritesheet('characters-sheet', 'assets/sprites/characters/characters.png', {
       frameWidth: 16,
       frameHeight: 16,
@@ -94,10 +155,22 @@ export class PreloaderScene extends Phaser.Scene {
       frameHeight: 16,
     })
 
-    // Load tilesets
+    // Legacy tilesets
     this.load.image('basictiles', 'assets/tilesets/basictiles.png')
     this.load.image('rpg-overworld', 'assets/tilesets/rpg-overworld.png')
     this.load.image('rpg-dungeon', 'assets/tilesets/rpg-dungeon.png')
+
+    // ===========================================
+    // NINJA ADVENTURE UI/ITEMS (16x16)
+    // ===========================================
+
+    // HUD elements
+    this.load.image('ui-heart', 'assets/ninja-adventure/hud/heart.png')
+    this.load.image('ui-dialog', 'assets/ninja-adventure/hud/dialogue-bubble.png')
+
+    // Item icons
+    this.load.image('item-coin', 'assets/ninja-adventure/items/gold-coin.png')
+    this.load.image('item-heart', 'assets/ninja-adventure/items/heart.png')
   }
 
   private loadAudioAssets(): void {
@@ -131,36 +204,168 @@ export class PreloaderScene extends Phaser.Scene {
   }
 
   private createPlayerAnimations(): void {
-    // Check if we have the real character sheet loaded
-    const hasCharacterSheet = this.textures.exists('characters-sheet')
+    // Try to use 32x32 characters first, fall back to 16x16
+    const has32Characters = this.textures.exists('characters-32')
+    const has16Characters = this.textures.exists('characters-sheet')
 
-    if (hasCharacterSheet) {
-      this.createRealPlayerAnimations()
+    if (has32Characters) {
+      this.create32PlayerAnimations()
+    } else if (has16Characters) {
+      this.create16PlayerAnimations()
     } else {
       this.createFallbackPlayerAnimations()
     }
   }
 
-  private createRealPlayerAnimations(): void {
-    // Characters sheet is 192x128 (12x8 grid of 16x16 sprites)
-    // Layout: 4 characters per row, each character uses 3 columns for walk cycle
-    // Row 0: Front-facing (down direction) for all characters
-    // Row 1: Side-facing (facing LEFT) for all characters
-    // Row 2: Small creatures (not character sprites)
-    // Row 3: Back-facing (up direction) for all characters
+  private create32PlayerAnimations(): void {
+    // 32x32 character sheet layout (rpg-characters-32x32-transparent.png):
+    // - 12 columns × 21 rows of 32x32 sprites
+    // - Each row is one character with 12 frames total:
+    //   - Columns 0-2: Down-facing (3 frames)
+    //   - Columns 3-5: Left-facing (3 frames)
+    //   - Columns 6-8: Right-facing (3 frames)
+    //   - Columns 9-11: Up-facing (3 frames)
     //
-    // First character (knight/hero) is in columns 0-2:
-    // - Down/Front: row 0, cols 0-2 → frames 0, 1, 2
-    // - Side (facing left): row 1, cols 0-2 → frames 12, 13, 14
-    // - Up/Back: row 3, cols 0-2 → frames 36, 37, 38
+    // Walk cycle pattern: Frame 1 is standing, frames 0 and 2 are walk poses
+    // Proper walk sequence: 1 -> 0 -> 1 -> 2 (stand, step, stand, step)
+    //
+    // Player character uses row 2 (light skin, blonde hair)
+
+    const COLS_PER_ROW = 12
+    const PLAYER_ROW = 2 // Light skin, blonde hair
+
+    const rowStart = PLAYER_ROW * COLS_PER_ROW
+
+    // Sprite sheet layout analysis:
+    // - Cols 0-2: Down/Front-facing
+    // - Cols 3-5: Up/Back-facing
+    // - Cols 6-8: Up/Back-facing (duplicate)
+    // - Cols 9-11: Left side profile (only one side view exists)
+    //
+    // For right-facing, we use left sprites and flip horizontally in the game
+    const directionOffsets = {
+      down: 0,   // Cols 0-2: Front-facing
+      up: 3,     // Cols 3-5: Back-facing
+      left: 9,   // Cols 9-11: Left side profile
+      right: 9,  // Same as left (flip sprite horizontally in player code)
+    } as const
+
+    const directions = ['down', 'left', 'right', 'up'] as const
+
+    directions.forEach((dir) => {
+      const offset = directionOffsets[dir]
+      const base = rowStart + offset
+
+      // Different frame patterns for different directions:
+      // - Down/Up: frames 1 and 2 work (frame 0 has issues)
+      // - Left/Right: frames 0 and 1 work (frame 2 is empty/weapons)
+      const isHorizontal = dir === 'left' || dir === 'right'
+
+      const walkFrames = isHorizontal
+        ? [
+            { key: 'characters-32', frame: base + 0 }, // Walk pose 1
+            { key: 'characters-32', frame: base + 1 }, // Walk pose 2
+          ]
+        : [
+            { key: 'characters-32', frame: base + 1 }, // Neutral
+            { key: 'characters-32', frame: base + 2 }, // Walk pose
+          ]
+
+      const idleFrame = isHorizontal ? base + 1 : base + 1
+
+      this.anims.create({
+        key: `player-walk-${dir}`,
+        frames: walkFrames,
+        frameRate: 6,
+        repeat: -1,
+      })
+
+      // Idle animation
+      this.anims.create({
+        key: `player-idle-${dir}`,
+        frames: [{ key: 'characters-32', frame: idleFrame }],
+        frameRate: 1,
+        repeat: 0,
+      })
+    })
+  }
+
+  private createNPCAnimations(): void {
+    // Create animations for NPCs using the 32x32 character sheet
+    const has32Characters = this.textures.exists('characters-32')
+    if (!has32Characters) return
 
     const COLS_PER_ROW = 12
 
+    // NPC row mappings from CHARACTER-MAP.md
+    const npcRows: Record<string, number> = {
+      'village-guide': 10,    // Brown clothed
+      'shopkeeper': 14,       // Tan/merchant
+      'healer': 8,            // White robed
+      'breeder': 16,          // Orange clothed
+      'guard': 6,             // Gray armored knight
+      'skeleton': 0,          // White skeleton (enemy)
+    }
+
+    // Direction offsets within each row (same as player)
+    const directionOffsets = {
+      down: 0,   // Cols 0-2: Front-facing
+      up: 3,     // Cols 3-5: Back-facing
+      left: 9,   // Cols 9-11: Left side profile
+      right: 9,  // Same as left (flip sprite horizontally)
+    } as const
+
+    const directions = ['down', 'left', 'right', 'up'] as const
+
+    Object.entries(npcRows).forEach(([npcId, row]) => {
+      const rowStart = row * COLS_PER_ROW
+
+      directions.forEach((dir) => {
+        const offset = directionOffsets[dir]
+        const base = rowStart + offset
+
+        // Different frame patterns for different directions
+        const isHorizontal = dir === 'left' || dir === 'right'
+
+        const walkFrames = isHorizontal
+          ? [
+              { key: 'characters-32', frame: base + 0 },
+              { key: 'characters-32', frame: base + 1 },
+            ]
+          : [
+              { key: 'characters-32', frame: base + 1 },
+              { key: 'characters-32', frame: base + 2 },
+            ]
+
+        const idleFrame = base + 1
+
+        this.anims.create({
+          key: `${npcId}-walk-${dir}`,
+          frames: walkFrames,
+          frameRate: 5,
+          repeat: -1,
+        })
+
+        this.anims.create({
+          key: `${npcId}-idle-${dir}`,
+          frames: [{ key: 'characters-32', frame: idleFrame }],
+          frameRate: 1,
+          repeat: 0,
+        })
+      })
+    })
+  }
+
+  private create16PlayerAnimations(): void {
+    // Legacy 16x16 character sheet animations
+    // Characters sheet is 192x128 (12x8 grid of 16x16 sprites)
+    const COLS_PER_ROW = 12
+
     const frameMap = {
-      down: [0, 1, 2],                                    // Row 0: Front-facing
-      left: [COLS_PER_ROW + 0, COLS_PER_ROW + 1, COLS_PER_ROW + 2],   // Row 1: Side (faces left, no flip)
-      right: [COLS_PER_ROW + 0, COLS_PER_ROW + 1, COLS_PER_ROW + 2],  // Row 1: Side (flip sprite to face right)
-      up: [COLS_PER_ROW * 3 + 0, COLS_PER_ROW * 3 + 1, COLS_PER_ROW * 3 + 2],  // Row 3: Back-facing (frames 36-38)
+      down: [0, 1, 2],
+      left: [COLS_PER_ROW + 0, COLS_PER_ROW + 1, COLS_PER_ROW + 2],
+      right: [COLS_PER_ROW + 0, COLS_PER_ROW + 1, COLS_PER_ROW + 2],
+      up: [COLS_PER_ROW * 3 + 0, COLS_PER_ROW * 3 + 1, COLS_PER_ROW * 3 + 2],
     } as const
 
     const directions = ['down', 'left', 'right', 'up'] as const
@@ -179,7 +384,6 @@ export class PreloaderScene extends Phaser.Scene {
         repeat: -1,
       })
 
-      // Idle animation (middle frame)
       this.anims.create({
         key: `player-idle-${dir}`,
         frames: [{ key: 'characters-sheet', frame: frameIndices[1] }],
