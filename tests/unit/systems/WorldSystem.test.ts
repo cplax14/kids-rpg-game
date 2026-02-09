@@ -80,6 +80,7 @@ const mockSpecies: MonsterSpecies = {
   evolutionChain: null,
   breedingGroup: 'beast',
   breedingTraits: [],
+  obtainableVia: 'both',
 }
 
 const mockBossSpecies: MonsterSpecies = {
@@ -87,6 +88,14 @@ const mockBossSpecies: MonsterSpecies = {
   speciesId: 'boss-monster',
   name: 'Boss Monster',
   captureBaseDifficulty: 1.0,
+  obtainableVia: 'both',
+}
+
+const mockBreedingOnlySpecies: MonsterSpecies = {
+  ...mockSpecies,
+  speciesId: 'breeding-only-monster',
+  name: 'Breeding Only Monster',
+  obtainableVia: 'breeding',
 }
 
 const mockArea: GameAreaDefinition = {
@@ -124,6 +133,25 @@ const mockSafeArea: GameAreaDefinition = {
   encounters: [],
   transitions: [],
   bossIds: [],
+}
+
+const mockAreaWithBreedingOnly: GameAreaDefinition = {
+  ...mockArea,
+  areaId: 'breeding-filter-area',
+  name: 'Breeding Filter Area',
+  encounters: [
+    { speciesId: 'test-monster', weight: 50, minLevel: 3, maxLevel: 5 },
+    { speciesId: 'breeding-only-monster', weight: 50, minLevel: 3, maxLevel: 5 },
+  ],
+}
+
+const mockAreaOnlyBreedingEncounters: GameAreaDefinition = {
+  ...mockArea,
+  areaId: 'only-breeding-area',
+  name: 'Only Breeding Area',
+  encounters: [
+    { speciesId: 'breeding-only-monster', weight: 100, minLevel: 3, maxLevel: 5 },
+  ],
 }
 
 const mockBoss: BossDefinition = {
@@ -189,9 +217,9 @@ const createMockGameState = (overrides: Partial<GameState> = {}): GameState => (
 
 describe('WorldSystem', () => {
   beforeEach(() => {
-    loadAreaData([mockArea, mockSafeArea])
+    loadAreaData([mockArea, mockSafeArea, mockAreaWithBreedingOnly, mockAreaOnlyBreedingEncounters])
     loadBossData([mockBoss])
-    loadSpeciesData([mockSpecies, mockBossSpecies])
+    loadSpeciesData([mockSpecies, mockBossSpecies, mockBreedingOnlySpecies])
     loadAbilityData([mockAbility])
   })
 
@@ -209,7 +237,7 @@ describe('WorldSystem', () => {
 
     it('should get all areas', () => {
       const areas = getAllAreas()
-      expect(areas.length).toBe(2)
+      expect(areas.length).toBe(4) // test-area, safe-area, breeding-filter-area, only-breeding-area
     })
   })
 
@@ -246,6 +274,23 @@ describe('WorldSystem', () => {
 
     it('should return null for non-existent areas', () => {
       const encounter = generateAreaEncounter('non-existent')
+      expect(encounter).toBeNull()
+    })
+
+    it('should filter out breeding-exclusive species from encounters', () => {
+      // Run many times to ensure we never get the breeding-only species
+      for (let i = 0; i < 50; i++) {
+        const encounter = generateAreaEncounter('breeding-filter-area')
+        expect(encounter).not.toBeNull()
+        // Should only contain the wild species, not the breeding-only one
+        expect(encounter?.speciesIds).not.toContain('breeding-only-monster')
+        expect(encounter?.speciesIds.every((id) => id === 'test-monster')).toBe(true)
+      }
+    })
+
+    it('should return null when area only has breeding-exclusive species', () => {
+      const encounter = generateAreaEncounter('only-breeding-area')
+      // No wild species available, should return null
       expect(encounter).toBeNull()
     })
   })

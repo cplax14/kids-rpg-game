@@ -132,6 +132,8 @@ export interface EvolutionStage {
   readonly itemRequired: string | null
 }
 
+export type ObtainableVia = 'wild' | 'breeding' | 'both'
+
 export interface MonsterSpecies {
   readonly speciesId: string
   readonly name: string
@@ -146,6 +148,7 @@ export interface MonsterSpecies {
   readonly evolutionChain: EvolutionStage | null
   readonly breedingGroup: string
   readonly breedingTraits: ReadonlyArray<string>
+  readonly obtainableVia: ObtainableVia // 'wild', 'breeding', or 'both'
 }
 
 export interface MonsterInstance {
@@ -161,6 +164,11 @@ export interface MonsterInstance {
   readonly isInSquad: boolean
   readonly capturedAt: string
   readonly bondLevel: number
+  // Breeding progression fields
+  readonly generation: number // 0 = wild-caught, 1+ = bred
+  readonly inheritedStatBonus: Partial<CharacterStats> // Bonus from parent stats
+  readonly legacyAbilities: ReadonlyArray<string> // Ability IDs inherited from parents
+  readonly isPerfect: boolean // Rare perfect offspring flag
 }
 
 // ── Items ──

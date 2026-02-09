@@ -14,6 +14,11 @@ import {
   executeBreeding,
   canBreed,
   getCompatibleMonstersForBreeding,
+  getTrainedStats,
+  calculateInheritedStatBonus,
+  calculateOffspringGeneration,
+  getMaxTraitSlotsForGeneration,
+  rollForLegacyAbilities,
 } from '../../../src/systems/BreedingSystem'
 import { loadSpeciesData, loadAbilityData } from '../../../src/systems/MonsterSystem'
 import { loadTraitData } from '../../../src/systems/TraitSystem'
@@ -26,19 +31,62 @@ import type {
   Ability,
 } from '../../../src/models/types'
 
-const mockAbility: Ability = {
-  abilityId: 'tackle',
-  name: 'Tackle',
-  description: 'A basic attack',
-  element: 'neutral',
-  type: 'physical',
-  power: 40,
-  accuracy: 95,
-  mpCost: 0,
-  targetType: 'single_enemy',
-  statusEffect: null,
-  animation: 'tackle',
-}
+const mockAbilities: Ability[] = [
+  {
+    abilityId: 'tackle',
+    name: 'Tackle',
+    description: 'A basic attack',
+    element: 'neutral',
+    type: 'physical',
+    power: 40,
+    accuracy: 95,
+    mpCost: 0,
+    targetType: 'single_enemy',
+    statusEffect: null,
+    animation: 'tackle',
+  },
+  {
+    abilityId: 'ember',
+    name: 'Ember',
+    description: 'A fire attack',
+    element: 'fire',
+    type: 'magical',
+    power: 50,
+    accuracy: 90,
+    mpCost: 5,
+    targetType: 'single_enemy',
+    statusEffect: null,
+    animation: 'ember',
+  },
+  {
+    abilityId: 'water-gun',
+    name: 'Water Gun',
+    description: 'A water attack',
+    element: 'water',
+    type: 'magical',
+    power: 50,
+    accuracy: 90,
+    mpCost: 5,
+    targetType: 'single_enemy',
+    statusEffect: null,
+    animation: 'water-gun',
+  },
+  {
+    abilityId: 'leaf-blade',
+    name: 'Leaf Blade',
+    description: 'A grass attack',
+    element: 'earth',
+    type: 'physical',
+    power: 55,
+    accuracy: 85,
+    mpCost: 6,
+    targetType: 'single_enemy',
+    statusEffect: null,
+    animation: 'leaf-blade',
+  },
+]
+
+const mockAbility = mockAbilities[0]
 
 const mockSpecies: MonsterSpecies[] = [
   {
@@ -197,6 +245,11 @@ const createMockMonster = (
   isInSquad: false,
   capturedAt: new Date().toISOString(),
   bondLevel: 50,
+  // Breeding progression fields
+  generation: 0,
+  inheritedStatBonus: {},
+  legacyAbilities: [],
+  isPerfect: false,
   ...overrides,
 })
 
@@ -215,7 +268,7 @@ const createBreedingItem = (itemId: string, magnitude: number): Item => ({
 
 beforeEach(() => {
   loadSpeciesData(mockSpecies)
-  loadAbilityData([mockAbility])
+  loadAbilityData(mockAbilities)
   loadTraitData(mockTraits)
   loadBreedingRecipes(mockRecipes)
 })
@@ -581,5 +634,303 @@ describe('getCompatibleMonstersForBreeding', () => {
 
     const compatible = getCompatibleMonstersForBreeding(target, candidates)
     expect(compatible.length).toBe(1) // aquatic and beast are technically compatible
+  })
+})
+
+// ── Breeding Progression Tests ──
+
+describe('getTrainedStats', () => {
+  it('calculates trained stats as difference from base', () => {
+    // Create a level 5 monster with grown stats
+    const monster = createMockMonster('flamepup', {
+      level: 5,
+      stats: {
+        maxHp: 116, // 88 base + 7*4 growth
+        currentHp: 116,
+        maxMp: 37, // 25 + 3*4
+        currentMp: 37,
+        attack: 24, // 16 + 2*4
+        defense: 18, // 12 + 1.5*4
+        magicAttack: 20, // 14 + 1.5*4
+        magicDefense: 18, // 13 + 1.2*4
+        speed: 21, // 15 + 1.5*4
+        luck: 12,
+      },
+    })
+
+    const trained = getTrainedStats(monster)
+    expect(trained.maxHp).toBeGreaterThan(0)
+    expect(trained.attack).toBeGreaterThan(0)
+  })
+
+  it('returns empty object for unknown species', () => {
+    const monster = createMockMonster('unknown-species')
+    const trained = getTrainedStats(monster)
+    expect(trained).toEqual({})
+  })
+})
+
+describe('calculateInheritedStatBonus', () => {
+  it('calculates 20% of average trained stats', () => {
+    const parent1 = createMockMonster('flamepup', {
+      level: 10,
+      stats: { maxHp: 150, currentHp: 150, maxMp: 50, currentMp: 50, attack: 30, defense: 20, magicAttack: 25, magicDefense: 20, speed: 25, luck: 12 },
+    })
+    const parent2 = createMockMonster('mossbun', {
+      level: 10,
+      stats: { maxHp: 140, currentHp: 140, maxMp: 45, currentMp: 45, attack: 28, defense: 22, magicAttack: 22, magicDefense: 22, speed: 22, luck: 10 },
+    })
+
+    const bonus = calculateInheritedStatBonus(parent1, parent2, false)
+
+    // Bonus should be positive numbers
+    expect(bonus.maxHp).toBeGreaterThanOrEqual(0)
+    expect(bonus.attack).toBeGreaterThanOrEqual(0)
+  })
+
+  it('applies perfect multiplier when isPerfect is true', () => {
+    const parent1 = createMockMonster('flamepup', {
+      level: 15,
+      stats: { maxHp: 200, currentHp: 200, maxMp: 70, currentMp: 70, attack: 50, defense: 35, magicAttack: 40, magicDefense: 35, speed: 40, luck: 12 },
+    })
+    const parent2 = createMockMonster('mossbun', {
+      level: 15,
+      stats: { maxHp: 190, currentHp: 190, maxMp: 65, currentMp: 65, attack: 45, defense: 38, magicAttack: 38, magicDefense: 38, speed: 35, luck: 10 },
+    })
+
+    const normalBonus = calculateInheritedStatBonus(parent1, parent2, false)
+    const perfectBonus = calculateInheritedStatBonus(parent1, parent2, true)
+
+    // Perfect bonus should be higher
+    expect(perfectBonus.maxHp).toBeGreaterThanOrEqual(normalBonus.maxHp ?? 0)
+  })
+})
+
+describe('calculateOffspringGeneration', () => {
+  it('returns 1 for wild parents (generation 0)', () => {
+    const parent1 = createMockMonster('flamepup', { generation: 0 })
+    const parent2 = createMockMonster('mossbun', { generation: 0 })
+
+    const gen = calculateOffspringGeneration(parent1, parent2)
+    expect(gen).toBe(1)
+  })
+
+  it('returns max parent generation + 1', () => {
+    const parent1 = createMockMonster('flamepup', { generation: 1 })
+    const parent2 = createMockMonster('mossbun', { generation: 3 })
+
+    const gen = calculateOffspringGeneration(parent1, parent2)
+    expect(gen).toBe(4)
+  })
+
+  it('handles undefined generation as 0', () => {
+    const parent1 = createMockMonster('flamepup')
+    const parent2 = createMockMonster('mossbun')
+
+    const gen = calculateOffspringGeneration(parent1, parent2)
+    expect(gen).toBe(1)
+  })
+})
+
+describe('getMaxTraitSlotsForGeneration', () => {
+  it('returns 1 for wild monsters (gen 0)', () => {
+    expect(getMaxTraitSlotsForGeneration(0)).toBe(1)
+  })
+
+  it('returns 2 for G1 monsters', () => {
+    expect(getMaxTraitSlotsForGeneration(1)).toBe(2)
+  })
+
+  it('returns 3 for G2+ monsters', () => {
+    expect(getMaxTraitSlotsForGeneration(2)).toBe(3)
+    expect(getMaxTraitSlotsForGeneration(5)).toBe(3)
+  })
+})
+
+describe('executeBreeding with progression', () => {
+  it('creates offspring with generation field', () => {
+    const parent1 = createMockMonster('flamepup', { generation: 0 })
+    const parent2 = createMockMonster('mossbun', { generation: 0 })
+    const pair = createBreedingPair(parent1, parent2)
+
+    const result = executeBreeding(pair!)
+    expect(result!.offspring.generation).toBe(1)
+  })
+
+  it('creates offspring with inheritedStatBonus', () => {
+    const parent1 = createMockMonster('flamepup', {
+      level: 10,
+      stats: { maxHp: 150, currentHp: 150, maxMp: 50, currentMp: 50, attack: 30, defense: 20, magicAttack: 25, magicDefense: 20, speed: 25, luck: 12 },
+    })
+    const parent2 = createMockMonster('mossbun', {
+      level: 10,
+      stats: { maxHp: 140, currentHp: 140, maxMp: 45, currentMp: 45, attack: 28, defense: 22, magicAttack: 22, magicDefense: 22, speed: 22, luck: 10 },
+    })
+    const pair = createBreedingPair(parent1, parent2)
+
+    const result = executeBreeding(pair!)
+    expect(result!.offspring.inheritedStatBonus).toBeDefined()
+  })
+
+  it('limits traits based on generation', () => {
+    // G1 monster should have max 2 traits
+    const parent1 = createMockMonster('flamepup', {
+      generation: 0,
+      inheritedTraits: ['fireproof', 'fierce', 'lucky'],
+    })
+    const parent2 = createMockMonster('mossbun', {
+      generation: 0,
+      inheritedTraits: ['gentle', 'hardy', 'speedy'],
+    })
+    const pair = createBreedingPair(parent1, parent2)
+
+    // Run multiple times - G1 should never have more than 2 traits
+    for (let i = 0; i < 10; i++) {
+      const result = executeBreeding(pair!)
+      expect(result!.offspring.inheritedTraits.length).toBeLessThanOrEqual(2)
+    }
+  })
+})
+
+describe('rollForLegacyAbilities', () => {
+  it('returns empty array when parents have no abilities', () => {
+    const parent1 = createMockMonster('flamepup', { learnedAbilities: [] })
+    const parent2 = createMockMonster('mossbun', { learnedAbilities: [] })
+
+    const legacy = rollForLegacyAbilities(parent1, parent2, 'emberbun')
+    expect(legacy).toEqual([])
+  })
+
+  it('only considers abilities offspring cannot naturally learn', () => {
+    // emberbun can naturally learn tackle, so tackle should NOT be a legacy ability
+    const parent1 = createMockMonster('flamepup', {
+      learnedAbilities: [mockAbilities[0]], // tackle - natural for emberbun
+    })
+    const parent2 = createMockMonster('mossbun', {
+      learnedAbilities: [mockAbilities[0]], // tackle
+    })
+
+    // Run many times - should always be empty since tackle is natural
+    for (let i = 0; i < 20; i++) {
+      const legacy = rollForLegacyAbilities(parent1, parent2, 'emberbun')
+      expect(legacy).not.toContain('tackle')
+    }
+  })
+
+  it('can inherit abilities offspring cannot naturally learn', () => {
+    // ember and water-gun are not in emberbun's natural abilities
+    const parent1 = createMockMonster('flamepup', {
+      learnedAbilities: [mockAbilities[1]], // ember
+    })
+    const parent2 = createMockMonster('mossbun', {
+      learnedAbilities: [mockAbilities[2]], // water-gun
+    })
+
+    // Run many times to catch some inheritance (25% chance)
+    let inheritedAny = false
+    for (let i = 0; i < 100; i++) {
+      const legacy = rollForLegacyAbilities(parent1, parent2, 'emberbun')
+      if (legacy.length > 0) {
+        inheritedAny = true
+        // Should only contain non-natural abilities
+        expect(legacy.every((id) => id === 'ember' || id === 'water-gun')).toBe(true)
+        break
+      }
+    }
+
+    // Should inherit at least once in 100 tries (probability of NOT inheriting any in 100 tries is (1-0.25)^200 ≈ 0)
+    expect(inheritedAny).toBe(true)
+  })
+
+  it('includes legacy abilities from parents in the pool', () => {
+    // Parent has legacy abilities from their own breeding
+    const parent1 = createMockMonster('flamepup', {
+      learnedAbilities: [mockAbilities[0]], // tackle
+      legacyAbilities: ['leaf-blade'], // inherited from grandparents
+    })
+    const parent2 = createMockMonster('mossbun', {
+      learnedAbilities: [mockAbilities[0]], // tackle
+    })
+
+    // Run many times to catch inheritance of the grandparent ability
+    let inheritedLegacy = false
+    for (let i = 0; i < 100; i++) {
+      const legacy = rollForLegacyAbilities(parent1, parent2, 'emberbun')
+      if (legacy.includes('leaf-blade')) {
+        inheritedLegacy = true
+        break
+      }
+    }
+
+    // Should be able to inherit grandparent's legacy ability
+    expect(inheritedLegacy).toBe(true)
+  })
+
+  it('returns empty for unknown offspring species', () => {
+    const parent1 = createMockMonster('flamepup', {
+      learnedAbilities: [mockAbilities[1]],
+    })
+    const parent2 = createMockMonster('mossbun', {
+      learnedAbilities: [mockAbilities[2]],
+    })
+
+    const legacy = rollForLegacyAbilities(parent1, parent2, 'unknown-species')
+    expect(legacy).toEqual([])
+  })
+
+  it('deduplicates abilities from both parents', () => {
+    // Both parents have the same ability
+    const parent1 = createMockMonster('flamepup', {
+      learnedAbilities: [mockAbilities[1]], // ember
+    })
+    const parent2 = createMockMonster('mossbun', {
+      learnedAbilities: [mockAbilities[1]], // ember (same)
+    })
+
+    // Even though both have ember, it should only have one chance to inherit
+    for (let i = 0; i < 50; i++) {
+      const legacy = rollForLegacyAbilities(parent1, parent2, 'emberbun')
+      // Should never have duplicates
+      const uniqueLegacy = [...new Set(legacy)]
+      expect(legacy.length).toBe(uniqueLegacy.length)
+    }
+  })
+})
+
+describe('executeBreeding with legacy abilities', () => {
+  it('offspring has legacyAbilities field', () => {
+    const parent1 = createMockMonster('flamepup', {
+      learnedAbilities: [mockAbilities[1]], // ember
+    })
+    const parent2 = createMockMonster('mossbun', {
+      learnedAbilities: [mockAbilities[2]], // water-gun
+    })
+    const pair = createBreedingPair(parent1, parent2)
+
+    const result = executeBreeding(pair!)
+    expect(result!.offspring.legacyAbilities).toBeDefined()
+    expect(Array.isArray(result!.offspring.legacyAbilities)).toBe(true)
+  })
+
+  it('can produce offspring with inherited legacy abilities', () => {
+    // Run many times to catch some with legacy abilities
+    let hasLegacy = false
+    for (let i = 0; i < 100; i++) {
+      const parent1 = createMockMonster('flamepup', {
+        learnedAbilities: [mockAbilities[1], mockAbilities[2], mockAbilities[3]], // multiple abilities
+      })
+      const parent2 = createMockMonster('mossbun', {
+        learnedAbilities: [mockAbilities[1], mockAbilities[2], mockAbilities[3]],
+      })
+      const pair = createBreedingPair(parent1, parent2)
+
+      const result = executeBreeding(pair!)
+      if (result!.offspring.legacyAbilities.length > 0) {
+        hasLegacy = true
+        break
+      }
+    }
+
+    expect(hasLegacy).toBe(true)
   })
 })

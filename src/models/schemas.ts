@@ -90,6 +90,8 @@ export const EvolutionStageSchema = z.object({
   itemRequired: z.string().nullable(),
 })
 
+export const ObtainableViaSchema = z.enum(['wild', 'breeding', 'both'])
+
 export const MonsterSpeciesSchema = z.object({
   speciesId: z.string().min(1),
   name: z.string().min(1),
@@ -104,6 +106,7 @@ export const MonsterSpeciesSchema = z.object({
   evolutionChain: EvolutionStageSchema.nullable(),
   breedingGroup: z.string().min(1),
   breedingTraits: z.array(z.string()),
+  obtainableVia: ObtainableViaSchema.default('both'),
 })
 
 // ── Items ──
