@@ -138,6 +138,33 @@ export const BOND_PER_WIN = 1
 export const BOND_MAX = 100
 export const BOND_STAT_BONUS_MAX = 0.1
 
+// ── Monster XP Distribution Constants ──
+
+export const XP_BENCH_PERCENTAGE = 0.1 // 10% XP to bench monsters
+
+// ── Breeding Progression Constants ──
+
+export const INHERITED_STAT_PERCENTAGE = 0.2 // 20% of parents' trained stats
+export const LEGACY_ABILITY_CHANCE = 0.25 // 25% per parent ability
+export const PERFECT_BASE_CHANCE = 0.02 // 2% base chance for perfect offspring
+export const PERFECT_HARMONY_BONUS = 0.03 // +3% with harmony-bell
+export const PERFECT_BOND_BONUS = 0.02 // +2% if both parents have >80 bond
+export const PERFECT_STAT_MULTIPLIER = 1.15 // +15% to inherited stat bonuses
+
+// Generation trait slots: how many traits each generation can have
+export const GENERATION_TRAIT_SLOTS: Record<number, number> = {
+  0: 1, // Wild-caught
+  1: 2, // G1 bred
+  2: 3, // G2+ bred
+}
+
+// Generation stat ceiling multipliers
+export const GENERATION_STAT_CEILING: Record<number, number> = {
+  0: 1.0, // Wild: 100% max
+  1: 1.1, // G1: 110% max
+  2: 1.2, // G2+: 120% max
+}
+
 // ── Status Effect Constants ──
 
 export const POISON_DAMAGE_PERCENT = 0.1

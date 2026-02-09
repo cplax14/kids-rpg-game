@@ -8,6 +8,7 @@ import {
   updateMonsterStorage,
 } from '../../systems/GameStateManager'
 import { getSpecies } from '../../systems/MonsterSystem'
+import { getXpToNextLevel } from '../../systems/CharacterSystem'
 import {
   removeFromSquad,
   moveToStorage,
@@ -207,8 +208,38 @@ export class SquadPanel {
     })
     this.detailContainer.add(levelText)
 
+    // XP progress bar
+    const xpY = 58
+    const xpLabel = this.scene.add.text(15, xpY, 'XP:', {
+      ...TEXT_STYLES.SMALL,
+      fontSize: '11px',
+      color: '#90caf9',
+    })
+    this.detailContainer.add(xpLabel)
+
+    const xpToNext = getXpToNextLevel(monster.level) || 1
+    const xpRatio = Math.min(monster.experience / xpToNext, 1)
+
+    const xpBg = this.scene.add.graphics()
+    xpBg.fillStyle(0x333333, 1)
+    xpBg.fillRoundedRect(45, xpY + 2, 180, 10, 4)
+    this.detailContainer.add(xpBg)
+
+    const xpFill = this.scene.add.graphics()
+    xpFill.fillStyle(0x64b5f6, 1)
+    xpFill.fillRoundedRect(45, xpY + 2, 180 * xpRatio, 10, 4)
+    this.detailContainer.add(xpFill)
+
+    const xpPercent = Math.floor(xpRatio * 100)
+    const xpText = this.scene.add.text(235, xpY, `${monster.experience}/${xpToNext} (${xpPercent}%)`, {
+      ...TEXT_STYLES.SMALL,
+      fontSize: '11px',
+      color: '#90caf9',
+    })
+    this.detailContainer.add(xpText)
+
     // Stats with bond bonus shown in green
-    const statsY = 70
+    const statsY = 85
     const stats = [
       { label: 'HP', base: monster.stats.maxHp, bonded: bondedStats.maxHp },
       { label: 'MP', base: monster.stats.maxMp, bonded: bondedStats.maxMp },
@@ -276,7 +307,7 @@ export class SquadPanel {
     })
 
     // Action buttons
-    const buttonsY = 310
+    const buttonsY = 330
 
     if (this.selectedFromStorage) {
       // Add to squad button (only if squad not full)

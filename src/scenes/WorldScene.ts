@@ -23,7 +23,10 @@ import {
   calculateMonsterStats,
   getLearnedAbilitiesAtLevel,
   createMonsterInstance,
+  addExperienceToMonsterWithInfo,
+  type MonsterLevelUpResult,
 } from '../systems/MonsterSystem'
+import { XP_BENCH_PERCENTAGE } from '../models/constants'
 import { createCombatantFromPlayer, createCombatantFromEnemy } from '../systems/CombatSystem'
 import { addExperience, updatePlayerGold } from '../systems/CharacterSystem'
 import { randomInt, randomChance, weightedRandom } from '../utils/math'
@@ -37,6 +40,7 @@ import {
   updatePlayer,
   updateInventory,
   updateSquad,
+  updateMonsterStorage,
   updateDiscoveredSpecies,
   updateCurrentArea,
   updateActiveQuests,
@@ -1571,12 +1575,53 @@ export class WorldScene extends Phaser.Scene {
 
   private applyBattleRewards(rewards: { experience: number; gold: number }): void {
     // Update game state with rewards
-    const state = getGameState(this)
+    let state = getGameState(this)
     const updatedPlayer = updatePlayerGold(
       addExperience(state.player, rewards.experience),
       rewards.gold,
     )
-    setGameState(this, updatePlayer(state, updatedPlayer))
+    state = updatePlayer(state, updatedPlayer)
+
+    // Distribute XP to squad monsters (active squad gets even split)
+    const levelUps: Array<{ name: string; previousLevel: number; newLevel: number }> = []
+    const totalXP = rewards.experience
+
+    if (state.squad.length > 0) {
+      const xpPerSquadMember = Math.floor(totalXP / state.squad.length)
+      const updatedSquad = state.squad.map((monster) => {
+        const result = addExperienceToMonsterWithInfo(monster, xpPerSquadMember)
+        if (result.didLevelUp) {
+          const species = getSpecies(monster.speciesId)
+          levelUps.push({
+            name: monster.nickname ?? species?.name ?? 'Monster',
+            previousLevel: result.previousLevel,
+            newLevel: result.newLevel,
+          })
+        }
+        return result.monster
+      })
+      state = updateSquad(state, updatedSquad)
+    }
+
+    // Distribute 10% XP to bench monsters (storage)
+    if (state.monsterStorage.length > 0) {
+      const benchXP = Math.floor(totalXP * XP_BENCH_PERCENTAGE)
+      const updatedStorage = state.monsterStorage.map((monster) => {
+        const result = addExperienceToMonsterWithInfo(monster, benchXP)
+        if (result.didLevelUp) {
+          const species = getSpecies(monster.speciesId)
+          levelUps.push({
+            name: monster.nickname ?? species?.name ?? 'Monster',
+            previousLevel: result.previousLevel,
+            newLevel: result.newLevel,
+          })
+        }
+        return result.monster
+      })
+      state = updateMonsterStorage(state, updatedStorage)
+    }
+
+    setGameState(this, state)
 
     // Show reward notification
     const text = this.add.text(
@@ -1602,6 +1647,54 @@ export class WorldScene extends Phaser.Scene {
       duration: 2500,
       ease: 'Power2',
       onComplete: () => text.destroy(),
+    })
+
+    // Show level-up notifications for monsters
+    if (levelUps.length > 0) {
+      this.showMonsterLevelUpNotifications(levelUps)
+    }
+  }
+
+  private showMonsterLevelUpNotifications(
+    levelUps: Array<{ name: string; previousLevel: number; newLevel: number }>,
+  ): void {
+    // Show each level-up with staggered timing
+    levelUps.forEach((levelUp, index) => {
+      this.time.delayedCall(500 + index * 800, () => {
+        const levelUpText = this.add.text(
+          GAME_WIDTH / 2,
+          GAME_HEIGHT / 2 - 50 + index * 30,
+          `${levelUp.name} leveled up! Lv.${levelUp.previousLevel} → Lv.${levelUp.newLevel}`,
+          {
+            ...TEXT_STYLES.BODY,
+            fontSize: '18px',
+            color: '#4fc3f7',
+            stroke: '#000000',
+            strokeThickness: 4,
+          },
+        )
+        levelUpText.setOrigin(0.5)
+        levelUpText.setScrollFactor(0)
+        levelUpText.setDepth(DEPTH.UI + 10)
+
+        // Bounce and fade animation
+        this.tweens.add({
+          targets: levelUpText,
+          y: levelUpText.y - 20,
+          duration: 300,
+          ease: 'Back.easeOut',
+          yoyo: false,
+        })
+
+        this.tweens.add({
+          targets: levelUpText,
+          alpha: 0,
+          delay: 2000,
+          duration: 500,
+          ease: 'Power2',
+          onComplete: () => levelUpText.destroy(),
+        })
+      })
     })
   }
 

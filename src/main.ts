@@ -1,5 +1,8 @@
 import Phaser from 'phaser'
 import { GAME_WIDTH, GAME_HEIGHT, SCENE_KEYS } from './config'
+
+// Import test exports for E2E testing (only in dev mode)
+import './test-exports'
 import { BootScene } from './scenes/BootScene'
 import { PreloaderScene } from './scenes/PreloaderScene'
 import { TitleScene } from './scenes/TitleScene'

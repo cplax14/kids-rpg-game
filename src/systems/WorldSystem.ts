@@ -57,13 +57,24 @@ export function generateAreaEncounter(areaId: string): AreaEncounterResult | nul
     return null
   }
 
+  // Filter out breeding-exclusive species from encounter table
+  const wildEncounters = area.encounters.filter((e) => {
+    const species = getSpecies(e.speciesId)
+    // Include species that are wild or both - exclude breeding-only
+    return species && species.obtainableVia !== 'breeding'
+  })
+
+  if (wildEncounters.length === 0) {
+    return null
+  }
+
   // Pick 1-2 enemies
   const enemyCount = Math.random() < 0.3 ? 2 : 1
   const enemies: BattleCombatant[] = []
   const speciesIds: string[] = []
 
-  const items = area.encounters.map((e) => e)
-  const weights = area.encounters.map((e) => e.weight)
+  const items = wildEncounters.map((e) => e)
+  const weights = wildEncounters.map((e) => e.weight)
 
   for (let i = 0; i < enemyCount; i++) {
     const picked = weightedRandom(items, weights) as AreaEncounterEntry
