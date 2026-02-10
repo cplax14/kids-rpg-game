@@ -288,16 +288,155 @@ export class BattleHUD {
 
   updatePlayerStats(combatants: ReadonlyArray<BattleCombatant>): void {
     this.elements.playerPanel.removeAll(true)
-    // Dynamically calculate Y position so panel always fits on screen
-    // Each entry is 50px, plus 10px padding, plus 10px margin from bottom
-    const panelHeight = combatants.length * 50 + 10
-    const startY = GAME_HEIGHT - panelHeight - 10
-    this.buildStatPanel(this.elements.playerPanel, combatants, GAME_WIDTH - 320, startY)
+    // Position individual stat labels under each sprite using 2-row layout
+    const positions = this.calculateSquadPositions(combatants.length)
+    this.buildIndividualStatLabels(this.elements.playerPanel, combatants, positions)
   }
 
-  updateEnemyStats(combatants: ReadonlyArray<BattleCombatant>): void {
+  private calculateSquadPositions(squadCount: number): Array<{ x: number; y: number }> {
+    // Match the layout from BattleScene
+    const centerX = 950
+    const topRowY = GAME_HEIGHT * 0.54 + 55  // Below top row sprites
+    const bottomRowY = GAME_HEIGHT * 0.78 + 55  // Below bottom row sprites
+    const spacing = 180
+
+    let topRowCount: number
+    let bottomRowCount: number
+
+    switch (squadCount) {
+      case 1:
+        topRowCount = 1
+        bottomRowCount = 0
+        break
+      case 2:
+        topRowCount = 2
+        bottomRowCount = 0
+        break
+      case 3:
+        topRowCount = 2
+        bottomRowCount = 1
+        break
+      case 4:
+        topRowCount = 2
+        bottomRowCount = 2
+        break
+      case 5:
+        topRowCount = 3
+        bottomRowCount = 2
+        break
+      case 6:
+      default:
+        topRowCount = 3
+        bottomRowCount = squadCount - 3
+        break
+    }
+
+    const positions: Array<{ x: number; y: number }> = []
+
+    const topRowStartX = centerX - ((topRowCount - 1) * spacing) / 2
+    for (let i = 0; i < topRowCount; i++) {
+      positions.push({
+        x: topRowStartX + i * spacing,
+        y: topRowY,
+      })
+    }
+
+    if (bottomRowCount > 0) {
+      const bottomRowStartX = centerX - ((bottomRowCount - 1) * spacing) / 2
+      for (let i = 0; i < bottomRowCount; i++) {
+        positions.push({
+          x: bottomRowStartX + i * spacing,
+          y: bottomRowY,
+        })
+      }
+    }
+
+    return positions
+  }
+
+  updateEnemyStats(combatants: ReadonlyArray<BattleCombatant>, isBossBattle: boolean = false): void {
     this.elements.enemyPanel.removeAll(true)
-    this.buildEnemyStatPanel(this.elements.enemyPanel, combatants, 20, 20)
+    const positions = this.calculateEnemyPositions(combatants.length, isBossBattle)
+    this.buildIndividualEnemyLabels(this.elements.enemyPanel, combatants, positions)
+  }
+
+  private calculateEnemyPositions(
+    enemyCount: number,
+    isBossBattle: boolean,
+  ): Array<{ x: number; y: number }> {
+    // Match enemy sprite positions from BattleScene, with labels below
+    const positions: Array<{ x: number; y: number }> = []
+
+    for (let i = 0; i < enemyCount; i++) {
+      const spriteX = isBossBattle ? GAME_WIDTH * 0.22 : GAME_WIDTH * 0.15 + i * 140
+      const spriteY = isBossBattle ? GAME_HEIGHT * 0.35 : GAME_HEIGHT * 0.38
+      positions.push({
+        x: spriteX,
+        y: spriteY + 70, // Position labels below sprites
+      })
+    }
+
+    return positions
+  }
+
+  private buildIndividualEnemyLabels(
+    container: Phaser.GameObjects.Container,
+    combatants: ReadonlyArray<BattleCombatant>,
+    positions: ReadonlyArray<{ x: number; y: number }>,
+  ): void {
+    const labelWidth = 160
+    const labelHeight = 55
+
+    combatants.forEach((c, index) => {
+      if (c.stats.currentHp <= 0) return
+
+      const { x, y: labelY } = positions[index]
+
+      // Background panel
+      const bg = this.scene.add.graphics()
+      bg.fillStyle(0x16213e, 0.85)
+      bg.fillRoundedRect(x - labelWidth / 2, labelY, labelWidth, labelHeight, 8)
+      bg.lineStyle(1, COLORS.PRIMARY, 0.6)
+      bg.strokeRoundedRect(x - labelWidth / 2, labelY, labelWidth, labelHeight, 8)
+      container.add(bg)
+
+      // Name (centered)
+      const name = this.scene.add.text(x, labelY + 6, c.name, {
+        ...TEXT_STYLES.BODY,
+        fontSize: '13px',
+        color: '#ffffff',
+      })
+      name.setOrigin(0.5, 0)
+      container.add(name)
+
+      // HP bar
+      const barWidth = labelWidth - 20
+      const hpRatio = c.stats.maxHp > 0 ? c.stats.currentHp / c.stats.maxHp : 0
+      const hpColor = hpRatio > 0.5 ? COLORS.HP_GREEN : hpRatio > 0.25 ? COLORS.HP_YELLOW : COLORS.HP_RED
+
+      const hpBg = this.scene.add.graphics()
+      hpBg.fillStyle(0x333333, 1)
+      hpBg.fillRoundedRect(x - barWidth / 2, labelY + 26, barWidth, 14, 3)
+      container.add(hpBg)
+
+      if (hpRatio > 0) {
+        const hpFill = this.scene.add.graphics()
+        hpFill.fillStyle(hpColor, 1)
+        hpFill.fillRoundedRect(x - barWidth / 2, labelY + 26, barWidth * hpRatio, 14, 3)
+        container.add(hpFill)
+      }
+
+      // HP text with contrast
+      const hpText = this.scene.add.text(x, labelY + 25, `${c.stats.currentHp}/${c.stats.maxHp}`, {
+        fontFamily: 'Arial, sans-serif',
+        fontSize: '14px',
+        color: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      hpText.setOrigin(0.5, 0)
+      container.add(hpText)
+    })
   }
 
   showMessage(text: string): Promise<void> {
@@ -328,11 +467,21 @@ export class BattleHUD {
     text.setOrigin(0.5)
     text.setDepth(DEPTH.UI + 5)
 
+    // Float up slightly while fully visible
     this.scene.tweens.add({
       targets: text,
-      y: y - 60,
+      y: y - 30,
+      duration: 600,
+      ease: 'Power1',
+    })
+
+    // Then fade out after a delay
+    this.scene.tweens.add({
+      targets: text,
+      y: y - 70,
       alpha: 0,
-      duration: 1000,
+      delay: 600,
+      duration: 800,
       ease: 'Power2',
       onComplete: () => text.destroy(),
     })
@@ -349,11 +498,21 @@ export class BattleHUD {
     text.setOrigin(0.5)
     text.setDepth(DEPTH.UI + 5)
 
+    // Float up slightly while fully visible
     this.scene.tweens.add({
       targets: text,
-      y: y - 50,
+      y: y - 25,
+      duration: 600,
+      ease: 'Power1',
+    })
+
+    // Then fade out after a delay
+    this.scene.tweens.add({
+      targets: text,
+      y: y - 60,
       alpha: 0,
-      duration: 1000,
+      delay: 600,
+      duration: 800,
       ease: 'Power2',
       onComplete: () => text.destroy(),
     })
@@ -446,7 +605,8 @@ export class BattleHUD {
   }
 
   private createMessageBox(): Phaser.GameObjects.Container {
-    const container = this.scene.add.container(GAME_WIDTH / 2 - 300, GAME_HEIGHT / 2 - 30)
+    // Position in upper right area
+    const container = this.scene.add.container(GAME_WIDTH - 620, 260)
     container.setDepth(DEPTH.UI + 10)
 
     const bg = this.scene.add.graphics()
@@ -527,6 +687,79 @@ export class BattleHUD {
         const mpFill = this.scene.add.graphics()
         mpFill.fillStyle(COLORS.MP_BLUE, 1)
         mpFill.fillRoundedRect(startX + 10, y + 33, 180 * mpRatio, 6, 2)
+        container.add(mpFill)
+      }
+    })
+  }
+
+  private buildIndividualStatLabels(
+    container: Phaser.GameObjects.Container,
+    combatants: ReadonlyArray<BattleCombatant>,
+    positions: ReadonlyArray<{ x: number; y: number }>,
+  ): void {
+    const labelWidth = 145
+    const labelHeight = 65
+
+    combatants.forEach((c, index) => {
+      const { x, y: labelY } = positions[index]
+      const isDead = c.stats.currentHp <= 0
+
+      // Background panel for this character's stats
+      const bg = this.scene.add.graphics()
+      bg.fillStyle(0x16213e, 0.85)
+      bg.fillRoundedRect(x - labelWidth / 2, labelY, labelWidth, labelHeight, 8)
+      bg.lineStyle(1, isDead ? COLORS.HP_RED : COLORS.PRIMARY, 0.6)
+      bg.strokeRoundedRect(x - labelWidth / 2, labelY, labelWidth, labelHeight, 8)
+      container.add(bg)
+
+      // Name (centered)
+      const name = this.scene.add.text(x, labelY + 6, c.name, {
+        ...TEXT_STYLES.BODY,
+        fontSize: '13px',
+        color: isDead ? '#ef5350' : '#ffffff',
+      })
+      name.setOrigin(0.5, 0)
+      container.add(name)
+
+      // HP bar
+      const barWidth = labelWidth - 20
+      const hpRatio = c.stats.maxHp > 0 ? c.stats.currentHp / c.stats.maxHp : 0
+      const hpColor = hpRatio > 0.5 ? COLORS.HP_GREEN : hpRatio > 0.25 ? COLORS.HP_YELLOW : COLORS.HP_RED
+
+      const hpBg = this.scene.add.graphics()
+      hpBg.fillStyle(0x333333, 1)
+      hpBg.fillRoundedRect(x - barWidth / 2, labelY + 26, barWidth, 14, 3)
+      container.add(hpBg)
+
+      if (hpRatio > 0) {
+        const hpFill = this.scene.add.graphics()
+        hpFill.fillStyle(hpColor, 1)
+        hpFill.fillRoundedRect(x - barWidth / 2, labelY + 26, barWidth * hpRatio, 14, 3)
+        container.add(hpFill)
+      }
+
+      // HP text with better contrast
+      const hpText = this.scene.add.text(x, labelY + 25, `${c.stats.currentHp}/${c.stats.maxHp}`, {
+        fontFamily: 'Arial, sans-serif',
+        fontSize: '14px',
+        color: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      hpText.setOrigin(0.5, 0)
+      container.add(hpText)
+
+      // MP bar (smaller)
+      const mpRatio = c.stats.maxMp > 0 ? c.stats.currentMp / c.stats.maxMp : 0
+      const mpBg = this.scene.add.graphics()
+      mpBg.fillStyle(0x333333, 1)
+      mpBg.fillRoundedRect(x - barWidth / 2, labelY + 48, barWidth, 8, 2)
+      container.add(mpBg)
+
+      if (mpRatio > 0) {
+        const mpFill = this.scene.add.graphics()
+        mpFill.fillStyle(COLORS.MP_BLUE, 1)
+        mpFill.fillRoundedRect(x - barWidth / 2, labelY + 48, barWidth * mpRatio, 8, 2)
         container.add(mpFill)
       }
     })

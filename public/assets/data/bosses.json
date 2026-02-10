@@ -84,6 +84,110 @@
         { "itemId": "potion-large", "quantity": 3 },
         { "itemId": "ultra-capsule", "quantity": 2 },
         { "itemId": "ether-medium", "quantity": 2 }
+      ],
+      "unlocksArea": "volcanic-peak"
+    }
+  },
+  {
+    "bossId": "emberlord",
+    "speciesId": "emberlord",
+    "name": "Emberlord",
+    "title": "Lord of the Volcanic Peak",
+    "level": 15,
+    "areaId": "volcanic-peak",
+    "position": { "x": 640, "y": 640 },
+    "introDialog": [
+      "The volcano rumbles as magma surges from the depths...",
+      "A colossal figure of living flame rises from the molten rock!",
+      "EMBERLORD: You dare trespass upon my mountain?",
+      "EMBERLORD: I have burned empires to ash!",
+      "EMBERLORD: Let us see if you can withstand my inferno!"
+    ],
+    "defeatDialog": [
+      "EMBERLORD: The flames... they fade...",
+      "EMBERLORD: You possess a fire within that rivals my own.",
+      "EMBERLORD: Very well. The path to the grotto is yours.",
+      "The Emberlord sinks back into the magma, cooling the peak.",
+      "A hidden passage reveals itself in the mountainside..."
+    ],
+    "rewards": {
+      "experience": 1800,
+      "gold": 1200,
+      "guaranteedItems": [
+        { "itemId": "potion-large", "quantity": 4 },
+        { "itemId": "ultra-capsule", "quantity": 2 },
+        { "itemId": "ether-large", "quantity": 2 }
+      ],
+      "unlocksArea": "seaside-grotto"
+    }
+  },
+  {
+    "bossId": "pearlqueen",
+    "speciesId": "pearlqueen",
+    "name": "Pearl Queen",
+    "title": "Sovereign of the Tides",
+    "level": 18,
+    "areaId": "seaside-grotto",
+    "position": { "x": 544, "y": 544 },
+    "introDialog": [
+      "The waters of the grotto begin to swirl and glow...",
+      "An ethereal figure rises from the depths, crowned in pearl!",
+      "PEARL QUEEN: A surface dweller dares enter my domain?",
+      "PEARL QUEEN: The ocean's might is beyond your comprehension.",
+      "PEARL QUEEN: But if you seek passage, you must prove your worth!"
+    ],
+    "defeatDialog": [
+      "PEARL QUEEN: Such strength... such determination...",
+      "PEARL QUEEN: You have earned the ocean's respect.",
+      "PEARL QUEEN: The marsh beyond holds the final trial.",
+      "The Pearl Queen parts the waters, revealing a shadowy passage.",
+      "A chill runs down your spine as darkness beckons..."
+    ],
+    "rewards": {
+      "experience": 2800,
+      "gold": 1800,
+      "guaranteedItems": [
+        { "itemId": "potion-large", "quantity": 5 },
+        { "itemId": "ultra-capsule", "quantity": 3 },
+        { "itemId": "ether-large", "quantity": 3 }
+      ],
+      "unlocksArea": "shadow-marsh"
+    }
+  },
+  {
+    "bossId": "umbralsovereign",
+    "speciesId": "umbralsovereign",
+    "name": "Umbral Sovereign",
+    "title": "Master of Shadows",
+    "level": 22,
+    "areaId": "shadow-marsh",
+    "position": { "x": 576, "y": 576 },
+    "introDialog": [
+      "The shadows of the marsh converge into a single point...",
+      "An overwhelming presence manifests from pure darkness!",
+      "UMBRAL SOVEREIGN: At last... a worthy challenger approaches.",
+      "UMBRAL SOVEREIGN: I am the final guardian. The end of all paths.",
+      "UMBRAL SOVEREIGN: Show me the strength that brought you this far!",
+      "UMBRAL SOVEREIGN: PREPARE YOURSELF!"
+    ],
+    "defeatDialog": [
+      "UMBRAL SOVEREIGN: Magnificent... truly magnificent...",
+      "UMBRAL SOVEREIGN: In all my centuries, none have matched you.",
+      "UMBRAL SOVEREIGN: The shadows acknowledge your supremacy.",
+      "UMBRAL SOVEREIGN: Go forth, champion. Your legend is complete.",
+      "The darkness recedes, bathing the marsh in unexpected light.",
+      "CONGRATULATIONS! You have completed the Shadow Marsh!",
+      "Your journey through Sunlit Village to the Shadow Marsh is complete!",
+      "But remember... a true monster tamer's adventure never truly ends..."
+    ],
+    "rewards": {
+      "experience": 5000,
+      "gold": 3000,
+      "guaranteedItems": [
+        { "itemId": "potion-large", "quantity": 5 },
+        { "itemId": "ultra-capsule", "quantity": 5 },
+        { "itemId": "ether-large", "quantity": 5 },
+        { "itemId": "master-capsule", "quantity": 1 }
       ]
     }
   }

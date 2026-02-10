@@ -55,7 +55,7 @@ interface BattleSceneData {
   readonly areaId?: string
 }
 
-type AreaType = 'village' | 'forest' | 'cave'
+type AreaType = 'village' | 'forest' | 'cave' | 'volcano' | 'grotto' | 'swamp'
 
 type BattlePhase = 'intro' | 'player_input' | 'executing' | 'enemy_turn' | 'victory' | 'defeat' | 'fled'
 
@@ -111,7 +111,7 @@ export class BattleScene extends Phaser.Scene {
     })
 
     this.hud.updatePlayerStats(this.battle.playerSquad)
-    this.hud.updateEnemyStats(this.battle.enemySquad)
+    this.hud.updateEnemyStats(this.battle.enemySquad, this.isBossBattle)
 
     // Intro sequence
     this.cameras.main.fadeIn(300)
@@ -133,7 +133,13 @@ export class BattleScene extends Phaser.Scene {
     const areaType = this.getAreaType()
     const bg = this.add.graphics()
 
-    if (areaType === 'cave') {
+    if (areaType === 'volcano') {
+      this.createVolcanoBackground(bg)
+    } else if (areaType === 'grotto') {
+      this.createGrottoBackground(bg)
+    } else if (areaType === 'swamp') {
+      this.createSwampBackground(bg)
+    } else if (areaType === 'cave') {
       this.createCaveBackground(bg)
     } else if (areaType === 'forest') {
       this.createForestBackground(bg)
@@ -145,7 +151,13 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private getAreaType(): AreaType {
-    if (this.areaId.includes('cave') || this.areaId.includes('crystal')) {
+    if (this.areaId.includes('volcanic') || this.areaId.includes('volcano')) {
+      return 'volcano'
+    } else if (this.areaId.includes('grotto') || this.areaId.includes('seaside')) {
+      return 'grotto'
+    } else if (this.areaId.includes('marsh') || this.areaId.includes('shadow') || this.areaId.includes('swamp')) {
+      return 'swamp'
+    } else if (this.areaId.includes('cave') || this.areaId.includes('crystal')) {
       return 'cave'
     } else if (this.areaId.includes('forest') || this.areaId.includes('whispering')) {
       return 'forest'
@@ -271,6 +283,216 @@ export class BattleScene extends Phaser.Scene {
     bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.66, 360, 45)
   }
 
+  private createVolcanoBackground(bg: Phaser.GameObjects.Graphics): void {
+    // Fiery red-orange sky with smoke
+    bg.fillGradientStyle(0x8b0000, 0xb22222, 0xff4500, 0xff6347)
+    bg.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT * 0.5)
+
+    // Darker smoky upper area
+    bg.fillStyle(0x2d1f1f, 0.6)
+    bg.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT * 0.2)
+
+    // Volcanic rocky ground
+    bg.fillGradientStyle(0x3d2817, 0x4a3222, 0x2d1f1a, 0x1a1210)
+    bg.fillRect(0, GAME_HEIGHT * 0.5, GAME_WIDTH, GAME_HEIGHT * 0.5)
+
+    // Lava rivers and pools
+    bg.fillStyle(0xff4500, 0.9)
+    for (let i = 0; i < 8; i++) {
+      const x = (i * 180 + 40) % GAME_WIDTH
+      const y = GAME_HEIGHT * 0.75 + (i * 31) % (GAME_HEIGHT * 0.2)
+      const width = 60 + (i % 4) * 20
+      bg.fillEllipse(x, y, width, 15)
+      // Lava glow
+      bg.fillStyle(0xff6347, 0.4)
+      bg.fillEllipse(x, y, width + 20, 25)
+      bg.fillStyle(0xff4500, 0.9)
+    }
+
+    // Embers floating in the air
+    bg.fillStyle(0xffa500, 0.8)
+    for (let i = 0; i < 20; i++) {
+      const x = (i * 73 + 10) % GAME_WIDTH
+      const y = GAME_HEIGHT * 0.15 + (i * 41) % (GAME_HEIGHT * 0.5)
+      const size = 2 + (i % 4)
+      bg.fillCircle(x, y, size)
+    }
+
+    // Distant volcanic mountains/peaks
+    bg.fillStyle(0x1a0f0a, 0.9)
+    bg.fillTriangle(100, GAME_HEIGHT * 0.5, 0, GAME_HEIGHT * 0.5, 50, GAME_HEIGHT * 0.25)
+    bg.fillTriangle(300, GAME_HEIGHT * 0.5, 180, GAME_HEIGHT * 0.5, 240, GAME_HEIGHT * 0.15)
+    bg.fillTriangle(550, GAME_HEIGHT * 0.5, 400, GAME_HEIGHT * 0.5, 475, GAME_HEIGHT * 0.2)
+    // Lava glow at peaks
+    bg.fillStyle(0xff4500, 0.5)
+    bg.fillCircle(240, GAME_HEIGHT * 0.18, 15)
+    bg.fillCircle(475, GAME_HEIGHT * 0.23, 12)
+
+    // Battle platform for enemies (obsidian with lava cracks)
+    bg.fillStyle(0x2d2d2d, 0.95)
+    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.48, 380, 70)
+    bg.fillStyle(0xff4500, 0.4)
+    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.48, 300, 40)
+    bg.fillStyle(0x1a1a1a, 0.8)
+    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.46, 340, 50)
+
+    // Battle platform for player
+    bg.fillStyle(0x2d2d2d, 0.95)
+    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.68, 420, 70)
+    bg.fillStyle(0xff4500, 0.4)
+    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.68, 340, 40)
+    bg.fillStyle(0x1a1a1a, 0.8)
+    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.66, 370, 50)
+  }
+
+  private createGrottoBackground(bg: Phaser.GameObjects.Graphics): void {
+    // Underwater blue-green gradient sky (cave ceiling with light filtering through)
+    bg.fillGradientStyle(0x006994, 0x0099b3, 0x40e0d0, 0x7fffd4)
+    bg.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT * 0.55)
+
+    // Light rays from above
+    bg.fillStyle(0x7fffd4, 0.15)
+    for (let i = 0; i < 6; i++) {
+      const x = 100 + i * 200
+      bg.fillTriangle(x, 0, x - 60, GAME_HEIGHT * 0.55, x + 60, GAME_HEIGHT * 0.55)
+    }
+
+    // Sandy/coral floor
+    bg.fillGradientStyle(0xdeb887, 0xd4a76a, 0xc4956a, 0xb08050)
+    bg.fillRect(0, GAME_HEIGHT * 0.55, GAME_WIDTH, GAME_HEIGHT * 0.45)
+
+    // Shallow water pools
+    bg.fillStyle(0x40e0d0, 0.5)
+    for (let i = 0; i < 10; i++) {
+      const x = (i * 140 + 30) % GAME_WIDTH
+      const y = GAME_HEIGHT * 0.7 + (i * 23) % (GAME_HEIGHT * 0.25)
+      bg.fillEllipse(x, y, 50 + (i % 3) * 20, 12)
+    }
+
+    // Coral and seaweed decorations
+    const coralColors = [0xff6b6b, 0xff8e72, 0xffa07a, 0xe75480]
+    for (let i = 0; i < 12; i++) {
+      const x = (i * 110 + 20) % GAME_WIDTH
+      const y = GAME_HEIGHT * 0.55
+      const color = coralColors[i % coralColors.length]
+      bg.fillStyle(color, 0.8)
+      // Coral branches
+      bg.fillRect(x - 3, y - 30 - (i % 20), 6, 30 + (i % 20))
+      bg.fillCircle(x, y - 35 - (i % 20), 10)
+      bg.fillCircle(x - 8, y - 25 - (i % 15), 7)
+      bg.fillCircle(x + 8, y - 28 - (i % 15), 8)
+    }
+
+    // Seaweed
+    bg.fillStyle(0x2e8b57, 0.7)
+    for (let i = 0; i < 8; i++) {
+      const x = (i * 170 + 80) % GAME_WIDTH
+      const height = 40 + (i % 3) * 15
+      bg.fillRect(x, GAME_HEIGHT * 0.55 - height, 4, height)
+      bg.fillRect(x + 8, GAME_HEIGHT * 0.55 - height + 10, 4, height - 10)
+    }
+
+    // Bubbles
+    bg.fillStyle(0xffffff, 0.4)
+    for (let i = 0; i < 15; i++) {
+      const x = (i * 89 + 25) % GAME_WIDTH
+      const y = GAME_HEIGHT * 0.2 + (i * 37) % (GAME_HEIGHT * 0.4)
+      bg.fillCircle(x, y, 3 + (i % 4))
+    }
+
+    // Battle platform for enemies (coral-encrusted rock)
+    bg.fillStyle(0xc4956a, 0.95)
+    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.48, 380, 70)
+    bg.fillStyle(0x40e0d0, 0.4)
+    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.46, 320, 45)
+
+    // Battle platform for player
+    bg.fillStyle(0xc4956a, 0.95)
+    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.68, 420, 70)
+    bg.fillStyle(0x7fffd4, 0.3)
+    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.66, 360, 45)
+  }
+
+  private createSwampBackground(bg: Phaser.GameObjects.Graphics): void {
+    // Dark, murky greenish-purple sky (foggy twilight)
+    bg.fillGradientStyle(0x2d2d3d, 0x3d3d4d, 0x4a4a5a, 0x3d4a3d)
+    bg.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT * 0.5)
+
+    // Fog layers
+    bg.fillStyle(0x6b6b7b, 0.3)
+    bg.fillRect(0, GAME_HEIGHT * 0.35, GAME_WIDTH, GAME_HEIGHT * 0.15)
+    bg.fillStyle(0x5a5a6a, 0.2)
+    bg.fillRect(0, GAME_HEIGHT * 0.25, GAME_WIDTH, GAME_HEIGHT * 0.1)
+
+    // Murky swamp ground
+    bg.fillGradientStyle(0x3d2817, 0x2d3d27, 0x2a3a2a, 0x1a2a1a)
+    bg.fillRect(0, GAME_HEIGHT * 0.5, GAME_WIDTH, GAME_HEIGHT * 0.5)
+
+    // Murky water pools
+    bg.fillStyle(0x2f4f2f, 0.7)
+    for (let i = 0; i < 12; i++) {
+      const x = (i * 120 + 20) % GAME_WIDTH
+      const y = GAME_HEIGHT * 0.65 + (i * 29) % (GAME_HEIGHT * 0.3)
+      bg.fillEllipse(x, y, 70 + (i % 4) * 15, 18)
+      // Murky reflection
+      bg.fillStyle(0x4a6a4a, 0.3)
+      bg.fillEllipse(x, y - 3, 50 + (i % 4) * 10, 10)
+      bg.fillStyle(0x2f4f2f, 0.7)
+    }
+
+    // Dead trees silhouettes
+    bg.fillStyle(0x1a1a1a, 0.9)
+    for (let i = 0; i < 6; i++) {
+      const x = i * 220 + 80
+      const height = 120 + (i % 3) * 30
+      // Gnarled trunk
+      bg.fillRect(x - 6, GAME_HEIGHT * 0.5 - height, 12, height)
+      // Dead branches
+      bg.fillTriangle(x, GAME_HEIGHT * 0.5 - height, x - 40, GAME_HEIGHT * 0.5 - height + 30, x, GAME_HEIGHT * 0.5 - height + 20)
+      bg.fillTriangle(x, GAME_HEIGHT * 0.5 - height + 10, x + 35, GAME_HEIGHT * 0.5 - height + 35, x, GAME_HEIGHT * 0.5 - height + 25)
+    }
+
+    // Glowing mushrooms
+    const mushroomColors = [0x9370db, 0x8a2be2, 0x7b68ee, 0x6a5acd]
+    for (let i = 0; i < 10; i++) {
+      const x = (i * 137 + 50) % GAME_WIDTH
+      const y = GAME_HEIGHT * 0.75 + (i * 19) % (GAME_HEIGHT * 0.2)
+      const color = mushroomColors[i % mushroomColors.length]
+      // Mushroom glow
+      bg.fillStyle(color, 0.3)
+      bg.fillCircle(x, y - 5, 15)
+      // Mushroom cap
+      bg.fillStyle(color, 0.8)
+      bg.fillEllipse(x, y - 8, 12, 6)
+      // Stem
+      bg.fillStyle(0xdcdcdc, 0.7)
+      bg.fillRect(x - 2, y - 5, 4, 10)
+    }
+
+    // Wisps / will-o-wisps
+    bg.fillStyle(0x98fb98, 0.5)
+    for (let i = 0; i < 8; i++) {
+      const x = (i * 167 + 100) % GAME_WIDTH
+      const y = GAME_HEIGHT * 0.3 + (i * 43) % (GAME_HEIGHT * 0.25)
+      bg.fillCircle(x, y, 5)
+      bg.fillStyle(0x98fb98, 0.2)
+      bg.fillCircle(x, y, 12)
+      bg.fillStyle(0x98fb98, 0.5)
+    }
+
+    // Battle platform for enemies (rotting log/mud mound)
+    bg.fillStyle(0x4a3a2a, 0.95)
+    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.48, 380, 70)
+    bg.fillStyle(0x3d4d3d, 0.5)
+    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.46, 320, 45)
+
+    // Battle platform for player
+    bg.fillStyle(0x4a3a2a, 0.95)
+    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.68, 420, 70)
+    bg.fillStyle(0x2f4f2f, 0.4)
+    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.66, 360, 45)
+  }
+
   private createCombatantSprites(): void {
     const hasCharacters32 = this.textures.exists('characters-32')
 
@@ -343,10 +565,13 @@ export class BattleScene extends Phaser.Scene {
       return sprite
     })
 
-    // Player sprites (right side)
+    // Player sprites - 2-row layout based on squad size
+    // Layout: 1=center, 2=side-by-side, 3=2+1, 4=2+2, 5=3+2, 6=3+3
+    const squadCount = this.battle.playerSquad.length
+    const positions = this.calculateSquadPositions(squadCount)
+
     this.playerSprites = this.battle.playerSquad.map((player, index) => {
-      const x = GAME_WIDTH * 0.62 + index * 110
-      const y = GAME_HEIGHT * 0.56
+      const { x, y } = positions[index]
 
       let sprite: BattleSprite
 
@@ -407,6 +632,71 @@ export class BattleScene extends Phaser.Scene {
     })
   }
 
+  private calculateSquadPositions(squadCount: number): Array<{ x: number; y: number }> {
+    // Layout configuration - positioned lower on screen
+    const centerX = 950  // Center point for the squad area (right side)
+    const topRowY = GAME_HEIGHT * 0.54  // Top row Y position
+    const bottomRowY = GAME_HEIGHT * 0.78  // Bottom row Y position
+    const spacing = 180  // Horizontal spacing between characters
+
+    // Determine row sizes based on squad count
+    // 1=1+0, 2=2+0, 3=2+1, 4=2+2, 5=3+2, 6=3+3
+    let topRowCount: number
+    let bottomRowCount: number
+
+    switch (squadCount) {
+      case 1:
+        topRowCount = 1
+        bottomRowCount = 0
+        break
+      case 2:
+        topRowCount = 2
+        bottomRowCount = 0
+        break
+      case 3:
+        topRowCount = 2
+        bottomRowCount = 1
+        break
+      case 4:
+        topRowCount = 2
+        bottomRowCount = 2
+        break
+      case 5:
+        topRowCount = 3
+        bottomRowCount = 2
+        break
+      case 6:
+      default:
+        topRowCount = 3
+        bottomRowCount = squadCount - 3
+        break
+    }
+
+    const positions: Array<{ x: number; y: number }> = []
+
+    // Calculate top row positions (centered)
+    const topRowStartX = centerX - ((topRowCount - 1) * spacing) / 2
+    for (let i = 0; i < topRowCount; i++) {
+      positions.push({
+        x: topRowStartX + i * spacing,
+        y: topRowY,
+      })
+    }
+
+    // Calculate bottom row positions (centered)
+    if (bottomRowCount > 0) {
+      const bottomRowStartX = centerX - ((bottomRowCount - 1) * spacing) / 2
+      for (let i = 0; i < bottomRowCount; i++) {
+        positions.push({
+          x: bottomRowStartX + i * spacing,
+          y: bottomRowY,
+        })
+      }
+    }
+
+    return positions
+  }
+
   private startNextTurn(): void {
     // Recalculate turn order each round
     if (this.currentTurnIndex === 0) {
@@ -437,7 +727,7 @@ export class BattleScene extends Phaser.Scene {
     // Process status effects at start of turn
     this.battle = processStatusEffects(this.battle, current.combatantId)
     this.hud.updatePlayerStats(this.battle.playerSquad)
-    this.hud.updateEnemyStats(this.battle.enemySquad)
+    this.hud.updateEnemyStats(this.battle.enemySquad, this.isBossBattle)
 
     // Recheck after status effects (poison could KO)
     const postStatusEnd = checkBattleEnd(this.battle)
@@ -592,7 +882,7 @@ export class BattleScene extends Phaser.Scene {
 
       this.hud.showMessage(result.message).then(() => {
         this.hud.updatePlayerStats(this.battle.playerSquad)
-        this.hud.updateEnemyStats(this.battle.enemySquad)
+        this.hud.updateEnemyStats(this.battle.enemySquad, this.isBossBattle)
 
         this.currentTurnIndex++
         const aliveCount = [...this.battle.playerSquad, ...this.battle.enemySquad].filter(
@@ -753,7 +1043,7 @@ export class BattleScene extends Phaser.Scene {
         const locationText = newSquad ? 'squad' : 'storage'
         this.hud.showMessage(`Caught ${target.name}! Added to ${locationText}!`).then(() => {
           this.hud.updatePlayerStats(this.battle.playerSquad)
-          this.hud.updateEnemyStats(this.battle.enemySquad)
+          this.hud.updateEnemyStats(this.battle.enemySquad, this.isBossBattle)
 
           // Check if battle should end (no more enemies)
           if (this.battle.enemySquad.every((e) => e.stats.currentHp <= 0)) {
@@ -810,7 +1100,7 @@ export class BattleScene extends Phaser.Scene {
     // Show message
     this.hud.showMessage(result.message).then(() => {
       this.hud.updatePlayerStats(this.battle.playerSquad)
-      this.hud.updateEnemyStats(this.battle.enemySquad)
+      this.hud.updateEnemyStats(this.battle.enemySquad, this.isBossBattle)
 
       // Check flee
       if (this.battle.state === 'fled') {

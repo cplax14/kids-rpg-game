@@ -29,6 +29,38 @@ const PLAYER_STAT_GROWTH = {
   luck: 1,
 }
 
+// Player abilities learned at specific levels
+export const PLAYER_ABILITY_PROGRESSION: ReadonlyArray<{
+  readonly level: number
+  readonly abilityId: string
+}> = [
+  { level: 1, abilityId: 'tackle' },
+  { level: 1, abilityId: 'heal' },
+  { level: 3, abilityId: 'power-strike' },
+  { level: 5, abilityId: 'war-cry' },
+  { level: 7, abilityId: 'group-heal' },
+  { level: 10, abilityId: 'defense-boost' },
+  { level: 12, abilityId: 'quick-step' },
+  { level: 15, abilityId: 'light-beam' },
+  { level: 18, abilityId: 'radiance' },
+  { level: 20, abilityId: 'regen' },
+]
+
+export function getPlayerAbilitiesAtLevel(level: number): ReadonlyArray<string> {
+  return PLAYER_ABILITY_PROGRESSION.filter((entry) => entry.level <= level).map(
+    (entry) => entry.abilityId,
+  )
+}
+
+export function getNewAbilitiesForLevelUp(
+  previousLevel: number,
+  newLevel: number,
+): ReadonlyArray<string> {
+  return PLAYER_ABILITY_PROGRESSION.filter(
+    (entry) => entry.level > previousLevel && entry.level <= newLevel,
+  ).map((entry) => entry.abilityId)
+}
+
 export function createNewPlayer(name: string): PlayerCharacter {
   return {
     id: generateId(),
@@ -76,9 +108,40 @@ export function calculateStatsForLevel(level: number): CharacterStats {
   }
 }
 
-export function addExperience(player: PlayerCharacter, xpGained: number): PlayerCharacter {
-  if (player.level >= MAX_LEVEL) return player
+export interface StatChange {
+  readonly stat: string
+  readonly label: string
+  readonly previousValue: number
+  readonly newValue: number
+  readonly change: number
+}
 
+export interface PlayerLevelUpResult {
+  readonly player: PlayerCharacter
+  readonly didLevelUp: boolean
+  readonly previousLevel: number
+  readonly newLevel: number
+  readonly statChanges: ReadonlyArray<StatChange>
+  readonly newAbilities: ReadonlyArray<string>
+}
+
+export function addExperience(player: PlayerCharacter, xpGained: number): PlayerCharacter {
+  return addExperienceWithInfo(player, xpGained).player
+}
+
+export function addExperienceWithInfo(player: PlayerCharacter, xpGained: number): PlayerLevelUpResult {
+  if (player.level >= MAX_LEVEL) {
+    return {
+      player,
+      didLevelUp: false,
+      previousLevel: player.level,
+      newLevel: player.level,
+      statChanges: [],
+      newAbilities: [],
+    }
+  }
+
+  const previousLevel = player.level
   const newXp = player.experience + xpGained
   let currentLevel = player.level
   let remainingXp = newXp
@@ -89,7 +152,71 @@ export function addExperience(player: PlayerCharacter, xpGained: number): Player
   }
 
   if (currentLevel > player.level) {
+    const previousStats = player.stats
     const newStats = calculateStatsForLevel(currentLevel)
+
+    // Calculate stat changes
+    const statChanges: StatChange[] = [
+      {
+        stat: 'maxHp',
+        label: 'HP',
+        previousValue: previousStats.maxHp,
+        newValue: newStats.maxHp,
+        change: newStats.maxHp - previousStats.maxHp,
+      },
+      {
+        stat: 'maxMp',
+        label: 'MP',
+        previousValue: previousStats.maxMp,
+        newValue: newStats.maxMp,
+        change: newStats.maxMp - previousStats.maxMp,
+      },
+      {
+        stat: 'attack',
+        label: 'Attack',
+        previousValue: previousStats.attack,
+        newValue: newStats.attack,
+        change: newStats.attack - previousStats.attack,
+      },
+      {
+        stat: 'defense',
+        label: 'Defense',
+        previousValue: previousStats.defense,
+        newValue: newStats.defense,
+        change: newStats.defense - previousStats.defense,
+      },
+      {
+        stat: 'magicAttack',
+        label: 'M.Atk',
+        previousValue: previousStats.magicAttack,
+        newValue: newStats.magicAttack,
+        change: newStats.magicAttack - previousStats.magicAttack,
+      },
+      {
+        stat: 'magicDefense',
+        label: 'M.Def',
+        previousValue: previousStats.magicDefense,
+        newValue: newStats.magicDefense,
+        change: newStats.magicDefense - previousStats.magicDefense,
+      },
+      {
+        stat: 'speed',
+        label: 'Speed',
+        previousValue: previousStats.speed,
+        newValue: newStats.speed,
+        change: newStats.speed - previousStats.speed,
+      },
+      {
+        stat: 'luck',
+        label: 'Luck',
+        previousValue: previousStats.luck,
+        newValue: newStats.luck,
+        change: newStats.luck - previousStats.luck,
+      },
+    ]
+
+    // Get new abilities learned
+    const newAbilities = getNewAbilitiesForLevelUp(previousLevel, currentLevel)
 
     // Preserve current HP/MP ratios
     const hpRatio = player.stats.currentHp / player.stats.maxHp
@@ -112,12 +239,26 @@ export function addExperience(player: PlayerCharacter, xpGained: number): Player
       newLevel: currentLevel,
     })
 
-    return updatedPlayer
+    return {
+      player: updatedPlayer,
+      didLevelUp: true,
+      previousLevel,
+      newLevel: currentLevel,
+      statChanges,
+      newAbilities,
+    }
   }
 
   return {
-    ...player,
-    experience: newXp,
+    player: {
+      ...player,
+      experience: newXp,
+    },
+    didLevelUp: false,
+    previousLevel,
+    newLevel: previousLevel,
+    statChanges: [],
+    newAbilities: [],
   }
 }
 

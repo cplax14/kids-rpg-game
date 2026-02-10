@@ -464,7 +464,7 @@ export interface BossDefinition {
 
 // ── Extended Area Definition ──
 
-export type TerrainType = 'village' | 'forest' | 'cave'
+export type TerrainType = 'village' | 'forest' | 'cave' | 'volcano' | 'grotto' | 'swamp'
 
 export interface AreaEncounterEntry {
   readonly speciesId: string

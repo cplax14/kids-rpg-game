@@ -109,6 +109,60 @@ describe('mapGenerator', () => {
       expect(map.groundLayer).toBeDefined()
       expect(map.objectLayer).toBeDefined()
     })
+
+    it('should generate volcano terrain', () => {
+      const config: MapConfig = {
+        width: 10,
+        height: 10,
+        terrainType: 'volcano',
+        entryPoints: [],
+        exitPoints: [],
+        reservedPositions: [],
+      }
+
+      const map = generateMap(config)
+
+      // Ground layer should have valid volcano tiles (40 = lava floor, 41 = obsidian)
+      const validVolcanoTiles = [40, 41]
+      const hasValidTiles = map.groundLayer.every((t) => validVolcanoTiles.includes(t))
+      expect(hasValidTiles).toBe(true)
+    })
+
+    it('should generate grotto terrain', () => {
+      const config: MapConfig = {
+        width: 10,
+        height: 10,
+        terrainType: 'grotto',
+        entryPoints: [],
+        exitPoints: [],
+        reservedPositions: [],
+      }
+
+      const map = generateMap(config)
+
+      // Ground layer should have valid grotto tiles (50 = sand, 51 = wet sand)
+      const validGrottoTiles = [50, 51]
+      const hasValidTiles = map.groundLayer.every((t) => validGrottoTiles.includes(t))
+      expect(hasValidTiles).toBe(true)
+    })
+
+    it('should generate swamp terrain', () => {
+      const config: MapConfig = {
+        width: 10,
+        height: 10,
+        terrainType: 'swamp',
+        entryPoints: [],
+        exitPoints: [],
+        reservedPositions: [],
+      }
+
+      const map = generateMap(config)
+
+      // Ground layer should have valid swamp tiles (60 = mud, 61 = murky water)
+      const validSwampTiles = [60, 61]
+      const hasValidTiles = map.groundLayer.every((t) => validSwampTiles.includes(t))
+      expect(hasValidTiles).toBe(true)
+    })
   })
 
   describe('getCollisionTiles', () => {
@@ -134,6 +188,29 @@ describe('mapGenerator', () => {
     it('should return empty array for village', () => {
       const tiles = getCollisionTiles('village')
       expect(tiles.length).toBe(0)
+    })
+
+    it('should return volcano collision tiles', () => {
+      const tiles = getCollisionTiles('volcano')
+
+      expect(tiles).toContain(42) // lava pool
+      expect(tiles).toContain(43) // volcanic wall
+      expect(tiles).toContain(46) // cooled rock
+    })
+
+    it('should return grotto collision tiles', () => {
+      const tiles = getCollisionTiles('grotto')
+
+      expect(tiles).toContain(53) // deep water
+      expect(tiles).toContain(54) // coral wall
+    })
+
+    it('should return swamp collision tiles', () => {
+      const tiles = getCollisionTiles('swamp')
+
+      expect(tiles).toContain(62) // deep bog
+      expect(tiles).toContain(63) // twisted root
+      expect(tiles).toContain(64) // dead tree
     })
   })
 

@@ -45,6 +45,36 @@ const CAVE_TILES = {
   STALAGMITE: 30,
 } as const
 
+const VOLCANO_TILES = {
+  LAVA_FLOOR: 40,
+  OBSIDIAN_FLOOR: 41,
+  LAVA_POOL: 42,
+  VOLCANIC_WALL: 43,
+  STEAM_VENT: 44,
+  EMBER: 45,
+  COOLED_ROCK: 46,
+} as const
+
+const GROTTO_TILES = {
+  SAND_FLOOR: 50,
+  WET_SAND: 51,
+  SHALLOW_WATER: 52,
+  DEEP_WATER: 53,
+  CORAL_WALL: 54,
+  SEAWEED: 55,
+  SHELL: 56,
+} as const
+
+const SWAMP_TILES = {
+  MUD_FLOOR: 60,
+  MURKY_WATER: 61,
+  DEEP_BOG: 62,
+  TWISTED_ROOT: 63,
+  DEAD_TREE: 64,
+  GLOW_MUSHROOM: 65,
+  FOG_PATCH: 66,
+} as const
+
 const EMPTY_TILE = -1
 
 function createEmptyLayer(width: number, height: number, fill: number = EMPTY_TILE): number[] {
@@ -93,6 +123,12 @@ function fillGroundLayer(
         layer[index] = randomChance(0.7) ? FOREST_TILES.GRASS_1 : FOREST_TILES.GRASS_2
       } else if (terrainType === 'cave') {
         layer[index] = randomChance(0.8) ? CAVE_TILES.STONE_FLOOR : CAVE_TILES.STONE_DARK
+      } else if (terrainType === 'volcano') {
+        layer[index] = randomChance(0.6) ? VOLCANO_TILES.LAVA_FLOOR : VOLCANO_TILES.OBSIDIAN_FLOOR
+      } else if (terrainType === 'grotto') {
+        layer[index] = randomChance(0.7) ? GROTTO_TILES.SAND_FLOOR : GROTTO_TILES.WET_SAND
+      } else if (terrainType === 'swamp') {
+        layer[index] = randomChance(0.6) ? SWAMP_TILES.MUD_FLOOR : SWAMP_TILES.MURKY_WATER
       } else {
         layer[index] = FOREST_TILES.GRASS_1
       }
@@ -270,6 +306,152 @@ function placeCaveObstacles(
   }
 }
 
+function placeVolcanoObstacles(
+  objectLayer: number[],
+  width: number,
+  height: number,
+  reservedPositions: ReadonlyArray<Position>,
+  tileSize: number,
+): void {
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const index = getTileIndex(x, y, width)
+
+      // Skip if already has obstacle or is on a path
+      if (objectLayer[index] !== EMPTY_TILE) continue
+
+      // Skip reserved positions
+      if (isReservedTile(x, y, reservedPositions, tileSize)) continue
+
+      // Create volcanic walls around edges
+      if (x === 0 || x === width - 1 || y === 0 || y === height - 1) {
+        objectLayer[index] = VOLCANO_TILES.VOLCANIC_WALL
+        continue
+      }
+
+      // Random obstacle and decoration placement
+      const roll = Math.random()
+
+      if (roll < 0.08) {
+        // Lava pools (obstacle)
+        objectLayer[index] = VOLCANO_TILES.LAVA_POOL
+      } else if (roll < 0.14) {
+        // Cooled rock formations (obstacle)
+        objectLayer[index] = VOLCANO_TILES.COOLED_ROCK
+      } else if (roll < 0.20) {
+        // Steam vents (decoration)
+        objectLayer[index] = VOLCANO_TILES.STEAM_VENT
+      } else if (roll < 0.25) {
+        // Embers (decoration)
+        objectLayer[index] = VOLCANO_TILES.EMBER
+      }
+    }
+  }
+}
+
+function placeGrottoObstacles(
+  objectLayer: number[],
+  width: number,
+  height: number,
+  reservedPositions: ReadonlyArray<Position>,
+  tileSize: number,
+): void {
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const index = getTileIndex(x, y, width)
+
+      // Skip if already has obstacle or is on a path
+      if (objectLayer[index] !== EMPTY_TILE) continue
+
+      // Skip reserved positions
+      if (isReservedTile(x, y, reservedPositions, tileSize)) continue
+
+      // Create coral walls around edges
+      if (x === 0 || x === width - 1 || y === 0 || y === height - 1) {
+        objectLayer[index] = GROTTO_TILES.CORAL_WALL
+        continue
+      }
+
+      // Check for nearby water for clustering
+      const hasNearbyWater = checkNearbyTile(objectLayer, x, y, width, height, [
+        GROTTO_TILES.SHALLOW_WATER,
+        GROTTO_TILES.DEEP_WATER,
+      ])
+
+      // Random obstacle and decoration placement
+      const roll = Math.random()
+
+      if (roll < 0.06) {
+        // Deep water pools (obstacle)
+        objectLayer[index] = GROTTO_TILES.DEEP_WATER
+      } else if (roll < 0.12 || (hasNearbyWater && roll < 0.18)) {
+        // Shallow water (passable, cluster near deep water)
+        objectLayer[index] = GROTTO_TILES.SHALLOW_WATER
+      } else if (roll < 0.16) {
+        // Coral walls
+        objectLayer[index] = GROTTO_TILES.CORAL_WALL
+      } else if (roll < 0.22) {
+        // Seaweed (decoration)
+        objectLayer[index] = GROTTO_TILES.SEAWEED
+      } else if (roll < 0.26) {
+        // Shells (decoration)
+        objectLayer[index] = GROTTO_TILES.SHELL
+      }
+    }
+  }
+}
+
+function placeSwampObstacles(
+  objectLayer: number[],
+  width: number,
+  height: number,
+  reservedPositions: ReadonlyArray<Position>,
+  tileSize: number,
+): void {
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const index = getTileIndex(x, y, width)
+
+      // Skip if already has obstacle or is on a path
+      if (objectLayer[index] !== EMPTY_TILE) continue
+
+      // Skip reserved positions
+      if (isReservedTile(x, y, reservedPositions, tileSize)) continue
+
+      // Skip edges for dead tree placement clearance
+      if (x <= 1 || x >= width - 2 || y <= 2 || y >= height - 1) {
+        if (x === 0 || x === width - 1 || y === 0 || y === height - 1) {
+          objectLayer[index] = SWAMP_TILES.TWISTED_ROOT
+        }
+        continue
+      }
+
+      // Check for nearby trees for clustering
+      const hasNearbyTree = checkNearbyTile(objectLayer, x, y, width, height, [SWAMP_TILES.DEAD_TREE])
+
+      // Random obstacle and decoration placement
+      const roll = Math.random()
+
+      if (roll < 0.06) {
+        // Deep bog (obstacle)
+        objectLayer[index] = SWAMP_TILES.DEEP_BOG
+      } else if (roll < 0.14 || (hasNearbyTree && roll < 0.18)) {
+        // Dead trees (cluster for eerie forest feel)
+        objectLayer[index] = SWAMP_TILES.DEAD_TREE
+      } else if (roll < 0.20) {
+        // Twisted roots (obstacle)
+        objectLayer[index] = SWAMP_TILES.TWISTED_ROOT
+      } else if (roll < 0.26) {
+        // Glowing mushrooms (decoration, eerie light source)
+        objectLayer[index] = SWAMP_TILES.GLOW_MUSHROOM
+      } else if (roll < 0.30) {
+        // Fog patches (decoration)
+        objectLayer[index] = SWAMP_TILES.FOG_PATCH
+      }
+    }
+  }
+}
+
 function addDecorations(
   _groundLayer: number[],
   objectLayer: number[],
@@ -355,6 +537,12 @@ export function generateMap(config: MapConfig): GeneratedMap {
     placeForestObstacles(objectLayer, width, height, reservedPositions, tileSize)
   } else if (terrainType === 'cave') {
     placeCaveObstacles(objectLayer, width, height, reservedPositions, tileSize)
+  } else if (terrainType === 'volcano') {
+    placeVolcanoObstacles(objectLayer, width, height, reservedPositions, tileSize)
+  } else if (terrainType === 'grotto') {
+    placeGrottoObstacles(objectLayer, width, height, reservedPositions, tileSize)
+  } else if (terrainType === 'swamp') {
+    placeSwampObstacles(objectLayer, width, height, reservedPositions, tileSize)
   }
 
   // Add decorative elements
@@ -383,6 +571,23 @@ export function getCollisionTiles(terrainType: TerrainType): ReadonlyArray<numbe
       CAVE_TILES.ROCK_1,
       CAVE_TILES.ROCK_2,
       CAVE_TILES.STALAGMITE,
+    ]
+  } else if (terrainType === 'volcano') {
+    return [
+      VOLCANO_TILES.LAVA_POOL,
+      VOLCANO_TILES.VOLCANIC_WALL,
+      VOLCANO_TILES.COOLED_ROCK,
+    ]
+  } else if (terrainType === 'grotto') {
+    return [
+      GROTTO_TILES.DEEP_WATER,
+      GROTTO_TILES.CORAL_WALL,
+    ]
+  } else if (terrainType === 'swamp') {
+    return [
+      SWAMP_TILES.DEEP_BOG,
+      SWAMP_TILES.TWISTED_ROOT,
+      SWAMP_TILES.DEAD_TREE,
     ]
   }
   return []
