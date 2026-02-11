@@ -285,7 +285,7 @@ export const BossDefinitionSchema = z.object({
 
 // ── Extended Area Definition ──
 
-export const TerrainTypeSchema = z.enum(['village', 'forest', 'cave'])
+export const TerrainTypeSchema = z.enum(['village', 'forest', 'cave', 'volcano', 'grotto', 'swamp'])
 
 export const AreaEncounterEntrySchema = z.object({
   speciesId: z.string().min(1),

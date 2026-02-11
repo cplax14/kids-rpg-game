@@ -28,7 +28,13 @@ import {
 } from '../systems/MonsterSystem'
 import { XP_BENCH_PERCENTAGE } from '../models/constants'
 import { createCombatantFromPlayer, createCombatantFromEnemy } from '../systems/CombatSystem'
-import { addExperience, updatePlayerGold } from '../systems/CharacterSystem'
+import {
+  addExperienceWithInfo,
+  updatePlayerGold,
+  getPlayerAbilitiesAtLevel,
+  type StatChange,
+  type PlayerLevelUpResult,
+} from '../systems/CharacterSystem'
 import { randomInt, randomChance, weightedRandom } from '../utils/math'
 import { EventBus } from '../events/EventBus'
 import { GAME_EVENTS } from '../events/GameEvents'
@@ -672,16 +678,27 @@ export class WorldScene extends Phaser.Scene {
 
   private renderProceduralMap(
     map: { groundLayer: ReadonlyArray<number>; objectLayer: ReadonlyArray<number>; width: number; height: number },
-    terrainType: 'village' | 'forest' | 'cave',
+    terrainType: 'village' | 'forest' | 'cave' | 'volcano' | 'grotto' | 'swamp',
   ): void {
     if (!this.proceduralMapGraphics) return
 
     const tileColors = this.getTileColors(terrainType)
 
     // Forest grass color palette - brighter, more vibrant greens like the Mixel sample
-    // Using a subtle checkerboard pattern with 2 shades for depth
     const forestGrassLight = 0x7cb342  // Bright lime green
     const forestGrassDark = 0x689f38   // Slightly darker green
+
+    // Volcano color palette - fiery reds and dark obsidian
+    const volcanoLavaLight = 0x8b3500  // Deep red-orange
+    const volcanoLavaDark = 0x5a1a00   // Darker lava
+
+    // Grotto color palette - sandy beaches and underwater tones
+    const grottoSandLight = 0xdeb887  // Light tan
+    const grottoSandDark = 0xc4a777   // Darker sand
+
+    // Swamp color palette - murky browns and greens
+    const swampMudLight = 0x4a3d2e   // Light mud
+    const swampMudDark = 0x3d2817    // Dark mud
 
     // Render ground layer with color variation
     for (let y = 0; y < map.height; y++) {
@@ -691,9 +708,21 @@ export class WorldScene extends Phaser.Scene {
 
         let color: number
         if (terrainType === 'forest') {
-          // Checkerboard pattern for subtle grass variation (like the sample)
+          // Checkerboard pattern for subtle grass variation
           const isLight = (x + y) % 2 === 0
-          color = tile === 7 ? 0x8d6e4c : (isLight ? forestGrassLight : forestGrassDark) // dirt or grass
+          color = tile === 7 ? 0x8d6e4c : (isLight ? forestGrassLight : forestGrassDark)
+        } else if (terrainType === 'volcano') {
+          // Fiery volcanic terrain with obsidian and lava tones
+          const isLight = (x + y) % 2 === 0
+          color = tile === 41 ? 0x1a1a1a : (isLight ? volcanoLavaLight : volcanoLavaDark)
+        } else if (terrainType === 'grotto') {
+          // Sandy underwater grotto
+          const isLight = (x + y) % 2 === 0
+          color = tile === 51 ? grottoSandDark : (isLight ? grottoSandLight : grottoSandDark)
+        } else if (terrainType === 'swamp') {
+          // Murky swamp terrain
+          const isLight = (x + y) % 2 === 0
+          color = tile === 61 ? 0x2f4f2f : (isLight ? swampMudLight : swampMudDark)
         } else {
           color = tileColors[tile] ?? 0x333333
         }
@@ -711,7 +740,7 @@ export class WorldScene extends Phaser.Scene {
 
   private renderProceduralObjects(
     map: { objectLayer: ReadonlyArray<number>; width: number; height: number },
-    terrainType: 'village' | 'forest' | 'cave',
+    terrainType: 'village' | 'forest' | 'cave' | 'volcano' | 'grotto' | 'swamp',
   ): void {
     const hasLargeTrees = this.textures.exists('tileset-trees-large')
     const hasRocks = this.textures.exists('tileset-rocks')
@@ -818,11 +847,199 @@ export class WorldScene extends Phaser.Scene {
             y * TILE_SIZE + 28,
           )
         }
+        // Volcano terrain tiles (40-46)
+        else if (tile >= 40 && tile <= 46 && this.proceduralMapGraphics) {
+          this.renderVolcanoTile(tile, posX, posY, y)
+        }
+        // Grotto terrain tiles (50-56)
+        else if (tile >= 50 && tile <= 56 && this.proceduralMapGraphics) {
+          this.renderGrottoTile(tile, posX, posY, y)
+        }
+        // Swamp terrain tiles (60-66)
+        else if (tile >= 60 && tile <= 66 && this.proceduralMapGraphics) {
+          this.renderSwampTile(tile, posX, posY, y)
+        }
       }
     }
   }
 
-  private getTileColors(terrainType: 'village' | 'forest' | 'cave'): Record<number, number> {
+  private renderVolcanoTile(tile: number, posX: number, posY: number, row: number): void {
+    if (!this.proceduralMapGraphics) return
+
+    // Tile constants
+    const LAVA_POOL = 42
+    const VOLCANIC_WALL = 43
+    const STEAM_VENT = 44
+    const EMBER = 45
+    const COOLED_ROCK = 46
+
+    if (tile === LAVA_POOL) {
+      // Lava pool - bright orange glow
+      this.proceduralMapGraphics.fillStyle(0xff4500, 0.9)
+      this.proceduralMapGraphics.fillCircle(posX, posY, TILE_SIZE / 2 - 2)
+      // Inner glow
+      this.proceduralMapGraphics.fillStyle(0xffcc00, 0.6)
+      this.proceduralMapGraphics.fillCircle(posX, posY, TILE_SIZE / 4)
+    } else if (tile === VOLCANIC_WALL) {
+      // Volcanic wall - dark obsidian with jagged edges
+      this.proceduralMapGraphics.fillStyle(0x1a1a1a, 1)
+      this.proceduralMapGraphics.fillRect(
+        posX - TILE_SIZE / 2,
+        posY - TILE_SIZE / 2,
+        TILE_SIZE,
+        TILE_SIZE,
+      )
+      // Add some texture
+      this.proceduralMapGraphics.fillStyle(0x2a2a2a, 0.5)
+      this.proceduralMapGraphics.fillTriangle(
+        posX - 8, posY - 12,
+        posX + 4, posY,
+        posX - 12, posY + 8,
+      )
+    } else if (tile === STEAM_VENT) {
+      // Steam vent - light gray wisps
+      this.proceduralMapGraphics.fillStyle(0xcccccc, 0.4)
+      this.proceduralMapGraphics.fillCircle(posX, posY - 4, 6)
+      this.proceduralMapGraphics.fillStyle(0xdddddd, 0.3)
+      this.proceduralMapGraphics.fillCircle(posX + 4, posY - 10, 4)
+      this.proceduralMapGraphics.fillCircle(posX - 3, posY - 14, 3)
+    } else if (tile === EMBER) {
+      // Floating ember particles
+      this.proceduralMapGraphics.fillStyle(0xff8800, 0.8)
+      this.proceduralMapGraphics.fillCircle(posX - 4, posY - 2, 2)
+      this.proceduralMapGraphics.fillStyle(0xffcc00, 0.7)
+      this.proceduralMapGraphics.fillCircle(posX + 3, posY + 4, 2)
+      this.proceduralMapGraphics.fillStyle(0xff5500, 0.9)
+      this.proceduralMapGraphics.fillCircle(posX + 1, posY - 6, 1)
+    } else if (tile === COOLED_ROCK) {
+      // Cooled rock formation
+      this.proceduralMapGraphics.fillStyle(0x4a4a4a, 1)
+      this.proceduralMapGraphics.fillRoundedRect(
+        posX - TILE_SIZE / 3,
+        posY - TILE_SIZE / 4,
+        TILE_SIZE / 1.5,
+        TILE_SIZE / 2,
+        4,
+      )
+    }
+  }
+
+  private renderGrottoTile(tile: number, posX: number, posY: number, row: number): void {
+    if (!this.proceduralMapGraphics) return
+
+    // Tile constants
+    const SHALLOW_WATER = 52
+    const DEEP_WATER = 53
+    const CORAL_WALL = 54
+    const SEAWEED = 55
+    const SHELL = 56
+
+    if (tile === SHALLOW_WATER) {
+      // Shallow water - turquoise with ripples
+      this.proceduralMapGraphics.fillStyle(0x40e0d0, 0.6)
+      this.proceduralMapGraphics.fillRect(
+        posX - TILE_SIZE / 2,
+        posY - TILE_SIZE / 2,
+        TILE_SIZE,
+        TILE_SIZE,
+      )
+      // Ripple effect
+      this.proceduralMapGraphics.lineStyle(1, 0xffffff, 0.3)
+      this.proceduralMapGraphics.strokeCircle(posX, posY, 8)
+    } else if (tile === DEEP_WATER) {
+      // Deep water - dark blue
+      this.proceduralMapGraphics.fillStyle(0x0000cd, 0.8)
+      this.proceduralMapGraphics.fillRect(
+        posX - TILE_SIZE / 2,
+        posY - TILE_SIZE / 2,
+        TILE_SIZE,
+        TILE_SIZE,
+      )
+      // Dark center for depth
+      this.proceduralMapGraphics.fillStyle(0x000080, 0.5)
+      this.proceduralMapGraphics.fillCircle(posX, posY, 10)
+    } else if (tile === CORAL_WALL) {
+      // Coral formation - pink/orange
+      this.proceduralMapGraphics.fillStyle(0xff7f50, 1)
+      this.proceduralMapGraphics.fillRoundedRect(
+        posX - TILE_SIZE / 2 + 2,
+        posY - TILE_SIZE / 2 + 2,
+        TILE_SIZE - 4,
+        TILE_SIZE - 4,
+        6,
+      )
+      // Add coral branch details
+      this.proceduralMapGraphics.fillStyle(0xff6347, 0.8)
+      this.proceduralMapGraphics.fillCircle(posX - 6, posY - 4, 4)
+      this.proceduralMapGraphics.fillCircle(posX + 4, posY + 3, 5)
+    } else if (tile === SEAWEED) {
+      // Seaweed - wavy green strands
+      this.proceduralMapGraphics.fillStyle(0x2e8b57, 0.8)
+      this.proceduralMapGraphics.fillRect(posX - 2, posY - 10, 3, 20)
+      this.proceduralMapGraphics.fillRect(posX + 4, posY - 8, 3, 18)
+      this.proceduralMapGraphics.fillRect(posX - 6, posY - 6, 3, 14)
+    } else if (tile === SHELL) {
+      // Decorative shell
+      this.proceduralMapGraphics.fillStyle(0xffe4c4, 0.9)
+      this.proceduralMapGraphics.fillCircle(posX, posY, 6)
+      this.proceduralMapGraphics.fillStyle(0xffdab9, 0.7)
+      this.proceduralMapGraphics.fillCircle(posX - 1, posY - 1, 4)
+    }
+  }
+
+  private renderSwampTile(tile: number, posX: number, posY: number, row: number): void {
+    if (!this.proceduralMapGraphics) return
+
+    // Tile constants
+    const DEEP_BOG = 62
+    const TWISTED_ROOT = 63
+    const DEAD_TREE = 64
+    const GLOW_MUSHROOM = 65
+    const FOG_PATCH = 66
+
+    if (tile === DEEP_BOG) {
+      // Deep bog - dark murky pit
+      this.proceduralMapGraphics.fillStyle(0x1a1a0a, 0.9)
+      this.proceduralMapGraphics.fillCircle(posX, posY, TILE_SIZE / 2 - 2)
+      // Bubbles
+      this.proceduralMapGraphics.fillStyle(0x2a2a1a, 0.6)
+      this.proceduralMapGraphics.fillCircle(posX - 4, posY + 2, 3)
+      this.proceduralMapGraphics.fillCircle(posX + 5, posY - 3, 2)
+    } else if (tile === TWISTED_ROOT) {
+      // Twisted roots
+      this.proceduralMapGraphics.fillStyle(0x4a3728, 1)
+      this.proceduralMapGraphics.fillRect(posX - 12, posY - 3, 24, 6)
+      this.proceduralMapGraphics.fillRect(posX - 3, posY - 12, 6, 24)
+      // Root knots
+      this.proceduralMapGraphics.fillStyle(0x3a2718, 0.8)
+      this.proceduralMapGraphics.fillCircle(posX, posY, 5)
+    } else if (tile === DEAD_TREE) {
+      // Dead tree trunk
+      this.proceduralMapGraphics.fillStyle(0x2a2a2a, 1)
+      this.proceduralMapGraphics.fillRect(posX - 6, posY - 20, 12, 40)
+      // Branches
+      this.proceduralMapGraphics.fillStyle(0x1a1a1a, 0.9)
+      this.proceduralMapGraphics.fillRect(posX - 16, posY - 12, 12, 4)
+      this.proceduralMapGraphics.fillRect(posX + 4, posY - 8, 14, 4)
+    } else if (tile === GLOW_MUSHROOM) {
+      // Glowing mushrooms - eerie light source
+      this.proceduralMapGraphics.fillStyle(0x7fff00, 0.3)
+      this.proceduralMapGraphics.fillCircle(posX, posY, 12) // Glow aura
+      this.proceduralMapGraphics.fillStyle(0x556b2f, 1)
+      this.proceduralMapGraphics.fillRect(posX - 2, posY, 4, 8) // Stem
+      this.proceduralMapGraphics.fillStyle(0x7fff00, 0.9)
+      this.proceduralMapGraphics.fillCircle(posX, posY - 2, 7) // Cap
+    } else if (tile === FOG_PATCH) {
+      // Fog patch - wispy gray
+      this.proceduralMapGraphics.fillStyle(0x696969, 0.2)
+      this.proceduralMapGraphics.fillCircle(posX, posY, 14)
+      this.proceduralMapGraphics.fillStyle(0x808080, 0.15)
+      this.proceduralMapGraphics.fillCircle(posX + 8, posY - 4, 10)
+      this.proceduralMapGraphics.fillCircle(posX - 6, posY + 6, 8)
+    }
+  }
+
+  private getTileColors(terrainType: 'village' | 'forest' | 'cave' | 'volcano' | 'grotto' | 'swamp'): Record<number, number> {
     if (terrainType === 'forest') {
       // All ground tiles should be grass colors - decorations are rendered as sprites
       return {
@@ -846,6 +1063,36 @@ export class WorldScene extends Phaser.Scene {
         29: 0x2d2d2d, // dark stone
         30: 0x6a6a7a, // stalagmite
       }
+    } else if (terrainType === 'volcano') {
+      return {
+        40: 0x8b2500, // lava floor (dark red-orange)
+        41: 0x1a1a1a, // obsidian floor (dark gray/black)
+        42: 0xff4500, // lava pool (bright orange)
+        43: 0x2d1a1a, // volcanic wall (dark obsidian)
+        44: 0xcccccc, // steam vent (light gray)
+        45: 0xff8800, // ember (orange-yellow)
+        46: 0x4a4a4a, // cooled rock (gray)
+      }
+    } else if (terrainType === 'grotto') {
+      return {
+        50: 0xdeb887, // sand floor (tan)
+        51: 0xb8956e, // wet sand (darker tan)
+        52: 0x40e0d0, // shallow water (turquoise)
+        53: 0x0000cd, // deep water (dark blue)
+        54: 0xff7f50, // coral wall (coral pink-orange)
+        55: 0x2e8b57, // seaweed (sea green)
+        56: 0xffe4c4, // shell (bisque/cream)
+      }
+    } else if (terrainType === 'swamp') {
+      return {
+        60: 0x3d2817, // mud floor (dark brown)
+        61: 0x2f4f2f, // murky water (dark green)
+        62: 0x1a1a0a, // deep bog (very dark)
+        63: 0x4a3728, // twisted root (brown)
+        64: 0x2a2a2a, // dead tree (dark gray)
+        65: 0x7fff00, // glow mushroom (chartreuse)
+        66: 0x696969, // fog patch (dim gray)
+      }
     }
     return {
       0: 0x4caf50, // grass
@@ -854,7 +1101,7 @@ export class WorldScene extends Phaser.Scene {
 
   private createProceduralCollisions(
     map: { objectLayer: ReadonlyArray<number>; width: number; height: number },
-    terrainType: 'village' | 'forest' | 'cave',
+    terrainType: 'village' | 'forest' | 'cave' | 'volcano' | 'grotto' | 'swamp',
     mapWidth: number,
     mapHeight: number,
   ): void {
@@ -1256,10 +1503,8 @@ export class WorldScene extends Phaser.Scene {
     const state = getGameState(this)
 
     // Apply XP and gold
-    const updatedPlayer = updatePlayerGold(
-      addExperience(state.player, rewards.experience),
-      rewards.gold,
-    )
+    const playerXpResult = addExperienceWithInfo(state.player, rewards.experience)
+    const updatedPlayer = updatePlayerGold(playerXpResult.player, rewards.gold)
     let newState = updatePlayer(state, updatedPlayer)
 
     // Add items
@@ -1299,6 +1544,13 @@ export class WorldScene extends Phaser.Scene {
       ease: 'Power2',
       onComplete: () => text.destroy(),
     })
+
+    // Show enhanced player level-up display if applicable
+    if (playerXpResult.didLevelUp) {
+      this.time.delayedCall(1000, () => {
+        this.showPlayerLevelUpDisplay(playerXpResult)
+      })
+    }
   }
 
   private showWarningMessage(message: string): void {
@@ -1563,11 +1815,11 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private getPlayerAbilities(): ReadonlyArray<Ability> {
-    // Player has basic attack abilities
     const abilitiesData = this.cache.json.get('abilities-data') as Ability[] | undefined
     if (!abilitiesData) return []
 
-    const playerAbilityIds = ['tackle', 'heal', 'power-strike']
+    const state = getGameState(this)
+    const playerAbilityIds = getPlayerAbilitiesAtLevel(state.player.level)
     return playerAbilityIds
       .map((id) => abilitiesData.find((a) => a.abilityId === id))
       .filter((a): a is Ability => a !== undefined)
@@ -1576,14 +1828,14 @@ export class WorldScene extends Phaser.Scene {
   private applyBattleRewards(rewards: { experience: number; gold: number }): void {
     // Update game state with rewards
     let state = getGameState(this)
-    const updatedPlayer = updatePlayerGold(
-      addExperience(state.player, rewards.experience),
-      rewards.gold,
-    )
+    const playerXpResult = addExperienceWithInfo(state.player, rewards.experience)
+    const updatedPlayer = updatePlayerGold(playerXpResult.player, rewards.gold)
     state = updatePlayer(state, updatedPlayer)
 
+    // Track monster level-ups (separate from player)
+    const monsterLevelUps: Array<{ name: string; previousLevel: number; newLevel: number }> = []
+
     // Distribute XP to squad monsters (active squad gets even split)
-    const levelUps: Array<{ name: string; previousLevel: number; newLevel: number }> = []
     const totalXP = rewards.experience
 
     if (state.squad.length > 0) {
@@ -1592,7 +1844,7 @@ export class WorldScene extends Phaser.Scene {
         const result = addExperienceToMonsterWithInfo(monster, xpPerSquadMember)
         if (result.didLevelUp) {
           const species = getSpecies(monster.speciesId)
-          levelUps.push({
+          monsterLevelUps.push({
             name: monster.nickname ?? species?.name ?? 'Monster',
             previousLevel: result.previousLevel,
             newLevel: result.newLevel,
@@ -1610,7 +1862,7 @@ export class WorldScene extends Phaser.Scene {
         const result = addExperienceToMonsterWithInfo(monster, benchXP)
         if (result.didLevelUp) {
           const species = getSpecies(monster.speciesId)
-          levelUps.push({
+          monsterLevelUps.push({
             name: monster.nickname ?? species?.name ?? 'Monster',
             previousLevel: result.previousLevel,
             newLevel: result.newLevel,
@@ -1649,9 +1901,19 @@ export class WorldScene extends Phaser.Scene {
       onComplete: () => text.destroy(),
     })
 
-    // Show level-up notifications for monsters
-    if (levelUps.length > 0) {
-      this.showMonsterLevelUpNotifications(levelUps)
+    // Show enhanced player level-up display if player leveled up
+    if (playerXpResult.didLevelUp) {
+      this.time.delayedCall(500, () => {
+        this.showPlayerLevelUpDisplay(playerXpResult)
+      })
+    }
+
+    // Show level-up notifications for monsters (after player display dismisses or immediately if no player level-up)
+    if (monsterLevelUps.length > 0) {
+      const monsterDelay = playerXpResult.didLevelUp ? 3500 : 500
+      this.time.delayedCall(monsterDelay, () => {
+        this.showMonsterLevelUpNotifications(monsterLevelUps)
+      })
     }
   }
 
@@ -1695,6 +1957,234 @@ export class WorldScene extends Phaser.Scene {
           onComplete: () => levelUpText.destroy(),
         })
       })
+    })
+  }
+
+  private showPlayerLevelUpDisplay(levelUpResult: PlayerLevelUpResult): void {
+    const { previousLevel, newLevel, statChanges, newAbilities } = levelUpResult
+    const state = getGameState(this)
+
+    // Create semi-transparent overlay
+    const overlay = this.add.rectangle(
+      GAME_WIDTH / 2,
+      GAME_HEIGHT / 2,
+      GAME_WIDTH,
+      GAME_HEIGHT,
+      0x000000,
+      0.7,
+    )
+    overlay.setScrollFactor(0)
+    overlay.setDepth(DEPTH.UI + 50)
+    overlay.setAlpha(0)
+
+    // Container for all level-up elements
+    const elements: Phaser.GameObjects.GameObject[] = [overlay]
+
+    // Level up header with glow effect
+    const headerText = this.add.text(GAME_WIDTH / 2, 60, 'LEVEL UP!', {
+      ...TEXT_STYLES.HEADING,
+      fontSize: '36px',
+      color: '#ffd700',
+      stroke: '#8b4513',
+      strokeThickness: 6,
+    })
+    headerText.setOrigin(0.5)
+    headerText.setScrollFactor(0)
+    headerText.setDepth(DEPTH.UI + 51)
+    headerText.setAlpha(0)
+    elements.push(headerText)
+
+    // Player name and level change
+    const levelText = this.add.text(
+      GAME_WIDTH / 2,
+      105,
+      `${state.player.name}: Lv.${previousLevel} → Lv.${newLevel}`,
+      {
+        ...TEXT_STYLES.BODY,
+        fontSize: '22px',
+        color: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 4,
+      },
+    )
+    levelText.setOrigin(0.5)
+    levelText.setScrollFactor(0)
+    levelText.setDepth(DEPTH.UI + 51)
+    levelText.setAlpha(0)
+    elements.push(levelText)
+
+    // Stats section header
+    const statsHeader = this.add.text(GAME_WIDTH / 2, 150, '~ Stats ~', {
+      ...TEXT_STYLES.BODY,
+      fontSize: '18px',
+      color: '#88ccff',
+      stroke: '#000000',
+      strokeThickness: 3,
+    })
+    statsHeader.setOrigin(0.5)
+    statsHeader.setScrollFactor(0)
+    statsHeader.setDepth(DEPTH.UI + 51)
+    statsHeader.setAlpha(0)
+    elements.push(statsHeader)
+
+    // Display stat changes in two columns
+    const leftColumnX = GAME_WIDTH / 2 - 100
+    const rightColumnX = GAME_WIDTH / 2 + 100
+    const startY = 180
+    const lineHeight = 26
+
+    statChanges.forEach((stat, index) => {
+      const columnX = index < 4 ? leftColumnX : rightColumnX
+      const rowIndex = index < 4 ? index : index - 4
+      const y = startY + rowIndex * lineHeight
+
+      const statText = this.add.text(
+        columnX,
+        y,
+        `${stat.label}: ${stat.previousValue} → ${stat.newValue}`,
+        {
+          ...TEXT_STYLES.BODY,
+          fontSize: '16px',
+          color: '#ffffff',
+          stroke: '#000000',
+          strokeThickness: 2,
+        },
+      )
+      statText.setOrigin(0.5)
+      statText.setScrollFactor(0)
+      statText.setDepth(DEPTH.UI + 51)
+      statText.setAlpha(0)
+      elements.push(statText)
+
+      // Show the change value in green
+      const changeText = this.add.text(columnX + 85, y, `+${stat.change}`, {
+        ...TEXT_STYLES.BODY,
+        fontSize: '16px',
+        color: '#4caf50',
+        stroke: '#000000',
+        strokeThickness: 2,
+      })
+      changeText.setOrigin(0.5)
+      changeText.setScrollFactor(0)
+      changeText.setDepth(DEPTH.UI + 51)
+      changeText.setAlpha(0)
+      elements.push(changeText)
+    })
+
+    // New abilities section (if any)
+    let abilitiesY = startY + 4 * lineHeight + 20
+
+    if (newAbilities.length > 0) {
+      const abilitiesHeader = this.add.text(GAME_WIDTH / 2, abilitiesY, '~ New Ability! ~', {
+        ...TEXT_STYLES.BODY,
+        fontSize: '18px',
+        color: '#ffcc00',
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      abilitiesHeader.setOrigin(0.5)
+      abilitiesHeader.setScrollFactor(0)
+      abilitiesHeader.setDepth(DEPTH.UI + 51)
+      abilitiesHeader.setAlpha(0)
+      elements.push(abilitiesHeader)
+      abilitiesY += 30
+
+      const abilitiesData = this.cache.json.get('abilities-data') as Ability[] | undefined
+      newAbilities.forEach((abilityId, index) => {
+        const ability = abilitiesData?.find((a) => a.abilityId === abilityId)
+        if (ability) {
+          const abilityText = this.add.text(
+            GAME_WIDTH / 2,
+            abilitiesY + index * 25,
+            `Learned: ${ability.name}`,
+            {
+              ...TEXT_STYLES.BODY,
+              fontSize: '16px',
+              color: '#ffeb3b',
+              stroke: '#000000',
+              strokeThickness: 2,
+            },
+          )
+          abilityText.setOrigin(0.5)
+          abilityText.setScrollFactor(0)
+          abilityText.setDepth(DEPTH.UI + 51)
+          abilityText.setAlpha(0)
+          elements.push(abilityText)
+
+          const descText = this.add.text(
+            GAME_WIDTH / 2,
+            abilitiesY + index * 25 + 18,
+            ability.description,
+            {
+              ...TEXT_STYLES.BODY,
+              fontSize: '12px',
+              color: '#cccccc',
+              stroke: '#000000',
+              strokeThickness: 2,
+            },
+          )
+          descText.setOrigin(0.5)
+          descText.setScrollFactor(0)
+          descText.setDepth(DEPTH.UI + 51)
+          descText.setAlpha(0)
+          elements.push(descText)
+        }
+      })
+    }
+
+    // Continue prompt
+    const promptY = newAbilities.length > 0 ? abilitiesY + newAbilities.length * 45 + 30 : abilitiesY + 20
+    const promptText = this.add.text(GAME_WIDTH / 2, Math.min(promptY, GAME_HEIGHT - 40), 'Press any key to continue', {
+      ...TEXT_STYLES.BODY,
+      fontSize: '14px',
+      color: '#aaaaaa',
+      stroke: '#000000',
+      strokeThickness: 2,
+    })
+    promptText.setOrigin(0.5)
+    promptText.setScrollFactor(0)
+    promptText.setDepth(DEPTH.UI + 51)
+    promptText.setAlpha(0)
+    elements.push(promptText)
+
+    // Animate in
+    this.tweens.add({
+      targets: elements,
+      alpha: 1,
+      duration: 400,
+      ease: 'Power2',
+    })
+
+    // Pulsing effect on header
+    this.tweens.add({
+      targets: headerText,
+      scale: { from: 1, to: 1.1 },
+      duration: 500,
+      yoyo: true,
+      repeat: 2,
+      ease: 'Sine.easeInOut',
+    })
+
+    // Wait for input to dismiss
+    const dismissHandler = () => {
+      this.input.keyboard?.off('keydown', dismissHandler)
+      this.input.off('pointerdown', dismissHandler)
+
+      this.tweens.add({
+        targets: elements,
+        alpha: 0,
+        duration: 300,
+        ease: 'Power2',
+        onComplete: () => {
+          elements.forEach((el) => el.destroy())
+        },
+      })
+    }
+
+    // Delay before allowing dismissal
+    this.time.delayedCall(800, () => {
+      this.input.keyboard?.on('keydown', dismissHandler)
+      this.input.on('pointerdown', dismissHandler)
     })
   }
 

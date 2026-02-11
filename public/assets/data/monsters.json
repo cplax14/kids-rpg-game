@@ -1624,5 +1624,538 @@
       "iron-will"
     ],
     "obtainableVia": "both"
+  },
+  {
+    "speciesId": "magmaslime",
+    "name": "Magmaslime",
+    "description": "A gelatinous creature of molten rock. Its body bubbles and glows with intense heat, yet it wobbles adorably when it moves.",
+    "element": "fire",
+    "rarity": "common",
+    "baseStats": {
+      "maxHp": 95,
+      "currentHp": 95,
+      "maxMp": 32,
+      "currentMp": 32,
+      "attack": 14,
+      "defense": 16,
+      "magicAttack": 18,
+      "magicDefense": 15,
+      "speed": 12,
+      "luck": 11
+    },
+    "statGrowth": {
+      "hp": 8,
+      "mp": 3,
+      "attack": 2,
+      "defense": 2,
+      "magicAttack": 2,
+      "magicDefense": 2,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "ember", "learnAtLevel": 3 },
+      { "abilityId": "fireball", "learnAtLevel": 8 },
+      { "abilityId": "shield-wall", "learnAtLevel": 12 },
+      { "abilityId": "inferno", "learnAtLevel": 18 }
+    ],
+    "captureBaseDifficulty": 0.35,
+    "spriteKey": "magmaslime",
+    "evolutionChain": null,
+    "breedingGroup": "elemental",
+    "breedingTraits": ["fireproof", "tough"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "cinderbird",
+    "name": "Cinderbird",
+    "description": "A swift phoenix-like bird wreathed in dancing flames. Its feathers leave trails of sparks as it swoops through volcanic updrafts.",
+    "element": "fire",
+    "rarity": "uncommon",
+    "baseStats": {
+      "maxHp": 90,
+      "currentHp": 90,
+      "maxMp": 35,
+      "currentMp": 35,
+      "attack": 16,
+      "defense": 12,
+      "magicAttack": 22,
+      "magicDefense": 16,
+      "speed": 24,
+      "luck": 14
+    },
+    "statGrowth": {
+      "hp": 7,
+      "mp": 4,
+      "attack": 2,
+      "defense": 1,
+      "magicAttack": 3,
+      "magicDefense": 2,
+      "speed": 3
+    },
+    "abilities": [
+      { "abilityId": "scratch", "learnAtLevel": 1 },
+      { "abilityId": "ember", "learnAtLevel": 2 },
+      { "abilityId": "quick-step", "learnAtLevel": 6 },
+      { "abilityId": "fireball", "learnAtLevel": 10 },
+      { "abilityId": "flame-burst", "learnAtLevel": 16 }
+    ],
+    "captureBaseDifficulty": 0.48,
+    "spriteKey": "cinderbird",
+    "evolutionChain": null,
+    "breedingGroup": "avian",
+    "breedingTraits": ["nimble", "fireproof"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "obsidiangolem",
+    "name": "Obsidiangolem",
+    "description": "A towering construct of volcanic glass and molten core. Its obsidian armor reflects light like a dark mirror, hiding the fire within.",
+    "element": "fire",
+    "rarity": "rare",
+    "baseStats": {
+      "maxHp": 165,
+      "currentHp": 165,
+      "maxMp": 28,
+      "currentMp": 28,
+      "attack": 24,
+      "defense": 28,
+      "magicAttack": 18,
+      "magicDefense": 22,
+      "speed": 8,
+      "luck": 10
+    },
+    "statGrowth": {
+      "hp": 12,
+      "mp": 3,
+      "attack": 3,
+      "defense": 4,
+      "magicAttack": 2,
+      "magicDefense": 3,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "slam", "learnAtLevel": 1 },
+      { "abilityId": "rock-throw", "learnAtLevel": 3 },
+      { "abilityId": "shield-wall", "learnAtLevel": 6 },
+      { "abilityId": "fireball", "learnAtLevel": 10 },
+      { "abilityId": "earthquake", "learnAtLevel": 16 }
+    ],
+    "captureBaseDifficulty": 0.62,
+    "spriteKey": "obsidiangolem",
+    "evolutionChain": null,
+    "breedingGroup": "elemental",
+    "breedingTraits": ["tough", "thick-skin", "fireproof"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "glowjelly",
+    "name": "Glowjelly",
+    "description": "A luminescent jellyfish that drifts through underwater caves. Its gentle glow soothes allies and its tendrils carry healing properties.",
+    "element": "water",
+    "rarity": "common",
+    "baseStats": {
+      "maxHp": 88,
+      "currentHp": 88,
+      "maxMp": 38,
+      "currentMp": 38,
+      "attack": 10,
+      "defense": 14,
+      "magicAttack": 18,
+      "magicDefense": 20,
+      "speed": 14,
+      "luck": 16
+    },
+    "statGrowth": {
+      "hp": 7,
+      "mp": 4,
+      "attack": 1,
+      "defense": 2,
+      "magicAttack": 2,
+      "magicDefense": 3,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "water-splash", "learnAtLevel": 3 },
+      { "abilityId": "heal", "learnAtLevel": 6 },
+      { "abilityId": "light-beam", "learnAtLevel": 10 },
+      { "abilityId": "group-heal", "learnAtLevel": 16 }
+    ],
+    "captureBaseDifficulty": 0.32,
+    "spriteKey": "glowjelly",
+    "evolutionChain": null,
+    "breedingGroup": "aquatic",
+    "breedingTraits": ["gentle", "waterproof"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "shellwhisper",
+    "name": "Shellwhisper",
+    "description": "A mysterious hermit creature dwelling in an enchanted conch shell. It whispers ancient ocean secrets and shields allies with tidal barriers.",
+    "element": "water",
+    "rarity": "uncommon",
+    "baseStats": {
+      "maxHp": 115,
+      "currentHp": 115,
+      "maxMp": 34,
+      "currentMp": 34,
+      "attack": 14,
+      "defense": 24,
+      "magicAttack": 16,
+      "magicDefense": 22,
+      "speed": 12,
+      "luck": 14
+    },
+    "statGrowth": {
+      "hp": 9,
+      "mp": 3,
+      "attack": 2,
+      "defense": 3,
+      "magicAttack": 2,
+      "magicDefense": 3,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "water-splash", "learnAtLevel": 2 },
+      { "abilityId": "shield-wall", "learnAtLevel": 5 },
+      { "abilityId": "defense-boost", "learnAtLevel": 9 },
+      { "abilityId": "tidal-wave", "learnAtLevel": 15 }
+    ],
+    "captureBaseDifficulty": 0.45,
+    "spriteKey": "shellwhisper",
+    "evolutionChain": null,
+    "breedingGroup": "aquatic",
+    "breedingTraits": ["thick-skin", "waterproof"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "coraldragon",
+    "name": "Coraldragon",
+    "description": "A majestic sea dragon adorned with living coral growths. It commands the tides and breathes streams of crystalline water.",
+    "element": "water",
+    "rarity": "rare",
+    "baseStats": {
+      "maxHp": 155,
+      "currentHp": 155,
+      "maxMp": 48,
+      "currentMp": 48,
+      "attack": 22,
+      "defense": 20,
+      "magicAttack": 26,
+      "magicDefense": 22,
+      "speed": 18,
+      "luck": 14
+    },
+    "statGrowth": {
+      "hp": 11,
+      "mp": 5,
+      "attack": 3,
+      "defense": 2,
+      "magicAttack": 3,
+      "magicDefense": 3,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "bite", "learnAtLevel": 1 },
+      { "abilityId": "water-splash", "learnAtLevel": 3 },
+      { "abilityId": "ice-shard", "learnAtLevel": 7 },
+      { "abilityId": "tidal-wave", "learnAtLevel": 12 },
+      { "abilityId": "blizzard", "learnAtLevel": 18 }
+    ],
+    "captureBaseDifficulty": 0.58,
+    "spriteKey": "coraldragon",
+    "evolutionChain": null,
+    "breedingGroup": "dragon",
+    "breedingTraits": ["waterproof", "fierce"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "bogwitch",
+    "name": "Bogwitch",
+    "description": "A cunning creature cloaked in swamp mist and shadow magic. It cackles as it hurls bolts of dark energy at unwary travelers.",
+    "element": "dark",
+    "rarity": "common",
+    "baseStats": {
+      "maxHp": 92,
+      "currentHp": 92,
+      "maxMp": 36,
+      "currentMp": 36,
+      "attack": 12,
+      "defense": 14,
+      "magicAttack": 22,
+      "magicDefense": 18,
+      "speed": 16,
+      "luck": 14
+    },
+    "statGrowth": {
+      "hp": 7,
+      "mp": 4,
+      "attack": 1,
+      "defense": 2,
+      "magicAttack": 3,
+      "magicDefense": 2,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "scratch", "learnAtLevel": 1 },
+      { "abilityId": "shadow-strike", "learnAtLevel": 3 },
+      { "abilityId": "poison-sting", "learnAtLevel": 7 },
+      { "abilityId": "dark-pulse", "learnAtLevel": 12 },
+      { "abilityId": "lullaby", "learnAtLevel": 17 }
+    ],
+    "captureBaseDifficulty": 0.38,
+    "spriteKey": "bogwitch",
+    "evolutionChain": null,
+    "breedingGroup": "elemental",
+    "breedingTraits": ["keen-eye", "nimble"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "gloomtoad",
+    "name": "Gloomtoad",
+    "description": "A massive toad that lurks in the darkest bogs. Its croak echoes with dark energy, and its thick hide absorbs punishment.",
+    "element": "dark",
+    "rarity": "common",
+    "baseStats": {
+      "maxHp": 105,
+      "currentHp": 105,
+      "maxMp": 26,
+      "currentMp": 26,
+      "attack": 18,
+      "defense": 22,
+      "magicAttack": 14,
+      "magicDefense": 18,
+      "speed": 10,
+      "luck": 12
+    },
+    "statGrowth": {
+      "hp": 9,
+      "mp": 2,
+      "attack": 2,
+      "defense": 3,
+      "magicAttack": 1,
+      "magicDefense": 2,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "bite", "learnAtLevel": 3 },
+      { "abilityId": "poison-sting", "learnAtLevel": 6 },
+      { "abilityId": "shadow-strike", "learnAtLevel": 10 },
+      { "abilityId": "slam", "learnAtLevel": 15 }
+    ],
+    "captureBaseDifficulty": 0.34,
+    "spriteKey": "gloomtoad",
+    "evolutionChain": null,
+    "breedingGroup": "beast",
+    "breedingTraits": ["thick-skin", "tough"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "mistweaver",
+    "name": "Mistweaver",
+    "description": "A ghostly serpent formed from living fog and shadow. It coils through the marsh, weakening foes with debilitating mists.",
+    "element": "dark",
+    "rarity": "uncommon",
+    "baseStats": {
+      "maxHp": 100,
+      "currentHp": 100,
+      "maxMp": 40,
+      "currentMp": 40,
+      "attack": 14,
+      "defense": 16,
+      "magicAttack": 20,
+      "magicDefense": 20,
+      "speed": 18,
+      "luck": 16
+    },
+    "statGrowth": {
+      "hp": 8,
+      "mp": 4,
+      "attack": 1,
+      "defense": 2,
+      "magicAttack": 3,
+      "magicDefense": 2,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "shadow-strike", "learnAtLevel": 2 },
+      { "abilityId": "slow-fog", "learnAtLevel": 6 },
+      { "abilityId": "lullaby", "learnAtLevel": 10 },
+      { "abilityId": "dark-pulse", "learnAtLevel": 15 }
+    ],
+    "captureBaseDifficulty": 0.48,
+    "spriteKey": "mistweaver",
+    "evolutionChain": null,
+    "breedingGroup": "dragon",
+    "breedingTraits": ["nimble", "keen-eye"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "dreadwyrm",
+    "name": "Dreadwyrm",
+    "description": "A terrifying wyrm of pure darkness that rules the deepest marshes. Its presence alone fills the heart with dread.",
+    "element": "dark",
+    "rarity": "rare",
+    "baseStats": {
+      "maxHp": 170,
+      "currentHp": 170,
+      "maxMp": 42,
+      "currentMp": 42,
+      "attack": 28,
+      "defense": 22,
+      "magicAttack": 24,
+      "magicDefense": 20,
+      "speed": 16,
+      "luck": 12
+    },
+    "statGrowth": {
+      "hp": 12,
+      "mp": 4,
+      "attack": 4,
+      "defense": 3,
+      "magicAttack": 3,
+      "magicDefense": 2,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "bite", "learnAtLevel": 1 },
+      { "abilityId": "shadow-strike", "learnAtLevel": 3 },
+      { "abilityId": "war-cry", "learnAtLevel": 7 },
+      { "abilityId": "dark-pulse", "learnAtLevel": 12 },
+      { "abilityId": "power-strike", "learnAtLevel": 18 }
+    ],
+    "captureBaseDifficulty": 0.60,
+    "spriteKey": "dreadwyrm",
+    "evolutionChain": null,
+    "breedingGroup": "dragon",
+    "breedingTraits": ["fierce", "tough"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "emberlord",
+    "name": "Emberlord",
+    "description": "The supreme ruler of Volcanic Peak. This ancient fire elemental commands the very magma of the mountain, its rage igniting the sky.",
+    "element": "fire",
+    "rarity": "legendary",
+    "baseStats": {
+      "maxHp": 420,
+      "currentHp": 420,
+      "maxMp": 65,
+      "currentMp": 65,
+      "attack": 32,
+      "defense": 26,
+      "magicAttack": 38,
+      "magicDefense": 28,
+      "speed": 16,
+      "luck": 12
+    },
+    "statGrowth": {
+      "hp": 18,
+      "mp": 6,
+      "attack": 4,
+      "defense": 3,
+      "magicAttack": 5,
+      "magicDefense": 3,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "inferno", "learnAtLevel": 1 },
+      { "abilityId": "flame-burst", "learnAtLevel": 1 },
+      { "abilityId": "war-cry", "learnAtLevel": 1 },
+      { "abilityId": "fireball", "learnAtLevel": 1 },
+      { "abilityId": "earthquake", "learnAtLevel": 1 }
+    ],
+    "captureBaseDifficulty": 1,
+    "spriteKey": "emberlord",
+    "evolutionChain": null,
+    "breedingGroup": "elemental",
+    "breedingTraits": ["fireproof", "fierce", "tough"],
+    "obtainableVia": "both"
+  },
+  {
+    "speciesId": "pearlqueen",
+    "name": "Pearl Queen",
+    "description": "The ethereal sovereign of the Seaside Grotto. She commands the ocean's depths and heals her subjects with waves of pearl-light.",
+    "element": "water",
+    "rarity": "legendary",
+    "baseStats": {
+      "maxHp": 480,
+      "currentHp": 480,
+      "maxMp": 75,
+      "currentMp": 75,
+      "attack": 24,
+      "defense": 30,
+      "magicAttack": 42,
+      "magicDefense": 38,
+      "speed": 14,
+      "luck": 16
+    },
+    "statGrowth": {
+      "hp": 20,
+      "mp": 7,
+      "attack": 3,
+      "defense": 4,
+      "magicAttack": 5,
+      "magicDefense": 5,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "tidal-wave", "learnAtLevel": 1 },
+      { "abilityId": "blizzard", "learnAtLevel": 1 },
+      { "abilityId": "group-heal", "learnAtLevel": 1 },
+      { "abilityId": "shield-wall", "learnAtLevel": 1 },
+      { "abilityId": "ice-shard", "learnAtLevel": 1 }
+    ],
+    "captureBaseDifficulty": 1,
+    "spriteKey": "pearlqueen",
+    "evolutionChain": null,
+    "breedingGroup": "aquatic",
+    "breedingTraits": ["waterproof", "gentle", "keen-eye"],
+    "obtainableVia": "both"
+  },
+  {
+    "speciesId": "umbralsovereign",
+    "name": "Umbral Sovereign",
+    "description": "The final guardian of the Shadow Marsh and master of darkness itself. This ancient entity tests only the worthiest of heroes.",
+    "element": "dark",
+    "rarity": "legendary",
+    "baseStats": {
+      "maxHp": 600,
+      "currentHp": 600,
+      "maxMp": 80,
+      "currentMp": 80,
+      "attack": 38,
+      "defense": 32,
+      "magicAttack": 48,
+      "magicDefense": 36,
+      "speed": 18,
+      "luck": 14
+    },
+    "statGrowth": {
+      "hp": 24,
+      "mp": 8,
+      "attack": 5,
+      "defense": 4,
+      "magicAttack": 6,
+      "magicDefense": 4,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "dark-pulse", "learnAtLevel": 1 },
+      { "abilityId": "shadow-strike", "learnAtLevel": 1 },
+      { "abilityId": "regen", "learnAtLevel": 1 },
+      { "abilityId": "war-cry", "learnAtLevel": 1 },
+      { "abilityId": "power-strike", "learnAtLevel": 1 }
+    ],
+    "captureBaseDifficulty": 1,
+    "spriteKey": "umbralsovereign",
+    "evolutionChain": null,
+    "breedingGroup": "dragon",
+    "breedingTraits": ["fierce", "tough", "iron-will"],
+    "obtainableVia": "both"
   }
 ]

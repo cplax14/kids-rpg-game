@@ -142,6 +142,14 @@
         "targetAreaId": "whispering-forest",
         "targetPosition": { "x": 1100, "y": 640 },
         "triggerBounds": { "x": 0, "y": 512, "width": 128, "height": 192 }
+      },
+      {
+        "zoneId": "caves-to-volcano",
+        "targetAreaId": "volcanic-peak",
+        "targetPosition": { "x": 200, "y": 640 },
+        "triggerBounds": { "x": 1024, "y": 512, "width": 128, "height": 192 },
+        "requiredLevel": 12,
+        "requiredBossDefeated": "crystallix"
       }
     ],
     "interactables": [
@@ -181,9 +189,357 @@
           "The crystals here are said to hold ancient power.",
           "Deep within lurks the mighty Crystallix..."
         ]
+      },
+      {
+        "objectId": "caves-sign-2",
+        "type": "sign",
+        "position": { "x": 1024, "y": 640 },
+        "isOneTime": false,
+        "message": [
+          "Volcanic Peak ahead.",
+          "Only those who defeat Crystallix may pass.",
+          "Recommended level: 12+"
+        ]
       }
     ],
     "bossIds": ["crystallix"],
     "ambientColor": 4473924
+  },
+  {
+    "areaId": "volcanic-peak",
+    "name": "Volcanic Peak",
+    "description": "A treacherous mountain of fire and molten rock. The air shimmers with heat as lava flows through ancient channels.",
+    "recommendedLevel": 12,
+    "isSafeZone": false,
+    "mapWidth": 38,
+    "mapHeight": 38,
+    "terrainType": "volcano",
+    "encounters": [
+      { "speciesId": "magmaslime", "weight": 25, "minLevel": 12, "maxLevel": 14 },
+      { "speciesId": "cinderbird", "weight": 20, "minLevel": 13, "maxLevel": 15 },
+      { "speciesId": "obsidiangolem", "weight": 12, "minLevel": 14, "maxLevel": 16 },
+      { "speciesId": "flamepup", "weight": 15, "minLevel": 12, "maxLevel": 14 },
+      { "speciesId": "blazefox", "weight": 10, "minLevel": 13, "maxLevel": 15 }
+    ],
+    "transitions": [
+      {
+        "zoneId": "volcano-to-caves",
+        "targetAreaId": "crystal-caves",
+        "targetPosition": { "x": 980, "y": 640 },
+        "triggerBounds": { "x": 0, "y": 512, "width": 128, "height": 192 }
+      },
+      {
+        "zoneId": "volcano-to-grotto",
+        "targetAreaId": "seaside-grotto",
+        "targetPosition": { "x": 200, "y": 576 },
+        "triggerBounds": { "x": 1088, "y": 480, "width": 128, "height": 192 },
+        "requiredLevel": 15,
+        "requiredBossDefeated": "emberlord"
+      }
+    ],
+    "interactables": [
+      {
+        "objectId": "volcano-chest-1",
+        "type": "chest",
+        "position": { "x": 448, "y": 320 },
+        "isOneTime": true,
+        "contents": {
+          "items": [
+            { "itemId": "potion-large", "quantity": 4 },
+            { "itemId": "ultra-capsule", "quantity": 2 }
+          ],
+          "gold": 500
+        }
+      },
+      {
+        "objectId": "volcano-chest-2",
+        "type": "chest",
+        "position": { "x": 896, "y": 768 },
+        "isOneTime": true,
+        "contents": {
+          "items": [
+            { "itemId": "ether-medium", "quantity": 3 },
+            { "itemId": "antidote", "quantity": 4 }
+          ],
+          "gold": 400
+        }
+      },
+      {
+        "objectId": "volcano-chest-3",
+        "type": "chest",
+        "position": { "x": 256, "y": 960 },
+        "isOneTime": true,
+        "contents": {
+          "items": [
+            { "itemId": "super-capsule", "quantity": 3 }
+          ],
+          "gold": 350
+        }
+      },
+      {
+        "objectId": "volcano-fountain",
+        "type": "fountain",
+        "position": { "x": 608, "y": 480 },
+        "isOneTime": false,
+        "healPercent": 1.0,
+        "healsSquad": true
+      },
+      {
+        "objectId": "volcano-sign-1",
+        "type": "sign",
+        "position": { "x": 128, "y": 640 },
+        "isOneTime": false,
+        "message": [
+          "Volcanic Peak",
+          "The mountain's fury burns eternal.",
+          "The Emberlord awaits at the summit..."
+        ]
+      },
+      {
+        "objectId": "volcano-sign-2",
+        "type": "sign",
+        "position": { "x": 1088, "y": 576 },
+        "isOneTime": false,
+        "message": [
+          "Seaside Grotto ahead.",
+          "Only those who defeat the Emberlord may pass.",
+          "Recommended level: 15+"
+        ]
+      }
+    ],
+    "bossIds": ["emberlord"],
+    "ambientColor": 16744192
+  },
+  {
+    "areaId": "seaside-grotto",
+    "name": "Seaside Grotto",
+    "description": "A mystical underwater cavern where bioluminescent creatures light the depths. Ancient coral formations guard forgotten treasures.",
+    "recommendedLevel": 15,
+    "isSafeZone": false,
+    "mapWidth": 36,
+    "mapHeight": 36,
+    "terrainType": "grotto",
+    "encounters": [
+      { "speciesId": "glowjelly", "weight": 25, "minLevel": 15, "maxLevel": 17 },
+      { "speciesId": "shellwhisper", "weight": 18, "minLevel": 16, "maxLevel": 18 },
+      { "speciesId": "coraldragon", "weight": 10, "minLevel": 17, "maxLevel": 19 },
+      { "speciesId": "bubblefin", "weight": 15, "minLevel": 15, "maxLevel": 17 },
+      { "speciesId": "tidecrab", "weight": 12, "minLevel": 16, "maxLevel": 18 }
+    ],
+    "transitions": [
+      {
+        "zoneId": "grotto-to-volcano",
+        "targetAreaId": "volcanic-peak",
+        "targetPosition": { "x": 1040, "y": 576 },
+        "triggerBounds": { "x": 0, "y": 448, "width": 128, "height": 192 }
+      },
+      {
+        "zoneId": "grotto-to-marsh",
+        "targetAreaId": "shadow-marsh",
+        "targetPosition": { "x": 200, "y": 544 },
+        "triggerBounds": { "x": 1024, "y": 448, "width": 128, "height": 192 },
+        "requiredLevel": 18,
+        "requiredBossDefeated": "pearlqueen"
+      }
+    ],
+    "interactables": [
+      {
+        "objectId": "grotto-chest-1",
+        "type": "chest",
+        "position": { "x": 384, "y": 288 },
+        "isOneTime": true,
+        "contents": {
+          "items": [
+            { "itemId": "potion-large", "quantity": 5 },
+            { "itemId": "ultra-capsule", "quantity": 3 }
+          ],
+          "gold": 650
+        }
+      },
+      {
+        "objectId": "grotto-chest-2",
+        "type": "chest",
+        "position": { "x": 832, "y": 704 },
+        "isOneTime": true,
+        "contents": {
+          "items": [
+            { "itemId": "ether-large", "quantity": 2 },
+            { "itemId": "revive", "quantity": 2 }
+          ],
+          "gold": 550
+        }
+      },
+      {
+        "objectId": "grotto-chest-3",
+        "type": "chest",
+        "position": { "x": 192, "y": 896 },
+        "isOneTime": true,
+        "contents": {
+          "items": [
+            { "itemId": "ultra-capsule", "quantity": 2 },
+            { "itemId": "potion-large", "quantity": 3 }
+          ],
+          "gold": 450
+        }
+      },
+      {
+        "objectId": "grotto-chest-4",
+        "type": "chest",
+        "position": { "x": 960, "y": 320 },
+        "isOneTime": true,
+        "contents": {
+          "items": [
+            { "itemId": "ether-medium", "quantity": 4 }
+          ],
+          "gold": 400
+        }
+      },
+      {
+        "objectId": "grotto-fountain",
+        "type": "fountain",
+        "position": { "x": 576, "y": 576 },
+        "isOneTime": false,
+        "healPercent": 1.0,
+        "healsSquad": true
+      },
+      {
+        "objectId": "grotto-sign-1",
+        "type": "sign",
+        "position": { "x": 128, "y": 544 },
+        "isOneTime": false,
+        "message": [
+          "Seaside Grotto",
+          "The ocean's secrets lie hidden in these depths.",
+          "The Pearl Queen rules from her throne of coral..."
+        ]
+      },
+      {
+        "objectId": "grotto-sign-2",
+        "type": "sign",
+        "position": { "x": 1024, "y": 544 },
+        "isOneTime": false,
+        "message": [
+          "Shadow Marsh ahead.",
+          "Only those who defeat the Pearl Queen may pass.",
+          "Recommended level: 18+",
+          "WARNING: This is the final challenge!"
+        ]
+      }
+    ],
+    "bossIds": ["pearlqueen"],
+    "ambientColor": 4243668
+  },
+  {
+    "areaId": "shadow-marsh",
+    "name": "Shadow Marsh",
+    "description": "A haunted swampland shrouded in eternal twilight. Dark creatures lurk beneath the murky waters and twisted trees.",
+    "recommendedLevel": 18,
+    "isSafeZone": false,
+    "mapWidth": 40,
+    "mapHeight": 40,
+    "terrainType": "swamp",
+    "encounters": [
+      { "speciesId": "bogwitch", "weight": 22, "minLevel": 18, "maxLevel": 20 },
+      { "speciesId": "gloomtoad", "weight": 20, "minLevel": 18, "maxLevel": 20 },
+      { "speciesId": "mistweaver", "weight": 15, "minLevel": 19, "maxLevel": 21 },
+      { "speciesId": "dreadwyrm", "weight": 8, "minLevel": 20, "maxLevel": 22 },
+      { "speciesId": "shadowpup", "weight": 18, "minLevel": 18, "maxLevel": 20 },
+      { "speciesId": "nightstalker", "weight": 12, "minLevel": 19, "maxLevel": 21 }
+    ],
+    "transitions": [
+      {
+        "zoneId": "marsh-to-grotto",
+        "targetAreaId": "seaside-grotto",
+        "targetPosition": { "x": 980, "y": 544 },
+        "triggerBounds": { "x": 0, "y": 416, "width": 128, "height": 192 }
+      }
+    ],
+    "interactables": [
+      {
+        "objectId": "marsh-chest-1",
+        "type": "chest",
+        "position": { "x": 416, "y": 256 },
+        "isOneTime": true,
+        "contents": {
+          "items": [
+            { "itemId": "potion-large", "quantity": 5 },
+            { "itemId": "ultra-capsule", "quantity": 4 }
+          ],
+          "gold": 800
+        }
+      },
+      {
+        "objectId": "marsh-chest-2",
+        "type": "chest",
+        "position": { "x": 896, "y": 640 },
+        "isOneTime": true,
+        "contents": {
+          "items": [
+            { "itemId": "ether-large", "quantity": 3 },
+            { "itemId": "revive", "quantity": 3 }
+          ],
+          "gold": 700
+        }
+      },
+      {
+        "objectId": "marsh-chest-3",
+        "type": "chest",
+        "position": { "x": 256, "y": 1024 },
+        "isOneTime": true,
+        "contents": {
+          "items": [
+            { "itemId": "ultra-capsule", "quantity": 3 },
+            { "itemId": "potion-large", "quantity": 4 }
+          ],
+          "gold": 600
+        }
+      },
+      {
+        "objectId": "marsh-chest-4",
+        "type": "chest",
+        "position": { "x": 1024, "y": 288 },
+        "isOneTime": true,
+        "contents": {
+          "items": [
+            { "itemId": "master-capsule", "quantity": 1 },
+            { "itemId": "ether-large", "quantity": 2 }
+          ],
+          "gold": 1000
+        }
+      },
+      {
+        "objectId": "marsh-fountain",
+        "type": "fountain",
+        "position": { "x": 640, "y": 640 },
+        "isOneTime": false,
+        "healPercent": 1.0,
+        "healsSquad": true
+      },
+      {
+        "objectId": "marsh-sign-1",
+        "type": "sign",
+        "position": { "x": 128, "y": 512 },
+        "isOneTime": false,
+        "message": [
+          "Shadow Marsh",
+          "The final proving ground for champions.",
+          "The Umbral Sovereign awaits in the heart of darkness...",
+          "Turn back now, or face your destiny!"
+        ]
+      },
+      {
+        "objectId": "marsh-sign-2",
+        "type": "sign",
+        "position": { "x": 640, "y": 320 },
+        "isOneTime": false,
+        "message": [
+          "The Umbral Sovereign's Domain",
+          "Only the strongest may challenge the Master of Shadows.",
+          "This is the FINAL BOSS. Prepare yourself!"
+        ]
+      }
+    ],
+    "bossIds": ["umbralsovereign"],
+    "ambientColor": 3355443
   }
 ]
