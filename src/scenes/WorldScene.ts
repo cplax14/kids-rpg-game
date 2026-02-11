@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { SCENE_KEYS, TILE_SIZE, DEPTH, GAME_WIDTH, GAME_HEIGHT, TEXT_STYLES } from '../config'
+import { LevelUpCelebration } from '../ui/overlays/LevelUpCelebration'
 import { Player } from '../entities/Player'
 import { InputSystem } from '../systems/InputSystem'
 import type {
@@ -1963,229 +1964,22 @@ export class WorldScene extends Phaser.Scene {
   private showPlayerLevelUpDisplay(levelUpResult: PlayerLevelUpResult): void {
     const { previousLevel, newLevel, statChanges, newAbilities } = levelUpResult
     const state = getGameState(this)
+    const abilitiesData = this.cache.json.get('abilities-data') as Ability[] | undefined
 
-    // Create semi-transparent overlay
-    const overlay = this.add.rectangle(
-      GAME_WIDTH / 2,
-      GAME_HEIGHT / 2,
-      GAME_WIDTH,
-      GAME_HEIGHT,
-      0x000000,
-      0.7,
-    )
-    overlay.setScrollFactor(0)
-    overlay.setDepth(DEPTH.UI + 50)
-    overlay.setAlpha(0)
-
-    // Container for all level-up elements
-    const elements: Phaser.GameObjects.GameObject[] = [overlay]
-
-    // Level up header with glow effect
-    const headerText = this.add.text(GAME_WIDTH / 2, 60, 'LEVEL UP!', {
-      ...TEXT_STYLES.HEADING,
-      fontSize: '36px',
-      color: '#ffd700',
-      stroke: '#8b4513',
-      strokeThickness: 6,
-    })
-    headerText.setOrigin(0.5)
-    headerText.setScrollFactor(0)
-    headerText.setDepth(DEPTH.UI + 51)
-    headerText.setAlpha(0)
-    elements.push(headerText)
-
-    // Player name and level change
-    const levelText = this.add.text(
-      GAME_WIDTH / 2,
-      105,
-      `${state.player.name}: Lv.${previousLevel} → Lv.${newLevel}`,
+    new LevelUpCelebration(
+      this,
       {
-        ...TEXT_STYLES.BODY,
-        fontSize: '22px',
-        color: '#ffffff',
-        stroke: '#000000',
-        strokeThickness: 4,
+        playerName: state.player.name,
+        previousLevel,
+        newLevel,
+        statChanges,
+        newAbilities,
+        abilitiesData,
+      },
+      () => {
+        // Celebration dismissed - resume normal gameplay
       },
     )
-    levelText.setOrigin(0.5)
-    levelText.setScrollFactor(0)
-    levelText.setDepth(DEPTH.UI + 51)
-    levelText.setAlpha(0)
-    elements.push(levelText)
-
-    // Stats section header
-    const statsHeader = this.add.text(GAME_WIDTH / 2, 150, '~ Stats ~', {
-      ...TEXT_STYLES.BODY,
-      fontSize: '18px',
-      color: '#88ccff',
-      stroke: '#000000',
-      strokeThickness: 3,
-    })
-    statsHeader.setOrigin(0.5)
-    statsHeader.setScrollFactor(0)
-    statsHeader.setDepth(DEPTH.UI + 51)
-    statsHeader.setAlpha(0)
-    elements.push(statsHeader)
-
-    // Display stat changes in two columns
-    const leftColumnX = GAME_WIDTH / 2 - 100
-    const rightColumnX = GAME_WIDTH / 2 + 100
-    const startY = 180
-    const lineHeight = 26
-
-    statChanges.forEach((stat, index) => {
-      const columnX = index < 4 ? leftColumnX : rightColumnX
-      const rowIndex = index < 4 ? index : index - 4
-      const y = startY + rowIndex * lineHeight
-
-      const statText = this.add.text(
-        columnX,
-        y,
-        `${stat.label}: ${stat.previousValue} → ${stat.newValue}`,
-        {
-          ...TEXT_STYLES.BODY,
-          fontSize: '16px',
-          color: '#ffffff',
-          stroke: '#000000',
-          strokeThickness: 2,
-        },
-      )
-      statText.setOrigin(0.5)
-      statText.setScrollFactor(0)
-      statText.setDepth(DEPTH.UI + 51)
-      statText.setAlpha(0)
-      elements.push(statText)
-
-      // Show the change value in green
-      const changeText = this.add.text(columnX + 85, y, `+${stat.change}`, {
-        ...TEXT_STYLES.BODY,
-        fontSize: '16px',
-        color: '#4caf50',
-        stroke: '#000000',
-        strokeThickness: 2,
-      })
-      changeText.setOrigin(0.5)
-      changeText.setScrollFactor(0)
-      changeText.setDepth(DEPTH.UI + 51)
-      changeText.setAlpha(0)
-      elements.push(changeText)
-    })
-
-    // New abilities section (if any)
-    let abilitiesY = startY + 4 * lineHeight + 20
-
-    if (newAbilities.length > 0) {
-      const abilitiesHeader = this.add.text(GAME_WIDTH / 2, abilitiesY, '~ New Ability! ~', {
-        ...TEXT_STYLES.BODY,
-        fontSize: '18px',
-        color: '#ffcc00',
-        stroke: '#000000',
-        strokeThickness: 3,
-      })
-      abilitiesHeader.setOrigin(0.5)
-      abilitiesHeader.setScrollFactor(0)
-      abilitiesHeader.setDepth(DEPTH.UI + 51)
-      abilitiesHeader.setAlpha(0)
-      elements.push(abilitiesHeader)
-      abilitiesY += 30
-
-      const abilitiesData = this.cache.json.get('abilities-data') as Ability[] | undefined
-      newAbilities.forEach((abilityId, index) => {
-        const ability = abilitiesData?.find((a) => a.abilityId === abilityId)
-        if (ability) {
-          const abilityText = this.add.text(
-            GAME_WIDTH / 2,
-            abilitiesY + index * 25,
-            `Learned: ${ability.name}`,
-            {
-              ...TEXT_STYLES.BODY,
-              fontSize: '16px',
-              color: '#ffeb3b',
-              stroke: '#000000',
-              strokeThickness: 2,
-            },
-          )
-          abilityText.setOrigin(0.5)
-          abilityText.setScrollFactor(0)
-          abilityText.setDepth(DEPTH.UI + 51)
-          abilityText.setAlpha(0)
-          elements.push(abilityText)
-
-          const descText = this.add.text(
-            GAME_WIDTH / 2,
-            abilitiesY + index * 25 + 18,
-            ability.description,
-            {
-              ...TEXT_STYLES.BODY,
-              fontSize: '12px',
-              color: '#cccccc',
-              stroke: '#000000',
-              strokeThickness: 2,
-            },
-          )
-          descText.setOrigin(0.5)
-          descText.setScrollFactor(0)
-          descText.setDepth(DEPTH.UI + 51)
-          descText.setAlpha(0)
-          elements.push(descText)
-        }
-      })
-    }
-
-    // Continue prompt
-    const promptY = newAbilities.length > 0 ? abilitiesY + newAbilities.length * 45 + 30 : abilitiesY + 20
-    const promptText = this.add.text(GAME_WIDTH / 2, Math.min(promptY, GAME_HEIGHT - 40), 'Press any key to continue', {
-      ...TEXT_STYLES.BODY,
-      fontSize: '14px',
-      color: '#aaaaaa',
-      stroke: '#000000',
-      strokeThickness: 2,
-    })
-    promptText.setOrigin(0.5)
-    promptText.setScrollFactor(0)
-    promptText.setDepth(DEPTH.UI + 51)
-    promptText.setAlpha(0)
-    elements.push(promptText)
-
-    // Animate in
-    this.tweens.add({
-      targets: elements,
-      alpha: 1,
-      duration: 400,
-      ease: 'Power2',
-    })
-
-    // Pulsing effect on header
-    this.tweens.add({
-      targets: headerText,
-      scale: { from: 1, to: 1.1 },
-      duration: 500,
-      yoyo: true,
-      repeat: 2,
-      ease: 'Sine.easeInOut',
-    })
-
-    // Wait for input to dismiss
-    const dismissHandler = () => {
-      this.input.keyboard?.off('keydown', dismissHandler)
-      this.input.off('pointerdown', dismissHandler)
-
-      this.tweens.add({
-        targets: elements,
-        alpha: 0,
-        duration: 300,
-        ease: 'Power2',
-        onComplete: () => {
-          elements.forEach((el) => el.destroy())
-        },
-      })
-    }
-
-    // Delay before allowing dismissal
-    this.time.delayedCall(800, () => {
-      this.input.keyboard?.on('keydown', dismissHandler)
-      this.input.on('pointerdown', dismissHandler)
-    })
   }
 
   private applyLoot(loot: ReadonlyArray<ItemDrop>): void {
