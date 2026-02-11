@@ -288,6 +288,25 @@ export class EquipmentPanel {
       bg.fillRoundedRect(0, y, 550, 48, 8)
       this.listContainer.add(bg)
 
+      // Hover hit area (add early so buttons stay on top)
+      const hitArea = this.scene.add.rectangle(275, y + 24, 550, 48)
+      hitArea.setInteractive()
+      hitArea.on('pointerover', () => {
+        bg.clear()
+        bg.fillStyle(COLORS.PRIMARY, 0.2)
+        bg.fillRoundedRect(0, y, 550, 48, 8)
+        bg.lineStyle(1, COLORS.PRIMARY, 0.5)
+        bg.strokeRoundedRect(0, y, 550, 48, 8)
+        this.showComparison(equip)
+      })
+      hitArea.on('pointerout', () => {
+        bg.clear()
+        bg.fillStyle(COLORS.PANEL_BG, 0.4)
+        bg.fillRoundedRect(0, y, 550, 48, 8)
+        this.comparisonContainer.removeAll(true)
+      })
+      this.listContainer.add(hitArea)
+
       // Equipment name
       const name = this.scene.add.text(12, y + 8, equip.name, {
         ...TEXT_STYLES.BODY,
@@ -355,25 +374,6 @@ export class EquipmentPanel {
         lockText.setOrigin(0.5, 0)
         this.listContainer.add(lockText)
       }
-
-      // Hover to show comparison
-      const hitArea = this.scene.add.rectangle(275, y + 24, 550, 48)
-      hitArea.setInteractive()
-      hitArea.on('pointerover', () => {
-        bg.clear()
-        bg.fillStyle(COLORS.PRIMARY, 0.2)
-        bg.fillRoundedRect(0, y, 550, 48, 8)
-        bg.lineStyle(1, COLORS.PRIMARY, 0.5)
-        bg.strokeRoundedRect(0, y, 550, 48, 8)
-        this.showComparison(equip)
-      })
-      hitArea.on('pointerout', () => {
-        bg.clear()
-        bg.fillStyle(COLORS.PANEL_BG, 0.4)
-        bg.fillRoundedRect(0, y, 550, 48, 8)
-        this.comparisonContainer.removeAll(true)
-      })
-      this.listContainer.add(hitArea)
     })
   }
 
