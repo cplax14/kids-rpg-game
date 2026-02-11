@@ -220,43 +220,63 @@ export class DialogScene extends Phaser.Scene {
    * Filter dialog choices to only show quests the player can actually interact with.
    * - complete_quest actions: Only show if quest is ready to turn in (status === 'completed')
    * - accept_quest actions: Only show if quest hasn't been accepted or completed yet
+   * - Choices leading to quest offer nodes: Only show if that quest is available
    */
   private filterQuestChoices(choices: ReadonlyArray<DialogChoice>): ReadonlyArray<DialogChoice> {
-    // Check if this node has quest-related choices
-    const hasCompleteQuestChoices = choices.some((c) => c.action === 'complete_quest')
-    const hasAcceptQuestChoices = choices.some((c) => c.action === 'accept_quest')
-
-    if (!hasCompleteQuestChoices && !hasAcceptQuestChoices) {
-      return choices
-    }
-
     try {
       const state = getGameState(this)
 
       // Filter choices based on quest status
       const filtered = choices.filter((choice) => {
-        // Keep non-quest choices (like "Never mind" / "Back")
-        if (choice.action !== 'complete_quest' && choice.action !== 'accept_quest') {
-          return true
-        }
-
-        const questId = choice.actionData
-        if (!questId) return false
-
+        // Handle explicit quest actions
         if (choice.action === 'complete_quest') {
+          const questId = choice.actionData
+          if (!questId) return false
           // Only show if quest is ready to turn in
           const progress = state.activeQuests.find((q) => q.questId === questId)
           return progress?.status === 'completed'
         }
 
         if (choice.action === 'accept_quest') {
-          // Only show if quest hasn't been accepted or completed
+          const questId = choice.actionData
+          if (!questId) return false
+          // Only show if quest hasn't been accepted or completed (unless repeatable)
+          const quest = getQuest(questId)
           const isActive = state.activeQuests.some((q) => q.questId === questId)
           const isCompleted = state.completedQuestIds.includes(questId)
-          return !isActive && !isCompleted
+          // Allow if not active, and either not completed or is repeatable
+          return !isActive && (!isCompleted || (quest?.isRepeatable ?? false))
+        }
+
+        // Check if this choice leads to a quest offer node
+        if (choice.nextNodeId) {
+          const nextNode = getDialogNode(this.dialogTree, choice.nextNodeId)
+          if (nextNode) {
+            // Look for accept_quest action in the next node's choices
+            const acceptChoice = nextNode.choices.find((c) => c.action === 'accept_quest')
+            if (acceptChoice?.actionData) {
+              const questId = acceptChoice.actionData
+              const quest = getQuest(questId)
+              const isActive = state.activeQuests.some((q) => q.questId === questId)
+              const isCompleted = state.completedQuestIds.includes(questId)
+              // Filter out if quest is active or completed (unless repeatable)
+              if (isActive || (isCompleted && !(quest?.isRepeatable ?? false))) {
+                return false
+              }
+            }
+          }
         }
 
         return true
+      })
+
+      // Check if this is a quest-related node
+      const hasCompleteQuestChoices = choices.some((c) => c.action === 'complete_quest')
+      const hasAcceptQuestChoices = choices.some((c) => c.action === 'accept_quest')
+      const hasQuestOfferLinks = choices.some((c) => {
+        if (!c.nextNodeId) return false
+        const nextNode = getDialogNode(this.dialogTree, c.nextNodeId)
+        return nextNode?.choices.some((nc) => nc.action === 'accept_quest') ?? false
       })
 
       // Handle empty quest turn-in list
@@ -282,6 +302,44 @@ export class DialogScene extends Phaser.Scene {
               actionData: undefined,
             },
             ...nonCompleteChoices,
+          ]
+        }
+      }
+
+      // Handle empty quest selection list (all quests completed)
+      if (hasQuestOfferLinks && !hasAcceptQuestChoices && !hasCompleteQuestChoices) {
+        // Count how many quest offer choices remain
+        const questOfferChoices = filtered.filter((c) => {
+          if (!c.nextNodeId) return false
+          const nextNode = getDialogNode(this.dialogTree, c.nextNodeId)
+          return nextNode?.choices.some((nc) => nc.action === 'accept_quest') ?? false
+        })
+
+        if (questOfferChoices.length === 0) {
+          // Find the "back" choice
+          const backChoice = filtered.find((c) =>
+            c.text.toLowerCase().includes('back') ||
+            c.text.toLowerCase().includes('never mind') ||
+            c.nextNodeId === 'greeting' ||
+            c.nextNodeId === 'quest-hub'
+          )
+
+          // Return message plus back option
+          const nonQuestChoices = filtered.filter((c) => {
+            if (!c.nextNodeId) return true
+            const nextNode = getDialogNode(this.dialogTree, c.nextNodeId)
+            return !(nextNode?.choices.some((nc) => nc.action === 'accept_quest') ?? false)
+          })
+
+          return [
+            {
+              text: 'All quests completed!',
+              nextNodeId: backChoice?.nextNodeId ?? null,
+              action: undefined,
+              actionData: undefined,
+            },
+            ...nonQuestChoices.filter((c) => c !== backChoice),
+            ...(backChoice ? [backChoice] : []),
           ]
         }
       }
