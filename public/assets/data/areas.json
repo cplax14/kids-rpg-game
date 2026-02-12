@@ -35,6 +35,14 @@
           "Speak to the villagers to learn about monster taming.",
           "Head south when you're ready for adventure!"
         ]
+      },
+      {
+        "objectId": "village-waypoint-hub",
+        "type": "waypoint",
+        "position": { "x": 480, "y": 512 },
+        "isOneTime": false,
+        "waypointType": "hub",
+        "targetAreaId": null
       }
     ],
     "bossIds": [],
@@ -200,6 +208,14 @@
           "Only those who defeat Crystallix may pass.",
           "Recommended level: 12+"
         ]
+      },
+      {
+        "objectId": "caves-waypoint-return",
+        "type": "waypoint",
+        "position": { "x": 200, "y": 560 },
+        "isOneTime": false,
+        "waypointType": "return",
+        "targetAreaId": "sunlit-village"
       }
     ],
     "bossIds": ["crystallix"],
@@ -305,6 +321,14 @@
           "Only those who defeat the Emberlord may pass.",
           "Recommended level: 15+"
         ]
+      },
+      {
+        "objectId": "volcano-waypoint-return",
+        "type": "waypoint",
+        "position": { "x": 200, "y": 560 },
+        "isOneTime": false,
+        "waypointType": "return",
+        "targetAreaId": "sunlit-village"
       }
     ],
     "bossIds": ["emberlord"],
@@ -424,6 +448,14 @@
           "Recommended level: 18+",
           "WARNING: This is the final challenge!"
         ]
+      },
+      {
+        "objectId": "grotto-waypoint-return",
+        "type": "waypoint",
+        "position": { "x": 200, "y": 496 },
+        "isOneTime": false,
+        "waypointType": "return",
+        "targetAreaId": "sunlit-village"
       }
     ],
     "bossIds": ["pearlqueen"],
@@ -537,6 +569,14 @@
           "Only the strongest may challenge the Master of Shadows.",
           "This is the FINAL BOSS. Prepare yourself!"
         ]
+      },
+      {
+        "objectId": "marsh-waypoint-return",
+        "type": "waypoint",
+        "position": { "x": 200, "y": 464 },
+        "isOneTime": false,
+        "waypointType": "return",
+        "targetAreaId": "sunlit-village"
       }
     ],
     "bossIds": ["umbralsovereign"],

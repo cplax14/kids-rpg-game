@@ -394,7 +394,9 @@ export interface GameArea {
 
 // ── Interactables ──
 
-export type InteractableType = 'chest' | 'sign' | 'fountain'
+export type InteractableType = 'chest' | 'sign' | 'fountain' | 'waypoint'
+
+export type WaypointType = 'return' | 'hub'
 
 export interface InteractableObject {
   readonly objectId: string
@@ -422,6 +424,12 @@ export interface FountainObject extends InteractableObject {
   readonly type: 'fountain'
   readonly healPercent: number
   readonly healsSquad: boolean
+}
+
+export interface WaypointObject extends InteractableObject {
+  readonly type: 'waypoint'
+  readonly waypointType: WaypointType
+  readonly targetAreaId?: string // For return waypoints only
 }
 
 // ── Area Transitions ──

@@ -15,6 +15,7 @@ import type {
   ChestObject,
   SignObject,
   FountainObject,
+  WaypointObject,
   TutorialStep,
 } from '../models/types'
 import {
@@ -51,6 +52,7 @@ import {
   updateDiscoveredSpecies,
   updateCurrentArea,
   updateActiveQuests,
+  addVisitedArea,
   type GameState,
 } from '../systems/GameStateManager'
 import { createSquadCombatants } from '../systems/SquadSystem'
@@ -80,7 +82,14 @@ import {
   isChestObject,
   isSignObject,
   isFountainObject,
+  isWaypointObject,
 } from '../systems/InteractableSystem'
+import {
+  isFastTravelHubAvailable,
+  getUnlockedFastTravelDestinations,
+  canFastTravelTo,
+  getFastTravelSpawnPosition,
+} from '../systems/FastTravelSystem'
 import { generateMap, getCollisionTiles } from '../utils/mapGenerator'
 import { initAudioSystem, playMusic, crossfadeMusic, playSfx, stopMusic, MUSIC_KEYS, SFX_KEYS } from '../systems/AudioSystem'
 import { loadTutorialData, checkAndShowTutorial } from '../systems/TutorialSystem'
@@ -229,6 +238,19 @@ export class WorldScene extends Phaser.Scene {
         checkAndShowTutorial(this, 'first_area_transition')
       })
     }
+
+    // Listen for fast travel requests from DialogScene
+    const fastTravelHandler = (payload?: unknown) => {
+      if (payload && typeof payload === 'object' && 'targetAreaId' in payload) {
+        this.handleFastTravel(payload as { targetAreaId: string })
+      }
+    }
+    EventBus.on(GAME_EVENTS.FAST_TRAVEL_REQUESTED, fastTravelHandler, this)
+
+    // Clean up event listener when scene shuts down
+    this.events.once('shutdown', () => {
+      EventBus.off(GAME_EVENTS.FAST_TRAVEL_REQUESTED, fastTravelHandler, this)
+    })
   }
 
   update(): void {
@@ -283,6 +305,17 @@ export class WorldScene extends Phaser.Scene {
       this.createFallbackMap()
       this.createPlayer({ newGame: false }, spawnPosition)
       return
+    }
+
+    // Track visited area for fast travel system
+    try {
+      const state = getGameState(this)
+      const newState = addVisitedArea(state, areaId)
+      if (newState !== state) {
+        setGameState(this, newState)
+      }
+    } catch {
+      // Game state not yet initialized
     }
 
     // Clear previous area content
@@ -1343,6 +1376,8 @@ export class WorldScene extends Phaser.Scene {
       this.handleSignInteraction(definition as SignObject)
     } else if (isFountainObject(definition)) {
       this.handleFountainInteraction(definition as FountainObject)
+    } else if (isWaypointObject(definition)) {
+      this.handleWaypointInteraction(definition as WaypointObject)
     }
   }
 
@@ -1408,6 +1443,111 @@ export class WorldScene extends Phaser.Scene {
     } else {
       this.showMessage('You are already at full health.')
     }
+  }
+
+  private handleWaypointInteraction(waypoint: WaypointObject): void {
+    const gameState = getGameState(this)
+
+    this.inputSystem.setEnabled(false)
+    this.player.update({
+      up: false,
+      down: false,
+      left: false,
+      right: false,
+      interact: false,
+      menu: false,
+      cancel: false,
+    })
+
+    if (waypoint.waypointType === 'return') {
+      // Return waypoint - simple confirmation dialog
+      this.scene.launch(SCENE_KEYS.DIALOG, {
+        dialogTreeId: 'fast-travel-return',
+        npcName: 'Waypoint',
+        npcType: 'info',
+      })
+    } else {
+      // Hub waypoint - check if available and show destination selection
+      if (!isFastTravelHubAvailable(gameState.defeatedBosses)) {
+        // Hub not available yet
+        this.scene.launch(SCENE_KEYS.DIALOG, {
+          dialogTreeId: 'fast-travel-hub-unavailable',
+          npcName: 'Travel Hub',
+          npcType: 'info',
+        })
+      } else {
+        // Hub available - get unlocked destinations
+        const unlockedDestinations = getUnlockedFastTravelDestinations(
+          gameState.defeatedBosses,
+          gameState.visitedAreas,
+        )
+
+        this.scene.launch(SCENE_KEYS.DIALOG, {
+          dialogTreeId: 'fast-travel-hub',
+          npcName: 'Travel Hub',
+          npcType: 'info',
+          unlockedDestinations,
+        })
+      }
+    }
+
+    this.scene.pause()
+
+    this.events.once('resume', () => {
+      this.inputSystem.setEnabled(true)
+    })
+  }
+
+  private handleFastTravel(data: { targetAreaId: string }): void {
+    const { targetAreaId } = data
+    const gameState = getGameState(this)
+
+    // Validate fast travel is allowed
+    if (targetAreaId !== 'sunlit-village') {
+      if (!canFastTravelTo(targetAreaId, gameState.defeatedBosses, gameState.visitedAreas)) {
+        this.showWarningMessage('You cannot travel to this area yet.')
+        return
+      }
+    }
+
+    // Prevent multiple transitions
+    if (this.transitionInProgress) {
+      return
+    }
+    this.transitionInProgress = true
+
+    // Get spawn position for target area
+    const spawnPosition = getFastTravelSpawnPosition(targetAreaId)
+
+    // Auto-save before fast travel
+    autoSave(this, this.currentSaveSlot, this.getCurrentPlayTime())
+
+    // Disable input during transition
+    this.inputSystem.setEnabled(false)
+    this.player.update({
+      up: false,
+      down: false,
+      left: false,
+      right: false,
+      interact: false,
+      menu: false,
+      cancel: false,
+    })
+
+    // Play teleport sound (using existing SFX for now)
+    playSfx(SFX_KEYS.MENU_SELECT)
+
+    // Fade out and transition to new area
+    this.cameras.main.fadeOut(500)
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      this.scene.start(SCENE_KEYS.WORLD, {
+        newGame: false,
+        areaId: targetAreaId,
+        spawnPosition,
+        playTime: this.getCurrentPlayTime(),
+        saveSlot: this.currentSaveSlot,
+      })
+    })
   }
 
   private triggerBossEncounter(boss: BossDefinition): void {

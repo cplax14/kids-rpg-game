@@ -93,6 +93,9 @@ export const GAME_EVENTS = {
   // Achievement
   ACHIEVEMENT_UNLOCKED: 'achievement:unlocked',
   ACHIEVEMENT_PROGRESS: 'achievement:progress',
+
+  // Fast Travel
+  FAST_TRAVEL_REQUESTED: 'fast_travel:requested',
 } as const
 
 export type GameEventName = (typeof GAME_EVENTS)[keyof typeof GAME_EVENTS]
@@ -142,4 +145,7 @@ export interface GameEventPayloads {
   // Achievement events
   [GAME_EVENTS.ACHIEVEMENT_UNLOCKED]: { achievement: AchievementDefinition; progress: AchievementProgress }
   [GAME_EVENTS.ACHIEVEMENT_PROGRESS]: { achievementId: string; progress: Record<string, number> }
+
+  // Fast travel events
+  [GAME_EVENTS.FAST_TRAVEL_REQUESTED]: { targetAreaId: string }
 }

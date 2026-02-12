@@ -150,6 +150,7 @@ export function gameStateFromSave(save: SaveGame): GameState {
     squad: [...save.squad],
     monsterStorage: [...save.monsterStorage],
     discoveredSpecies: [...save.discoveredSpecies],
+    visitedAreas: [...(save.visitedAreas ?? ['sunlit-village'])],
     currentAreaId: save.currentAreaId,
     defeatedBosses: [...save.defeatedBosses],
     openedChests: [...save.openedChests],

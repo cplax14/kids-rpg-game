@@ -204,7 +204,9 @@ export const GameAreaSchema = z.object({
 
 // ── Interactables ──
 
-export const InteractableTypeSchema = z.enum(['chest', 'sign', 'fountain'])
+export const InteractableTypeSchema = z.enum(['chest', 'sign', 'fountain', 'waypoint'])
+
+export const WaypointTypeSchema = z.enum(['return', 'hub'])
 
 export const ItemDropSchema = z.object({
   itemId: z.string().min(1),
@@ -239,10 +241,17 @@ export const FountainObjectSchema = InteractableBaseSchema.extend({
   healsSquad: z.boolean(),
 })
 
+export const WaypointObjectSchema = InteractableBaseSchema.extend({
+  type: z.literal('waypoint'),
+  waypointType: WaypointTypeSchema,
+  targetAreaId: z.string().min(1).optional(),
+})
+
 export const InteractableObjectSchema = z.union([
   ChestObjectSchema,
   SignObjectSchema,
   FountainObjectSchema,
+  WaypointObjectSchema,
 ])
 
 // ── Area Transitions ──

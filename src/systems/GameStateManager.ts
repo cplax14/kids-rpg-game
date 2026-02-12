@@ -17,6 +17,7 @@ export interface GameState {
   readonly squad: ReadonlyArray<MonsterInstance>
   readonly monsterStorage: ReadonlyArray<MonsterInstance>
   readonly discoveredSpecies: ReadonlyArray<string>
+  readonly visitedAreas: ReadonlyArray<string>
   readonly currentAreaId: string
   readonly defeatedBosses: ReadonlyArray<string>
   readonly openedChests: ReadonlyArray<string>
@@ -41,6 +42,7 @@ export function createInitialGameState(playerName: string): GameState {
     squad: [],
     monsterStorage: [],
     discoveredSpecies: [],
+    visitedAreas: ['sunlit-village'],
     currentAreaId: 'sunlit-village',
     defeatedBosses: [],
     openedChests: [],
@@ -155,4 +157,11 @@ export function updateAchievementStats(
   achievementStats: AchievementStats,
 ): GameState {
   return { ...state, achievementStats }
+}
+
+export function addVisitedArea(state: GameState, areaId: string): GameState {
+  if (state.visitedAreas.includes(areaId)) {
+    return state
+  }
+  return { ...state, visitedAreas: [...state.visitedAreas, areaId] }
 }
