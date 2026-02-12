@@ -12,7 +12,7 @@ export interface DPadState {
 const BASE_DPAD_RADIUS = 60
 const BASE_BUTTON_RADIUS = 20
 const BASE_PADDING = 15  // Base padding from edge
-const MOBILE_BOTTOM_PADDING = 25  // Extra padding for mobile browser chrome
+const MOBILE_BOTTOM_PADDING = 45  // Extra padding for mobile browser chrome
 const DEAD_ZONE = 15
 
 /**

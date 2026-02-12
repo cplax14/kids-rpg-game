@@ -603,7 +603,7 @@ export class BattleHUD {
   }
 
   private createCommandMenu(): Phaser.GameObjects.Container {
-    const container = this.scene.add.container(20, GAME_HEIGHT - 180)
+    const container = this.scene.add.container(20, GAME_HEIGHT - 210)
     container.setDepth(DEPTH.UI)
 
     const bg = this.scene.add.graphics()
