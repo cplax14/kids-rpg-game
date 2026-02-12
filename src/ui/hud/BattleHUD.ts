@@ -603,14 +603,15 @@ export class BattleHUD {
   }
 
   private createCommandMenu(): Phaser.GameObjects.Container {
-    const container = this.scene.add.container(20, GAME_HEIGHT - 230)
+    const container = this.scene.add.container(20, GAME_HEIGHT - 260)
     container.setDepth(DEPTH.UI)
 
+    // Larger menu background
     const bg = this.scene.add.graphics()
     bg.fillStyle(0x16213e, 0.95)
-    bg.fillRoundedRect(0, 0, 250, 170, 12)
+    bg.fillRoundedRect(0, 0, 290, 200, 12)
     bg.lineStyle(2, COLORS.PRIMARY)
-    bg.strokeRoundedRect(0, 0, 250, 170, 12)
+    bg.strokeRoundedRect(0, 0, 290, 200, 12)
     container.add(bg)
 
     const commands: ReadonlyArray<{ label: string; command: CommandChoice }> = [
@@ -622,36 +623,41 @@ export class BattleHUD {
       { label: 'Flee', command: 'flee' },
     ]
 
+    // Larger buttons with more spacing
+    const btnWidth = 125
+    const btnHeight = 52
+    const btnSpacing = 60
+
     commands.forEach((cmd, index) => {
       const col = index % 2
       const row = Math.floor(index / 2)
-      const x = 15 + col * 118
-      const y = 10 + row * 52
+      const x = 15 + col * (btnWidth + 10)
+      const y = 12 + row * btnSpacing
 
       const btnBg = this.scene.add.graphics()
       btnBg.fillStyle(COLORS.SECONDARY, 0.4)
-      btnBg.fillRoundedRect(x, y, 110, 44, 8)
+      btnBg.fillRoundedRect(x, y, btnWidth, btnHeight, 8)
       container.add(btnBg)
 
-      const text = this.scene.add.text(x + 55, y + 22, cmd.label, {
+      const text = this.scene.add.text(x + btnWidth / 2, y + btnHeight / 2, cmd.label, {
         ...TEXT_STYLES.BUTTON,
-        fontSize: '16px',
+        fontSize: '20px',
       })
       text.setOrigin(0.5)
       container.add(text)
 
-      const hitArea = this.scene.add.rectangle(x + 55, y + 22, 110, 44)
+      const hitArea = this.scene.add.rectangle(x + btnWidth / 2, y + btnHeight / 2, btnWidth, btnHeight)
       hitArea.setInteractive({ useHandCursor: true })
 
       hitArea.on('pointerover', () => {
         btnBg.clear()
         btnBg.fillStyle(COLORS.SECONDARY, 0.7)
-        btnBg.fillRoundedRect(x, y, 110, 44, 8)
+        btnBg.fillRoundedRect(x, y, btnWidth, btnHeight, 8)
       })
       hitArea.on('pointerout', () => {
         btnBg.clear()
         btnBg.fillStyle(COLORS.SECONDARY, 0.4)
-        btnBg.fillRoundedRect(x, y, 110, 44, 8)
+        btnBg.fillRoundedRect(x, y, btnWidth, btnHeight, 8)
       })
       hitArea.on('pointerdown', () => {
         this.onCommand?.(cmd.command)

@@ -99,10 +99,10 @@ export class NPC {
     // Name label above
     this.nameLabel = scene.add.text(x, y + labelOffsetY, definition.name, {
       ...TEXT_STYLES.SMALL,
-      fontSize: '11px',
+      fontSize: '14px',
       color: '#ffffff',
       stroke: '#000000',
-      strokeThickness: 2,
+      strokeThickness: 3,
     })
     this.nameLabel.setOrigin(0.5)
     this.nameLabel.setDepth(DEPTH.ABOVE_PLAYER)

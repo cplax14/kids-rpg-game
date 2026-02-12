@@ -2156,42 +2156,42 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private createNPCs(): void {
-    // Village shopkeeper
-    const shopkeeper = new NPC(this, 13 * TILE_SIZE, 13 * TILE_SIZE, {
+    // Village shopkeeper - left side
+    const shopkeeper = new NPC(this, 11 * TILE_SIZE, 14 * TILE_SIZE, {
       npcId: 'shopkeeper',
       name: 'Shopkeeper',
       spriteKey: 'npc-shop',
-      position: { x: 13 * TILE_SIZE, y: 13 * TILE_SIZE },
+      position: { x: 11 * TILE_SIZE, y: 14 * TILE_SIZE },
       dialogTreeId: 'shopkeeper-greeting',
       type: 'shop',
     })
 
-    // Village healer
-    const healer = new NPC(this, 17 * TILE_SIZE, 13 * TILE_SIZE, {
+    // Village healer - right of shopkeeper
+    const healer = new NPC(this, 17 * TILE_SIZE, 14 * TILE_SIZE, {
       npcId: 'healer',
       name: 'Healer',
       spriteKey: 'npc-healer',
-      position: { x: 17 * TILE_SIZE, y: 13 * TILE_SIZE },
+      position: { x: 17 * TILE_SIZE, y: 14 * TILE_SIZE },
       dialogTreeId: 'healer-greeting',
       type: 'healer',
     })
 
-    // Info NPC
-    const guide = new NPC(this, 15 * TILE_SIZE, 11 * TILE_SIZE, {
+    // Info NPC - center top
+    const guide = new NPC(this, 15 * TILE_SIZE, 10 * TILE_SIZE, {
       npcId: 'guide',
       name: 'Village Guide',
       spriteKey: 'npc-info',
-      position: { x: 15 * TILE_SIZE, y: 11 * TILE_SIZE },
+      position: { x: 15 * TILE_SIZE, y: 10 * TILE_SIZE },
       dialogTreeId: 'guide-tips',
       type: 'info',
     })
 
-    // Monster Breeder
-    const breeder = new NPC(this, 19 * TILE_SIZE, 13 * TILE_SIZE, {
+    // Monster Breeder - far right
+    const breeder = new NPC(this, 21 * TILE_SIZE, 14 * TILE_SIZE, {
       npcId: 'breeder',
       name: 'Monster Breeder',
       spriteKey: 'npc-breeder',
-      position: { x: 19 * TILE_SIZE, y: 13 * TILE_SIZE },
+      position: { x: 21 * TILE_SIZE, y: 14 * TILE_SIZE },
       dialogTreeId: 'breeder-greeting',
       type: 'breeder',
     })
