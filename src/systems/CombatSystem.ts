@@ -9,7 +9,12 @@ import type {
   CharacterStats,
   ItemDrop,
   MonsterElement,
+  TargetType,
 } from '../models/types'
+import {
+  resolveTargets,
+  getMultiTargetDamageMultiplier,
+} from './TargetingSystem'
 import {
   calculateDamage,
   calculateFleeChance,
@@ -109,13 +114,21 @@ function determineNextState(battle: Battle): BattleState {
 
 // ── Action Execution ──
 
+export interface TargetResult {
+  readonly targetId: string
+  readonly damage: number
+  readonly isCritical: boolean
+  readonly isEffective: 'super' | 'weak' | 'normal'
+}
+
 export interface ActionResult {
   readonly battle: Battle
-  readonly damage: number
+  readonly damage: number // Total damage (for backwards compat)
   readonly isCritical: boolean
   readonly isEffective: 'super' | 'weak' | 'normal'
   readonly statusApplied: string | null
   readonly message: string
+  readonly targetResults: ReadonlyArray<TargetResult> // Per-target results for multi-target abilities
 }
 
 export function executeAction(battle: Battle, action: BattleAction): ActionResult {
@@ -140,6 +153,7 @@ export function executeAction(battle: Battle, action: BattleAction): ActionResul
         isEffective: 'normal',
         statusApplied: null,
         message: 'Nothing happened.',
+        targetResults: [],
       }
   }
 }
@@ -154,6 +168,7 @@ function executeCaptureAction(battle: Battle, action: BattleAction): ActionResul
     isEffective: 'normal',
     statusApplied: null,
     message: 'Attempting to capture...',
+    targetResults: [],
   }
 }
 
@@ -166,6 +181,7 @@ function executeItemAction(battle: Battle, action: BattleAction): ActionResult {
     isEffective: 'normal',
     statusApplied: null,
     message: 'Used item.',
+    targetResults: [],
   }
 }
 
@@ -198,6 +214,12 @@ function executeBasicAttack(battle: Battle, action: BattleAction): ActionResult 
     isEffective: 'normal',
     statusApplied: null,
     message: `${attacker.name} attacks ${target.name} for ${damage} damage!${isCritical ? ' Critical hit!' : ''}`,
+    targetResults: [{
+      targetId: target.combatantId,
+      damage,
+      isCritical,
+      isEffective: 'normal',
+    }],
   }
 }
 
@@ -232,6 +254,7 @@ function executeAbilityAction(battle: Battle, action: BattleAction): ActionResul
       isEffective: 'normal',
       statusApplied: null,
       message: `${attacker.name} used ${ability.name} but it missed!`,
+      targetResults: [],
     }
   }
 
@@ -258,60 +281,101 @@ function executeDamageAbility(
   const attackStat = isPhysical ? getEffectiveAttack(attacker) : getEffectiveMagicAttack(attacker)
   const attackerElement = ability.element
 
-  if (ability.targetType === 'all_enemies') {
-    return executeAoeAbility(battle, attacker, ability, attackStat, attackerElement)
+  // Resolve targets using the targeting system
+  const targetIds = (action.targetIds && action.targetIds.length > 0)
+    ? action.targetIds
+    : resolveTargets(battle, ability.targetType, action.targetId, action.actorId)
+
+  if (targetIds.length === 0) {
+    return createEmptyResult(battle, 'No valid targets.')
   }
 
-  const target = findCombatant(battle, action.targetId ?? '')
-  if (!target) return createEmptyResult(battle, 'Invalid target.')
+  // Calculate damage multiplier for multi-target
+  const damageMultiplier = getMultiTargetDamageMultiplier(targetIds.length)
 
-  const defenseStat = isPhysical
-    ? getEffectiveDefense(target)
-    : getEffectiveMagicDefense(target)
-
-  // Determine defender element from their abilities (first elemental ability)
-  const defenderElement = guessElement(target)
-
-  const { damage, isCritical } = calculateDamage(
-    attackStat,
-    ability.power,
-    defenseStat,
-    attackerElement,
-    defenderElement,
-    attacker.stats.luck,
-  )
-
-  const multiplier = getElementMultiplier(attackerElement, defenderElement)
-  const effectiveness: 'super' | 'weak' | 'normal' =
-    multiplier > 1.5 ? 'super' : multiplier < 0.75 ? 'weak' : 'normal'
-
-  let updatedBattle = applyCombatantDamage(battle, target.combatantId, damage)
-
-  // Apply status effect if ability has one
+  let updatedBattle = battle
+  let totalDamage = 0
+  let anyCritical = false
+  let overallEffectiveness: 'super' | 'weak' | 'normal' = 'normal'
   let statusApplied: string | null = null
-  if (ability.statusEffect && randomChance(0.5)) {
-    updatedBattle = applyStatusEffect(updatedBattle, target.combatantId, {
-      effect: ability.statusEffect,
-      turnsRemaining: ability.statusEffect.duration,
-      appliedBy: attacker.combatantId,
+  const targetResults: TargetResult[] = []
+
+  for (const targetId of targetIds) {
+    const target = findCombatant(updatedBattle, targetId)
+    if (!target || target.stats.currentHp <= 0) continue
+
+    const defenseStat = isPhysical
+      ? getEffectiveDefense(target)
+      : getEffectiveMagicDefense(target)
+
+    const defenderElement = guessElement(target)
+
+    const { damage: rawDamage, isCritical } = calculateDamage(
+      attackStat,
+      ability.power,
+      defenseStat,
+      attackerElement,
+      defenderElement,
+      attacker.stats.luck,
+    )
+
+    // Apply multi-target damage reduction
+    const damage = Math.floor(rawDamage * damageMultiplier)
+
+    const multiplier = getElementMultiplier(attackerElement, defenderElement)
+    const effectiveness: 'super' | 'weak' | 'normal' =
+      multiplier > 1.5 ? 'super' : multiplier < 0.75 ? 'weak' : 'normal'
+
+    updatedBattle = applyCombatantDamage(updatedBattle, target.combatantId, damage)
+    totalDamage += damage
+
+    if (isCritical) anyCritical = true
+    if (effectiveness === 'super') overallEffectiveness = 'super'
+    else if (effectiveness === 'weak' && overallEffectiveness !== 'super') overallEffectiveness = 'weak'
+
+    targetResults.push({
+      targetId: target.combatantId,
+      damage,
+      isCritical,
+      isEffective: effectiveness,
     })
-    statusApplied = ability.statusEffect.name
+
+    // Apply status effect if ability has one (per target)
+    if (ability.statusEffect && randomChance(0.5)) {
+      updatedBattle = applyStatusEffect(updatedBattle, target.combatantId, {
+        effect: ability.statusEffect,
+        turnsRemaining: ability.statusEffect.duration,
+        appliedBy: attacker.combatantId,
+      })
+      statusApplied = ability.statusEffect.name
+    }
+  }
+
+  // Check if any targets were actually hit
+  if (targetResults.length === 0) {
+    return createEmptyResult(updatedBattle, 'No valid targets.')
   }
 
   const effectMsg =
-    effectiveness === 'super'
+    overallEffectiveness === 'super'
       ? " It's super effective!"
-      : effectiveness === 'weak'
+      : overallEffectiveness === 'weak'
         ? " It's not very effective..."
         : ''
 
+  const targetCount = targetResults.length
+  const message = targetCount > 1
+    ? `${attacker.name} used ${ability.name}! ${totalDamage} total damage to ${targetCount} targets!${anyCritical ? ' Critical hit!' : ''}${effectMsg}`
+    : `${attacker.name} used ${ability.name}! ${totalDamage} damage!${anyCritical ? ' Critical hit!' : ''}${effectMsg}`
+
   return {
     battle: updatedBattle,
-    damage,
-    isCritical,
-    isEffective: effectiveness,
+    damage: totalDamage,
+    isCritical: anyCritical,
+    isEffective: overallEffectiveness,
     statusApplied,
-    message: `${attacker.name} used ${ability.name}! ${damage} damage!${isCritical ? ' Critical hit!' : ''}${effectMsg}`,
+    message,
+    targetResults,
   }
 }
 
@@ -327,6 +391,7 @@ function executeAoeAbility(
   let totalDamage = 0
   let anyCritical = false
   const isPhysical = ability.type === 'physical'
+  const targetResults: TargetResult[] = []
 
   for (const target of targets) {
     if (target.stats.currentHp <= 0) continue
@@ -345,9 +410,20 @@ function executeAoeAbility(
       attacker.stats.luck,
     )
 
+    const multiplier = getElementMultiplier(attackerElement, defenderElement)
+    const effectiveness: 'super' | 'weak' | 'normal' =
+      multiplier > 1.5 ? 'super' : multiplier < 0.75 ? 'weak' : 'normal'
+
     updatedBattle = applyCombatantDamage(updatedBattle, target.combatantId, damage)
     totalDamage += damage
     if (isCritical) anyCritical = true
+
+    targetResults.push({
+      targetId: target.combatantId,
+      damage,
+      isCritical,
+      isEffective: effectiveness,
+    })
   }
 
   return {
@@ -357,6 +433,7 @@ function executeAoeAbility(
     isEffective: 'normal',
     statusApplied: null,
     message: `${attacker.name} used ${ability.name}! ${totalDamage} total damage to all enemies!`,
+    targetResults,
   }
 }
 
@@ -390,6 +467,7 @@ function executeHealingAbility(
       isEffective: 'normal',
       statusApplied: null,
       message: `${attacker.name} used ${ability.name}! Healed all allies for ${totalHealed} HP!`,
+      targetResults: [],
     }
   }
 
@@ -413,6 +491,7 @@ function executeHealingAbility(
     isEffective: 'normal',
     statusApplied: null,
     message: `${attacker.name} used ${ability.name}! ${target.name} recovered ${actualHeal} HP!`,
+    targetResults: [],
   }
 }
 
@@ -441,6 +520,7 @@ function executeStatusAbility(
       isEffective: 'normal',
       statusApplied: null,
       message: `${target.name} already has ${ability.statusEffect.name}!`,
+      targetResults: [],
     }
   }
 
@@ -457,6 +537,7 @@ function executeStatusAbility(
     isEffective: 'normal',
     statusApplied: ability.statusEffect.name,
     message: `${attacker.name} used ${ability.name}! ${target.name} is now ${ability.statusEffect.name}!`,
+    targetResults: [],
   }
 }
 
@@ -483,6 +564,7 @@ function executeDefend(battle: Battle, action: BattleAction): ActionResult {
     isEffective: 'normal',
     statusApplied: 'Defending',
     message: `${actor.name} is defending!`,
+    targetResults: [],
   }
 }
 
@@ -506,6 +588,7 @@ function executeFlee(battle: Battle, action: BattleAction): ActionResult {
       isEffective: 'normal',
       statusApplied: null,
       message: 'Got away safely!',
+      targetResults: [],
     }
   }
 
@@ -516,6 +599,7 @@ function executeFlee(battle: Battle, action: BattleAction): ActionResult {
     isEffective: 'normal',
     statusApplied: null,
     message: "Couldn't escape!",
+    targetResults: [],
   }
 }
 
@@ -583,7 +667,7 @@ export function isSleeping(combatant: BattleCombatant): boolean {
 export function getEnemyAction(battle: Battle, enemy: BattleCombatant): BattleAction {
   const aliveTargets = battle.playerSquad.filter((p) => p.stats.currentHp > 0)
   if (aliveTargets.length === 0) {
-    return { type: 'defend', actorId: enemy.combatantId, targetId: null, abilityId: null, itemId: null }
+    return { type: 'defend', actorId: enemy.combatantId, targetId: null, targetIds: [], abilityId: null, itemId: null }
   }
 
   // If HP is low and has healing, heal
@@ -595,6 +679,7 @@ export function getEnemyAction(battle: Battle, enemy: BattleCombatant): BattleAc
         type: 'ability',
         actorId: enemy.combatantId,
         targetId: enemy.combatantId,
+        targetIds: [],
         abilityId: healAbility.abilityId,
         itemId: null,
       }
@@ -625,6 +710,7 @@ export function getEnemyAction(battle: Battle, enemy: BattleCombatant): BattleAc
       type: 'ability',
       actorId: enemy.combatantId,
       targetId: chosen.targetType === 'all_enemies' ? null : target.combatantId,
+      targetIds: [],
       abilityId: chosen.abilityId,
       itemId: null,
     }
@@ -636,6 +722,7 @@ export function getEnemyAction(battle: Battle, enemy: BattleCombatant): BattleAc
     type: 'attack',
     actorId: enemy.combatantId,
     targetId: target.combatantId,
+    targetIds: [],
     abilityId: null,
     itemId: null,
   }
@@ -826,5 +913,6 @@ function createEmptyResult(battle: Battle, message: string): ActionResult {
     isEffective: 'normal',
     statusApplied: null,
     message,
+    targetResults: [],
   }
 }

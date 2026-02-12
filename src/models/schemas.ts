@@ -72,7 +72,16 @@ export const AbilitySchema = z.object({
   power: z.number().min(0),
   accuracy: z.number().min(0).max(100),
   mpCost: z.number().int().min(0),
-  targetType: z.enum(['single_enemy', 'all_enemies', 'self', 'single_ally', 'all_allies']),
+  targetType: z.enum([
+    'single_enemy',
+    'all_enemies',
+    'self',
+    'single_ally',
+    'all_allies',
+    'adjacent_enemies',
+    'random_enemies_2',
+    'random_enemies_3',
+  ]),
   statusEffect: StatusEffectSchema.nullable(),
   animation: z.string(),
 })

@@ -43,6 +43,8 @@ import { addToSquad, applyPostBattleBond, isSquadFull } from '../systems/SquadSy
 import { discoverSpecies, discoverMultipleSpecies } from '../systems/BestiarySystem'
 import { getSquadMonsterAction } from '../systems/SquadAI'
 import { playCaptureAnimation } from '../ui/animations/CaptureAnimation'
+import { requiresTargetSelection, getValidTargets } from '../systems/TargetingSystem'
+import type { TargetPosition } from '../ui/hud/TargetSelector'
 
 interface BattleSceneData {
   readonly playerCombatants: ReadonlyArray<BattleCombatant>
@@ -57,9 +59,17 @@ interface BattleSceneData {
 
 type AreaType = 'village' | 'forest' | 'cave' | 'volcano' | 'grotto' | 'swamp'
 
-type BattlePhase = 'intro' | 'player_input' | 'executing' | 'enemy_turn' | 'victory' | 'defeat' | 'fled'
+type BattlePhase = 'intro' | 'player_input' | 'targeting' | 'executing' | 'enemy_turn' | 'victory' | 'defeat' | 'fled'
+
+interface PendingAction {
+  readonly choice: CommandChoice
+  readonly abilityId: string | null
+}
 
 type BattleSprite = Phaser.GameObjects.Rectangle | Phaser.GameObjects.Sprite
+
+// Time window for detecting double-clicks (ms)
+const DOUBLE_CLICK_THRESHOLD = 400
 
 export class BattleScene extends Phaser.Scene {
   private battle!: Battle
@@ -73,6 +83,11 @@ export class BattleScene extends Phaser.Scene {
   private bossData: BossDefinition | null = null
   private playerPosition: { x: number; y: number } | null = null
   private areaId: string = 'sunlit-village'
+  private pendingAction: PendingAction | null = null
+  private lastTargetedEnemyId: string | null = null
+  private lastCommandTime: number = 0
+  private lastCommandChoice: CommandChoice | null = null
+  private lastCommandAbilityId: string | null = null
 
   constructor() {
     super({ key: SCENE_KEYS.BATTLE })
@@ -761,14 +776,28 @@ export class BattleScene extends Phaser.Scene {
       // Human player's turn
       this.phase = 'player_input'
       this.hud.showCommandMenu()
+      this.showActiveTurnIndicatorFor(current)
     } else if (current.isPlayer && current.isMonster) {
-      // Squad monster's turn - use AI
-      this.phase = 'executing'
-      this.executeSquadMonsterTurn(current)
+      // Squad monster's turn - player controls (no more AI)
+      this.phase = 'player_input'
+      this.hud.showCommandMenu()
+      this.showActiveTurnIndicatorFor(current)
     } else {
       // Enemy's turn
       this.phase = 'enemy_turn'
+      this.hud.hideActiveTurnIndicator()
       this.executeEnemyTurn(current)
+    }
+  }
+
+  private showActiveTurnIndicatorFor(combatant: BattleCombatant): void {
+    // Find sprite position for this combatant
+    const spriteIndex = this.battle.playerSquad.findIndex(
+      (c) => c.combatantId === combatant.combatantId,
+    )
+    if (spriteIndex >= 0 && this.playerSprites[spriteIndex]) {
+      const sprite = this.playerSprites[spriteIndex]
+      this.hud.showActiveTurnIndicator(combatant, sprite.x, sprite.y)
     }
   }
 
@@ -780,23 +809,141 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private handlePlayerCommand(choice: CommandChoice, targetId?: string, abilityId?: string): void {
-    if (this.phase !== 'player_input') return
-    this.phase = 'executing'
-    this.hud.hideCommandMenu()
+    if (this.phase !== 'player_input' && this.phase !== 'targeting') return
 
     const aliveTurnOrder = this.battle.turnOrder.filter((c) => c.stats.currentHp > 0)
     const current = aliveTurnOrder[this.currentTurnIndex % aliveTurnOrder.length]
     if (!current) return
 
+    const now = Date.now()
+
+    // Check for re-click during targeting phase (same command clicked again)
+    if (this.phase === 'targeting' && this.pendingAction && !targetId) {
+      const isSameCommand = choice === this.pendingAction.choice &&
+        (choice !== 'ability' || abilityId === this.pendingAction.abilityId)
+
+      if (isSameCommand) {
+        // Use default target based on the ability's target type
+        let defaultTarget: string | null = null
+        if (this.pendingAction.abilityId) {
+          const ability = current.abilities.find((a) => a.abilityId === this.pendingAction!.abilityId)
+          if (ability?.targetType === 'single_ally') {
+            defaultTarget = this.getDefaultAllyTarget(current.combatantId)
+          } else {
+            defaultTarget = this.getDefaultEnemyTarget()
+          }
+        } else {
+          defaultTarget = this.getDefaultEnemyTarget()
+        }
+
+        if (defaultTarget) {
+          this.phase = 'executing'
+          this.hud.hideTargetSelection()
+          this.hud.hideActiveTurnIndicator()
+
+          const action: BattleAction = {
+            type: this.pendingAction.choice === 'ability' ? 'ability' : 'attack',
+            actorId: current.combatantId,
+            targetId: defaultTarget,
+            targetIds: [],
+            abilityId: this.pendingAction.abilityId,
+            itemId: null,
+          }
+
+          this.pendingAction = null
+          this.lastCommandTime = 0
+          this.lastCommandChoice = null
+          this.lastCommandAbilityId = null
+          this.executeActionAndAnimate(action)
+          return
+        }
+      }
+    }
+
+    // If we have a target from targeting phase, execute the pending action
+    if (this.phase === 'targeting' && targetId && this.pendingAction) {
+      this.phase = 'executing'
+      this.hud.hideTargetSelection()
+      this.hud.hideActiveTurnIndicator()
+
+      const action: BattleAction = {
+        type: this.pendingAction.choice === 'ability' ? 'ability' : 'attack',
+        actorId: current.combatantId,
+        targetId,
+        targetIds: [],
+        abilityId: this.pendingAction.abilityId,
+        itemId: null,
+      }
+
+      this.pendingAction = null
+      this.lastCommandTime = 0
+      this.lastCommandChoice = null
+      this.lastCommandAbilityId = null
+      this.executeActionAndAnimate(action)
+      return
+    }
+
+    // Check for double-click on attack or ability (quick successive clicks)
+    const isDoubleClick = (choice === 'attack' || choice === 'ability') &&
+      this.lastCommandChoice === choice &&
+      (choice !== 'ability' || this.lastCommandAbilityId === abilityId) &&
+      (now - this.lastCommandTime) < DOUBLE_CLICK_THRESHOLD
+
+    if (isDoubleClick && !targetId) {
+      // Double-click detected - use default target and skip targeting phase
+      let defaultTarget: string | null = null
+      if (abilityId) {
+        const ability = current.abilities.find((a) => a.abilityId === abilityId)
+        if (ability?.targetType === 'single_ally') {
+          defaultTarget = this.getDefaultAllyTarget(current.combatantId)
+        } else if (ability && !requiresTargetSelection(ability.targetType)) {
+          // Auto-target abilities (all_enemies, self, etc.) don't need default
+          defaultTarget = null
+        } else {
+          defaultTarget = this.getDefaultEnemyTarget()
+        }
+      } else {
+        defaultTarget = this.getDefaultEnemyTarget()
+      }
+
+      if (defaultTarget) {
+        this.phase = 'executing'
+        this.hud.hideCommandMenu()
+        this.hud.hideActiveTurnIndicator()
+
+        const action: BattleAction = {
+          type: choice === 'ability' ? 'ability' : 'attack',
+          actorId: current.combatantId,
+          targetId: defaultTarget,
+          targetIds: [],
+          abilityId: abilityId ?? null,
+          itemId: null,
+        }
+
+        this.lastCommandTime = 0
+        this.lastCommandChoice = null
+        this.lastCommandAbilityId = null
+        this.executeActionAndAnimate(action)
+        return
+      }
+    }
+
+    // Track this command for potential double-click detection
+    this.lastCommandTime = now
+    this.lastCommandChoice = choice
+    this.lastCommandAbilityId = abilityId ?? null
+
+    // Handle submenu navigation first (these don't need targeting)
     if (choice === 'ability' && !abilityId) {
       // Show ability submenu
+      this.hud.hideCommandMenu()
       this.hud.showAbilityMenu(current.abilities, current.stats.currentMp)
-      this.phase = 'player_input'
       return
     }
 
     if (choice === 'item' && !abilityId) {
       // Show item submenu (reuse abilityId param as itemId)
+      this.hud.hideCommandMenu()
       try {
         const state = getGameState(this)
         const consumables = getConsumableItems(state.inventory)
@@ -804,12 +951,12 @@ export class BattleScene extends Phaser.Scene {
       } catch {
         // No game state yet, show nothing
       }
-      this.phase = 'player_input'
       return
     }
 
     // Handle capture device selection
     if (choice === 'capture' && !abilityId) {
+      this.hud.hideCommandMenu()
       try {
         const state = getGameState(this)
         const devices = getCaptureDevices(state.inventory)
@@ -817,35 +964,163 @@ export class BattleScene extends Phaser.Scene {
       } catch {
         // No game state yet, show nothing
       }
-      this.phase = 'player_input'
       return
     }
 
-    // Handle capture attempt
+    // Handle capture attempt - needs target selection
     if (choice === 'capture' && abilityId) {
+      this.phase = 'executing'
+      this.hud.hideCommandMenu()
       this.handleCaptureAttempt(current, abilityId)
       return
     }
 
     // Handle item usage
     if (choice === 'item' && abilityId) {
+      this.phase = 'executing'
+      this.hud.hideCommandMenu()
       this.handleItemUse(current, abilityId)
       return
     }
 
-    // Determine target - for attacks, pick first alive enemy
-    const aliveEnemies = this.battle.enemySquad.filter((e) => e.stats.currentHp > 0)
-    const defaultTarget = aliveEnemies[0]?.combatantId
+    // Check if attack needs target selection (always for attacks)
+    if (choice === 'attack' && !targetId) {
+      const aliveEnemies = this.battle.enemySquad.filter((e) => e.stats.currentHp > 0)
+      if (aliveEnemies.length > 1) {
+        // Keep command menu visible during targeting so user can click Attack again
+        this.enterTargetingPhase(choice, null, current)
+        return
+      }
+      // Single enemy, auto-target
+      targetId = aliveEnemies[0]?.combatantId
+    }
 
+    // Check if ability needs target selection
+    if (choice === 'ability' && abilityId && !targetId) {
+      const ability = current.abilities.find((a) => a.abilityId === abilityId)
+      if (ability && requiresTargetSelection(ability.targetType)) {
+        // Keep command menu visible during targeting so user can click Ability again
+        this.enterTargetingPhase(choice, abilityId, current)
+        return
+      }
+    }
+
+    // Now we're actually executing - hide menu
+    this.phase = 'executing'
+    this.hud.hideCommandMenu()
+
+    // Handle defend and flee (no target needed)
+    if (choice === 'defend' || choice === 'flee') {
+      this.hud.hideActiveTurnIndicator()
+      const action: BattleAction = {
+        type: choice,
+        actorId: current.combatantId,
+        targetId: null,
+        targetIds: [],
+        abilityId: null,
+        itemId: null,
+      }
+      this.executeActionAndAnimate(action)
+      return
+    }
+
+    // Execute with resolved target
+    const aliveEnemies = this.battle.enemySquad.filter((e) => e.stats.currentHp > 0)
+    const defaultTarget = targetId ?? aliveEnemies[0]?.combatantId ?? null
+
+    this.hud.hideActiveTurnIndicator()
     const action: BattleAction = {
-      type: choice === 'ability' ? 'ability' : choice === 'attack' ? 'attack' : choice === 'flee' ? 'flee' : 'defend',
+      type: choice === 'ability' ? 'ability' : 'attack',
       actorId: current.combatantId,
-      targetId: targetId ?? defaultTarget ?? null,
+      targetId: defaultTarget,
+      targetIds: [],
       abilityId: abilityId ?? null,
       itemId: null,
     }
 
     this.executeActionAndAnimate(action)
+  }
+
+  private enterTargetingPhase(choice: CommandChoice, abilityId: string | null, actor: BattleCombatant): void {
+    this.phase = 'targeting'
+    this.pendingAction = { choice, abilityId }
+
+    // Determine target type
+    let targetType: import('../models/types').TargetType = 'single_enemy'
+    if (abilityId) {
+      const ability = actor.abilities.find((a) => a.abilityId === abilityId)
+      if (ability) {
+        targetType = ability.targetType
+      }
+    }
+
+    // Get valid targets
+    const validTargets = getValidTargets(this.battle, actor.combatantId, targetType)
+
+    // Get target positions (enemy sprite positions)
+    const targetPositions: TargetPosition[] = this.getEnemyTargetPositions()
+
+    this.hud.showTargetSelection(
+      validTargets,
+      targetPositions,
+      (selectedTargetId) => {
+        this.handlePlayerCommand(choice, selectedTargetId, abilityId ?? undefined)
+      },
+      () => {
+        // Cancel - return to command menu
+        this.phase = 'player_input'
+        this.pendingAction = null
+        this.hud.showCommandMenu()
+      },
+    )
+  }
+
+  private getEnemyTargetPositions(): TargetPosition[] {
+    const positions: TargetPosition[] = []
+
+    this.battle.enemySquad.forEach((enemy, index) => {
+      if (enemy.stats.currentHp <= 0) return
+      if (index < this.enemySprites.length) {
+        const sprite = this.enemySprites[index]
+        positions.push({
+          combatantId: enemy.combatantId,
+          x: sprite.x,
+          y: sprite.y,
+        })
+      }
+    })
+
+    return positions
+  }
+
+  private getDefaultEnemyTarget(): string | null {
+    const aliveEnemies = this.battle.enemySquad.filter((e) => e.stats.currentHp > 0)
+    if (aliveEnemies.length === 0) return null
+
+    // If we have a last targeted enemy and it's still alive, use it
+    if (this.lastTargetedEnemyId) {
+      const lastTarget = aliveEnemies.find((e) => e.combatantId === this.lastTargetedEnemyId)
+      if (lastTarget) {
+        return lastTarget.combatantId
+      }
+    }
+
+    // Otherwise, use the first alive enemy
+    return aliveEnemies[0].combatantId
+  }
+
+  private getDefaultAllyTarget(actorId: string): string | null {
+    const aliveAllies = this.battle.playerSquad.filter((c) => c.stats.currentHp > 0)
+    if (aliveAllies.length === 0) return null
+
+    // For heals, default to the lowest HP ally
+    const lowestHpAlly = aliveAllies.reduce((lowest, ally) => {
+      const lowestRatio = lowest.stats.currentHp / lowest.stats.maxHp
+      const allyRatio = ally.stats.currentHp / ally.stats.maxHp
+      return allyRatio < lowestRatio ? ally : lowest
+    })
+
+    return lowestHpAlly.combatantId
   }
 
   private handleItemUse(actor: BattleCombatant, itemId: string): void {
@@ -1091,6 +1366,14 @@ export class BattleScene extends Phaser.Scene {
   private executeActionAndAnimate(action: BattleAction): void {
     const result = executeAction(this.battle, action)
     this.battle = result.battle
+
+    // Track last targeted enemy for default target selection
+    if (action.targetId && (action.type === 'attack' || action.type === 'ability')) {
+      const target = this.battle.enemySquad.find((e) => e.combatantId === action.targetId)
+      if (target) {
+        this.lastTargetedEnemyId = action.targetId
+      }
+    }
 
     // Animate attack
     if (result.damage > 0 && action.targetId) {
@@ -1435,5 +1718,10 @@ export class BattleScene extends Phaser.Scene {
     this.isBossBattle = false
     this.bossData = null
     this.playerPosition = null
+    this.pendingAction = null
+    this.lastTargetedEnemyId = null
+    this.lastCommandTime = 0
+    this.lastCommandChoice = null
+    this.lastCommandAbilityId = null
   }
 }

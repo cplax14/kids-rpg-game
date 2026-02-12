@@ -625,7 +625,7 @@ describe('executeAction - damage ability with element effectiveness', () => {
     expect(result.battle.enemySquad[0].stats.currentHp).toBeLessThan(100)
   })
 
-  it('returns invalid target message for missing target', () => {
+  it('returns no valid targets message for missing target', () => {
     const player = createCombatantFromPlayer('Hero', makeStats(), [fireAbility])
     const enemy = makeEnemy()
     const battle = createBattle([player], [enemy])
@@ -634,12 +634,13 @@ describe('executeAction - damage ability with element effectiveness', () => {
       type: 'ability',
       actorId: battle.playerSquad[0].combatantId,
       targetId: 'nonexistent-id',
+      targetIds: [],
       abilityId: 'ember',
       itemId: null,
     }
 
     const result = executeAction(battle, action)
-    expect(result.message).toContain('Invalid target')
+    expect(result.message).toContain('No valid targets')
   })
 })
 
