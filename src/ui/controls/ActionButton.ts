@@ -5,7 +5,7 @@ import { DEPTH, COLORS, TEXT_STYLES } from '../../config'
 const BASE_BUTTON_RADIUS = 28
 const BASE_PADDING = 15
 const BASE_SPACING = 65
-const MOBILE_BOTTOM_PADDING = 25  // Extra padding for mobile browser chrome
+const MOBILE_BOTTOM_PADDING = 45  // Extra padding for mobile browser chrome
 
 export type ButtonPosition = 'primary' | 'secondary' | 'tertiary'
 
