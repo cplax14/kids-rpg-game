@@ -274,6 +274,40 @@ export function trackItemCollection(
   return checkAndMarkComplete(updated)
 }
 
+/**
+ * Sync collect objectives with current inventory counts.
+ * Called when accepting a quest to count items already in inventory,
+ * or when re-syncing quest progress with inventory state.
+ */
+export function syncCollectObjectivesWithInventory(
+  activeQuests: ReadonlyArray<QuestProgress>,
+  getItemQuantity: (itemId: string) => number,
+): ReadonlyArray<QuestProgress> {
+  let updated = activeQuests
+
+  for (const progress of activeQuests) {
+    if (progress.status !== 'active') continue
+
+    const quest = getQuest(progress.questId)
+    if (!quest) continue
+
+    for (const obj of quest.objectives) {
+      if (obj.type === 'collect') {
+        const currentInventoryCount = getItemQuantity(obj.targetId)
+        const currentProgress = progress.objectiveProgress[obj.objectiveId] ?? 0
+
+        // Only update if inventory count is higher than current progress
+        if (currentInventoryCount > currentProgress) {
+          const increment = currentInventoryCount - currentProgress
+          updated = updateQuestProgress(updated, progress.questId, obj.objectiveId, increment)
+        }
+      }
+    }
+  }
+
+  return checkAndMarkComplete(updated)
+}
+
 export function trackBossDefeat(
   activeQuests: ReadonlyArray<QuestProgress>,
   bossId: string,

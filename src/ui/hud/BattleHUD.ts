@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import type { BattleCombatant, Ability, InventorySlot, MonsterElement } from '../../models/types'
 import { GAME_WIDTH, GAME_HEIGHT, COLORS, TEXT_STYLES, DEPTH } from '../../config'
 import { drawElementIndicator, ELEMENT_INDICATORS } from '../../utils/accessibility'
+import { TargetSelector, type TargetPosition } from './TargetSelector'
 
 export type CommandChoice = 'attack' | 'ability' | 'defend' | 'item' | 'capture' | 'flee'
 
@@ -11,6 +12,7 @@ interface HudElements {
   readonly enemyPanel: Phaser.GameObjects.Container
   readonly messageBox: Phaser.GameObjects.Container
   readonly abilityMenu: Phaser.GameObjects.Container | null
+  readonly activeTurnIndicator: Phaser.GameObjects.Container | null
 }
 
 export class BattleHUD {
@@ -18,15 +20,19 @@ export class BattleHUD {
   private elements: HudElements
   private onCommand: ((choice: CommandChoice, targetId?: string, abilityId?: string) => void) | null = null
   private messageText!: Phaser.GameObjects.Text
+  private targetSelector: TargetSelector
+  private activeCombatantId: string | null = null
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene
+    this.targetSelector = new TargetSelector(scene)
     this.elements = {
       commandMenu: this.createCommandMenu(),
       playerPanel: this.createPlayerPanel(),
       enemyPanel: this.createEnemyPanel(),
       messageBox: this.createMessageBox(),
       abilityMenu: null,
+      activeTurnIndicator: null,
     }
     this.hideAll()
   }
@@ -518,12 +524,77 @@ export class BattleHUD {
     })
   }
 
+  showTargetSelection(
+    validTargets: ReadonlyArray<BattleCombatant>,
+    targetPositions: ReadonlyArray<TargetPosition>,
+    onSelect: (targetId: string) => void,
+    onCancel: () => void,
+  ): void {
+    // Keep command menu visible so user can click Attack/Ability again for quick targeting
+    this.hideAbilityMenu()
+    this.targetSelector.show(validTargets, targetPositions, onSelect, onCancel)
+  }
+
+  hideTargetSelection(): void {
+    this.targetSelector.hide()
+  }
+
+  showActiveTurnIndicator(combatant: BattleCombatant, x: number, y: number): void {
+    this.hideActiveTurnIndicator()
+
+    const container = this.scene.add.container(x, y - 100)
+    container.setDepth(DEPTH.UI + 1)
+
+    // "Choose action for" text
+    const nameText = this.scene.add.text(0, 0, `${combatant.name}'s turn`, {
+      ...TEXT_STYLES.BODY,
+      fontSize: '16px',
+      backgroundColor: '#16213e',
+      padding: { x: 12, y: 8 },
+    })
+    nameText.setOrigin(0.5)
+    container.add(nameText)
+
+    // Pulsing arrow pointing down
+    const arrow = this.scene.add.graphics()
+    arrow.fillStyle(COLORS.WARNING, 1)
+    arrow.fillTriangle(0, 30, -10, 15, 10, 15)
+    container.add(arrow)
+
+    // Add pulse animation
+    this.scene.tweens.add({
+      targets: arrow,
+      alpha: 0.4,
+      duration: 600,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    })
+
+    this.elements = { ...this.elements, activeTurnIndicator: container }
+    this.activeCombatantId = combatant.combatantId
+  }
+
+  hideActiveTurnIndicator(): void {
+    if (this.elements.activeTurnIndicator) {
+      this.elements.activeTurnIndicator.destroy()
+      this.elements = { ...this.elements, activeTurnIndicator: null }
+    }
+    this.activeCombatantId = null
+  }
+
+  getActiveCombatantId(): string | null {
+    return this.activeCombatantId
+  }
+
   destroy(): void {
     this.elements.commandMenu.destroy()
     this.elements.playerPanel.destroy()
     this.elements.enemyPanel.destroy()
     this.elements.messageBox.destroy()
     this.hideAbilityMenu()
+    this.hideActiveTurnIndicator()
+    this.targetSelector.destroy()
   }
 
   private hideAll(): void {

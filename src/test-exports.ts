@@ -9,6 +9,7 @@ import * as BreedingSystem from './systems/BreedingSystem'
 import * as WorldSystem from './systems/WorldSystem'
 import * as TraitSystem from './systems/TraitSystem'
 import * as CombatSystem from './systems/CombatSystem'
+import * as TargetingSystem from './systems/TargetingSystem'
 import * as Constants from './models/constants'
 
 // Type declaration for global test exports
@@ -20,6 +21,7 @@ declare global {
       WorldSystem: typeof WorldSystem
       TraitSystem: typeof TraitSystem
       CombatSystem: typeof CombatSystem
+      TargetingSystem: typeof TargetingSystem
       Constants: typeof Constants
     }
   }
@@ -33,6 +35,7 @@ if (import.meta.env.DEV) {
     WorldSystem,
     TraitSystem,
     CombatSystem,
+    TargetingSystem,
     Constants,
   }
 }

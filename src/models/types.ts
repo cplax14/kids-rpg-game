@@ -77,7 +77,15 @@ export interface PlayerCharacter {
 // ── Abilities ──
 
 export type AbilityType = 'physical' | 'magical' | 'status' | 'healing'
-export type TargetType = 'single_enemy' | 'all_enemies' | 'self' | 'single_ally' | 'all_allies'
+export type TargetType =
+  | 'single_enemy'
+  | 'all_enemies'
+  | 'self'
+  | 'single_ally'
+  | 'all_allies'
+  | 'adjacent_enemies' // Hit target + adjacent enemies (2-3 targets)
+  | 'random_enemies_2' // Hit 2 random enemies
+  | 'random_enemies_3' // Hit 3 random enemies
 
 export interface Ability {
   readonly abilityId: string
@@ -247,7 +255,8 @@ export type BattleActionType = 'attack' | 'ability' | 'item' | 'capture' | 'flee
 export interface BattleAction {
   readonly type: BattleActionType
   readonly actorId: string
-  readonly targetId: string | null
+  readonly targetId: string | null // Primary target for single-target actions
+  readonly targetIds: ReadonlyArray<string> // All resolved targets for multi-target actions
   readonly abilityId: string | null
   readonly itemId: string | null
 }

@@ -23,8 +23,9 @@ import {
   acceptQuest,
   completeQuest,
   trackNpcTalk,
+  syncCollectObjectivesWithInventory,
 } from '../systems/QuestSystem'
-import { addItem } from '../systems/InventorySystem'
+import { addItem, getItemQuantity } from '../systems/InventorySystem'
 import { getEquipment } from '../systems/EquipmentSystem'
 import { EventBus } from '../events/EventBus'
 import { GAME_EVENTS } from '../events/GameEvents'
@@ -486,7 +487,13 @@ export class DialogScene extends Phaser.Scene {
 
     try {
       const state = getGameState(this)
-      const newActiveQuests = acceptQuest(quest, state.activeQuests)
+      let newActiveQuests = acceptQuest(quest, state.activeQuests)
+
+      // Sync collect objectives with current inventory (for items already owned)
+      newActiveQuests = syncCollectObjectivesWithInventory(
+        newActiveQuests,
+        (itemId) => getItemQuantity(state.inventory, itemId),
+      )
 
       setGameState(this, updateActiveQuests(state, newActiveQuests))
 

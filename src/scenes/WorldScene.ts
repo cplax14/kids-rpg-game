@@ -57,7 +57,7 @@ import {
 } from '../systems/GameStateManager'
 import { createSquadCombatants } from '../systems/SquadSystem'
 import { discoverMultipleSpecies } from '../systems/BestiarySystem'
-import { addItem, loadItemData } from '../systems/InventorySystem'
+import { addItem, loadItemData, getItemQuantity } from '../systems/InventorySystem'
 import { loadEquipmentData } from '../systems/EquipmentSystem'
 import { loadDialogData } from '../systems/DialogSystem'
 import { loadTraitData } from '../systems/TraitSystem'
@@ -98,6 +98,7 @@ import { autoSave } from '../systems/SaveSystem'
 import {
   loadQuestData,
   trackAreaExploration,
+  trackItemCollection,
   getQuestsForNpc,
 } from '../systems/QuestSystem'
 import { loadAchievementData } from '../systems/AchievementSystem'
@@ -247,9 +248,27 @@ export class WorldScene extends Phaser.Scene {
     }
     EventBus.on(GAME_EVENTS.FAST_TRAVEL_REQUESTED, fastTravelHandler, this)
 
-    // Clean up event listener when scene shuts down
+    // Listen for item additions to track quest progress
+    const itemAddedHandler = (payload?: unknown) => {
+      if (payload && typeof payload === 'object' && 'itemId' in payload && 'quantity' in payload) {
+        const { itemId, quantity } = payload as { itemId: string; quantity: number }
+        try {
+          const state = getGameState(this)
+          const updatedQuests = trackItemCollection(state.activeQuests, itemId, quantity)
+          if (updatedQuests !== state.activeQuests) {
+            setGameState(this, updateActiveQuests(state, updatedQuests))
+          }
+        } catch {
+          // No game state yet
+        }
+      }
+    }
+    EventBus.on(GAME_EVENTS.ITEM_ADDED, itemAddedHandler, this)
+
+    // Clean up event listeners when scene shuts down
     this.events.once('shutdown', () => {
       EventBus.off(GAME_EVENTS.FAST_TRAVEL_REQUESTED, fastTravelHandler, this)
+      EventBus.off(GAME_EVENTS.ITEM_ADDED, itemAddedHandler, this)
     })
   }
 

@@ -38,6 +38,7 @@ import {
   trackBossDefeat,
   trackAreaExploration,
   trackNpcTalk,
+  syncCollectObjectivesWithInventory,
   getQuestProgressPercent,
   getObjectiveProgress,
   getTierForLevel,
@@ -495,6 +496,46 @@ describe('QuestSystem', () => {
       }]
       const updated = trackNpcTalk(initial, 'breeder')
       expect(updated[0].objectiveProgress['obj-talk']).toBe(1)
+    })
+
+    it('syncs collect objectives with current inventory', () => {
+      const initial: QuestProgress[] = [{
+        questId: 'multi-objective',
+        status: 'active',
+        objectiveProgress: { 'obj-collect': 0, 'obj-explore': 0 },
+        acceptedAt: new Date().toISOString(),
+        completedAt: null,
+      }]
+      // Mock inventory that has 5 soft-fur items (more than the 3 required)
+      const mockGetItemQuantity = (itemId: string) => {
+        if (itemId === 'soft-fur') return 5
+        return 0
+      }
+      const updated = syncCollectObjectivesWithInventory(initial, mockGetItemQuantity)
+      // Progress is capped at requiredCount (3), even though inventory has 5
+      expect(updated[0].objectiveProgress['obj-collect']).toBe(3)
+      // Non-collect objective should remain unchanged
+      expect(updated[0].objectiveProgress['obj-explore']).toBe(0)
+      // Quest still active since explore objective not done
+      expect(updated[0].status).toBe('active')
+    })
+
+    it('does not reduce collect progress below current value', () => {
+      const initial: QuestProgress[] = [{
+        questId: 'multi-objective',
+        status: 'active',
+        objectiveProgress: { 'obj-collect': 8, 'obj-explore': 0 },
+        acceptedAt: new Date().toISOString(),
+        completedAt: null,
+      }]
+      // Inventory has fewer items than progress (items were used/sold)
+      const mockGetItemQuantity = (itemId: string) => {
+        if (itemId === 'soft-fur') return 3
+        return 0
+      }
+      const updated = syncCollectObjectivesWithInventory(initial, mockGetItemQuantity)
+      // Should not reduce progress
+      expect(updated[0].objectiveProgress['obj-collect']).toBe(8)
     })
 
     it('auto-marks quest as complete when all objectives done', () => {

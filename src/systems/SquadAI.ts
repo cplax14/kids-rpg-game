@@ -25,6 +25,7 @@ export function getSquadMonsterAction(
         type: 'ability',
         actorId: monster.combatantId,
         targetId: monster.combatantId,
+        targetIds: [],
         abilityId: healAbility.abilityId,
         itemId: null,
       }
@@ -48,6 +49,7 @@ export function getSquadMonsterAction(
         type: 'ability',
         actorId: monster.combatantId,
         targetId: target.combatantId,
+        targetIds: [],
         abilityId: healAllyAbility.abilityId,
         itemId: null,
       }
@@ -74,6 +76,7 @@ export function getSquadMonsterAction(
       type: 'ability',
       actorId: monster.combatantId,
       targetId: bestAbility.targetType === 'all_enemies' ? null : target.combatantId,
+      targetIds: [],
       abilityId: bestAbility.abilityId,
       itemId: null,
     }
@@ -85,6 +88,7 @@ export function getSquadMonsterAction(
     type: 'attack',
     actorId: monster.combatantId,
     targetId: target.combatantId,
+    targetIds: [],
     abilityId: null,
     itemId: null,
   }
@@ -114,6 +118,7 @@ function createDefendAction(monster: BattleCombatant): BattleAction {
     type: 'defend',
     actorId: monster.combatantId,
     targetId: null,
+    targetIds: [],
     abilityId: null,
     itemId: null,
   }

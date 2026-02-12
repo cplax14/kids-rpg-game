@@ -501,5 +501,70 @@
     "targetType": "single_enemy",
     "statusEffect": null,
     "animation": "hurricane"
+  },
+  {
+    "abilityId": "cleave",
+    "name": "Cleave",
+    "description": "A wide slash that hits the target and adjacent enemies.",
+    "element": "neutral",
+    "type": "physical",
+    "power": 50,
+    "accuracy": 85,
+    "mpCost": 5,
+    "targetType": "adjacent_enemies",
+    "statusEffect": null,
+    "animation": "cleave"
+  },
+  {
+    "abilityId": "scatter-shot",
+    "name": "Scatter Shot",
+    "description": "Fires multiple projectiles at two random enemies.",
+    "element": "neutral",
+    "type": "physical",
+    "power": 35,
+    "accuracy": 80,
+    "mpCost": 6,
+    "targetType": "random_enemies_2",
+    "statusEffect": null,
+    "animation": "scatter-shot"
+  },
+  {
+    "abilityId": "triple-strike",
+    "name": "Triple Strike",
+    "description": "A swift attack that hits three random foes.",
+    "element": "neutral",
+    "type": "physical",
+    "power": 30,
+    "accuracy": 75,
+    "mpCost": 8,
+    "targetType": "random_enemies_3",
+    "statusEffect": null,
+    "animation": "triple-strike"
+  },
+  {
+    "abilityId": "flame-sweep",
+    "name": "Flame Sweep",
+    "description": "Sweeps fire across the target and nearby enemies.",
+    "element": "fire",
+    "type": "magical",
+    "power": 45,
+    "accuracy": 85,
+    "mpCost": 7,
+    "targetType": "adjacent_enemies",
+    "statusEffect": null,
+    "animation": "flame-sweep"
+  },
+  {
+    "abilityId": "chain-lightning",
+    "name": "Chain Lightning",
+    "description": "Lightning arcs between two enemies.",
+    "element": "wind",
+    "type": "magical",
+    "power": 40,
+    "accuracy": 90,
+    "mpCost": 6,
+    "targetType": "random_enemies_2",
+    "statusEffect": null,
+    "animation": "chain-lightning"
   }
 ]
