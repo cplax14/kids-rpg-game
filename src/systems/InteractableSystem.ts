@@ -2,6 +2,7 @@ import type {
   ChestObject,
   SignObject,
   FountainObject,
+  WaypointObject,
   TransitionZone,
   ItemDrop,
   InteractableObject,
@@ -177,6 +178,10 @@ export function isFountainObject(obj: InteractableObject): obj is FountainObject
   return obj.type === 'fountain'
 }
 
+export function isWaypointObject(obj: InteractableObject): obj is WaypointObject {
+  return obj.type === 'waypoint'
+}
+
 export function getInteractableDescription(obj: InteractableObject): string {
   switch (obj.type) {
     case 'chest':
@@ -185,6 +190,8 @@ export function getInteractableDescription(obj: InteractableObject): string {
       return 'A wooden sign'
     case 'fountain':
       return 'A healing fountain'
+    case 'waypoint':
+      return 'A magical waypoint'
     default:
       return 'Something interesting'
   }

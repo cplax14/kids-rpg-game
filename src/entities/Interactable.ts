@@ -6,12 +6,14 @@ const INTERACTABLE_COLORS: Readonly<Record<InteractableType, number>> = {
   chest: 0xffd54f,
   sign: 0x8d6e63,
   fountain: 0x4fc3f7,
+  waypoint: 0x9c27b0,
 }
 
 const INTERACTABLE_SIZE: Readonly<Record<InteractableType, { width: number; height: number }>> = {
   chest: { width: 24, height: 20 },
   sign: { width: 20, height: 28 },
   fountain: { width: 32, height: 32 },
+  waypoint: { width: 40, height: 40 },
 }
 
 const INTERACTION_RADIUS = 1.5 * TILE_SIZE
@@ -69,6 +71,9 @@ export class Interactable {
         break
       case 'fountain':
         this.drawFountain(color, x, y, halfW, halfH)
+        break
+      case 'waypoint':
+        this.drawWaypoint(color, x, y, halfW, halfH)
         break
     }
   }
@@ -142,6 +147,43 @@ export class Interactable {
     this.sprite.fillCircle(x - 6, y - 4, 2)
     this.sprite.fillCircle(x + 6, y - 2, 2)
     this.sprite.fillCircle(x, y, 3)
+  }
+
+  private drawWaypoint(color: number, x: number, y: number, halfW: number, halfH: number): void {
+    // Stone platform base
+    this.sprite.fillStyle(0x5d4e37, 1)
+    this.sprite.fillEllipse(x, y + halfH - 4, halfW * 1.8, halfH * 0.5)
+
+    // Stone platform top
+    this.sprite.fillStyle(0x7a6a5a, 1)
+    this.sprite.fillEllipse(x, y + halfH - 8, halfW * 1.6, halfH * 0.4)
+
+    // Outer glow ring
+    this.sprite.fillStyle(color, 0.3)
+    this.sprite.fillCircle(x, y - 4, halfW * 0.9)
+
+    // Portal circle (main glow)
+    this.sprite.fillStyle(color, 0.6)
+    this.sprite.fillCircle(x, y - 4, halfW * 0.7)
+
+    // Inner light core
+    this.sprite.fillStyle(0xe1bee7, 0.8)
+    this.sprite.fillCircle(x, y - 4, halfW * 0.4)
+
+    // Bright center
+    this.sprite.fillStyle(0xffffff, 0.9)
+    this.sprite.fillCircle(x, y - 4, halfW * 0.2)
+
+    // Sparkle particles
+    this.sprite.fillStyle(0xce93d8, 0.7)
+    this.sprite.fillCircle(x - 8, y - 12, 2)
+    this.sprite.fillCircle(x + 10, y - 8, 2)
+    this.sprite.fillCircle(x - 6, y + 4, 1.5)
+    this.sprite.fillCircle(x + 8, y, 1.5)
+
+    // Portal ring outline
+    this.sprite.lineStyle(2, 0xba68c8, 0.8)
+    this.sprite.strokeCircle(x, y - 4, halfW * 0.7)
   }
 
   showPrompt(): void {

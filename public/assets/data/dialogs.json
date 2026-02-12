@@ -438,5 +438,67 @@
         "isEnd": true
       }
     ]
+  },
+  {
+    "treeId": "fast-travel-return",
+    "startNodeId": "confirm",
+    "nodes": [
+      {
+        "nodeId": "confirm",
+        "speaker": "Waypoint",
+        "text": "This magical waypoint pulses with energy. Do you want to travel back to Sunlit Village?",
+        "choices": [
+          { "text": "Yes, take me there", "nextNodeId": null, "action": "fast_travel", "actionData": "sunlit-village" },
+          { "text": "No, stay here", "nextNodeId": "cancel" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "cancel",
+        "speaker": "Waypoint",
+        "text": "The waypoint's glow fades as you step back.",
+        "choices": [],
+        "isEnd": true
+      }
+    ]
+  },
+  {
+    "treeId": "fast-travel-hub",
+    "startNodeId": "select",
+    "nodes": [
+      {
+        "nodeId": "select",
+        "speaker": "Travel Hub",
+        "text": "The village waypoint hums with ancient power. Where would you like to travel?",
+        "choices": [
+          { "text": "Crystal Caves", "nextNodeId": null, "action": "fast_travel", "actionData": "crystal-caves" },
+          { "text": "Volcanic Peak", "nextNodeId": null, "action": "fast_travel", "actionData": "volcanic-peak" },
+          { "text": "Seaside Grotto", "nextNodeId": null, "action": "fast_travel", "actionData": "seaside-grotto" },
+          { "text": "Shadow Marsh", "nextNodeId": null, "action": "fast_travel", "actionData": "shadow-marsh" },
+          { "text": "Stay here", "nextNodeId": "cancel" }
+        ],
+        "isEnd": false
+      },
+      {
+        "nodeId": "cancel",
+        "speaker": "Travel Hub",
+        "text": "The waypoint's glow fades as you step back.",
+        "choices": [],
+        "isEnd": true
+      }
+    ]
+  },
+  {
+    "treeId": "fast-travel-hub-unavailable",
+    "startNodeId": "unavailable",
+    "nodes": [
+      {
+        "nodeId": "unavailable",
+        "speaker": "Travel Hub",
+        "text": "The waypoint flickers weakly. It seems to require more magical energy to activate... Perhaps defeating the guardian of Whispering Forest would restore its power?",
+        "choices": [],
+        "isEnd": true
+      }
+    ]
   }
 ]

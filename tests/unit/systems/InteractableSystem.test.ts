@@ -3,6 +3,7 @@ import type {
   ChestObject,
   SignObject,
   FountainObject,
+  WaypointObject,
   TransitionZone,
   Item,
   Inventory,
@@ -67,6 +68,7 @@ import {
   isChestObject,
   isSignObject,
   isFountainObject,
+  isWaypointObject,
   getInteractableDescription,
 } from '../../../src/systems/InteractableSystem'
 
@@ -107,6 +109,23 @@ const mockTransition: TransitionZone = {
   triggerBounds: { x: 0, y: 0, width: 32, height: 32 },
   requiredLevel: 5,
   requiredBossDefeated: 'test-boss',
+}
+
+const mockReturnWaypoint: WaypointObject = {
+  objectId: 'waypoint-1',
+  type: 'waypoint',
+  position: { x: 400, y: 400 },
+  isOneTime: false,
+  waypointType: 'return',
+  targetAreaId: 'sunlit-village',
+}
+
+const mockHubWaypoint: WaypointObject = {
+  objectId: 'waypoint-2',
+  type: 'waypoint',
+  position: { x: 500, y: 500 },
+  isOneTime: false,
+  waypointType: 'hub',
 }
 
 const createMockGameState = (overrides: Partial<GameState> = {}): GameState => ({
@@ -291,6 +310,13 @@ describe('InteractableSystem', () => {
       expect(isFountainObject(mockFountain)).toBe(true)
       expect(isFountainObject(mockChest)).toBe(false)
     })
+
+    it('should identify waypoint objects', () => {
+      expect(isWaypointObject(mockReturnWaypoint)).toBe(true)
+      expect(isWaypointObject(mockHubWaypoint)).toBe(true)
+      expect(isWaypointObject(mockChest)).toBe(false)
+      expect(isWaypointObject(mockFountain)).toBe(false)
+    })
   })
 
   describe('getInteractableDescription', () => {
@@ -298,6 +324,8 @@ describe('InteractableSystem', () => {
       expect(getInteractableDescription(mockChest)).toContain('chest')
       expect(getInteractableDescription(mockSign)).toContain('sign')
       expect(getInteractableDescription(mockFountain)).toContain('fountain')
+      expect(getInteractableDescription(mockReturnWaypoint)).toContain('waypoint')
+      expect(getInteractableDescription(mockHubWaypoint)).toContain('waypoint')
     })
   })
 })

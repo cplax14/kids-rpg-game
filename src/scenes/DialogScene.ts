@@ -30,6 +30,7 @@ import { EventBus } from '../events/EventBus'
 import { GAME_EVENTS } from '../events/GameEvents'
 import { playSfx, SFX_KEYS } from '../systems/AudioSystem'
 import { QuestCelebration } from '../ui/overlays/QuestCelebration'
+import type { FastTravelDestination } from '../systems/FastTravelSystem'
 
 interface DialogSceneData {
   readonly dialogTreeId: string
@@ -38,6 +39,7 @@ interface DialogSceneData {
   readonly npcId?: string
   readonly messages?: ReadonlyArray<string>
   readonly parentSceneKey?: string
+  readonly unlockedDestinations?: ReadonlyArray<FastTravelDestination>
 }
 
 const TYPEWRITER_DELAY = 30
@@ -57,6 +59,8 @@ export class DialogScene extends Phaser.Scene {
   private fullText: string = ''
   private typewriterTimer: Phaser.Time.TimerEvent | null = null
   private pendingCelebration: { questId: string } | null = null
+  private pendingFastTravel: string | null = null
+  private unlockedDestinations: ReadonlyArray<FastTravelDestination> = []
 
   constructor() {
     super({ key: SCENE_KEYS.DIALOG })
@@ -68,6 +72,8 @@ export class DialogScene extends Phaser.Scene {
     this.npcId = data.npcId ?? ''
     this.parentSceneKey = data.parentSceneKey ?? SCENE_KEYS.WORLD
     this.pendingCelebration = null
+    this.pendingFastTravel = null
+    this.unlockedDestinations = data.unlockedDestinations ?? []
 
     // Track NPC talk for quest objectives
     if (this.npcId) {
@@ -212,7 +218,27 @@ export class DialogScene extends Phaser.Scene {
     }
 
     // Filter choices based on quest completion status
-    const filteredChoices = this.filterQuestChoices(this.currentNode.choices)
+    let filteredChoices = this.filterQuestChoices(this.currentNode.choices)
+
+    // If we have unlocked destinations info, filter hub choices
+    if (this.unlockedDestinations.length > 0) {
+      filteredChoices = this.filterHubChoices(filteredChoices)
+
+      // If no destinations available after filtering, show a message
+      const hasFastTravelChoices = filteredChoices.some((c) => c.action === 'fast_travel')
+      if (!hasFastTravelChoices && this.currentNode.choices.some((c) => c.action === 'fast_travel')) {
+        // All fast travel options were filtered out - add a "no destinations" option
+        filteredChoices = [
+          {
+            text: 'No destinations unlocked yet',
+            nextNodeId: 'cancel',
+            action: undefined,
+            actionData: undefined,
+          },
+        ]
+      }
+    }
+
     this.showChoices(filteredChoices)
   }
 
@@ -446,6 +472,11 @@ export class DialogScene extends Phaser.Scene {
         this.handleCompleteQuest(data)
         break
       }
+      case 'fast_travel': {
+        if (!data) break
+        this.pendingFastTravel = data
+        break
+      }
     }
   }
 
@@ -610,6 +641,24 @@ export class DialogScene extends Phaser.Scene {
       }
     }
 
+    // Check if fast travel was requested
+    if (this.pendingFastTravel) {
+      const targetAreaId = this.pendingFastTravel
+      this.pendingFastTravel = null
+
+      // Resume parent scene first
+      const parentScene = this.scene.get(this.parentSceneKey)
+      if (parentScene) {
+        this.scene.resume(this.parentSceneKey)
+      }
+
+      // Emit fast travel event (WorldScene will handle the actual transition)
+      EventBus.emit(GAME_EVENTS.FAST_TRAVEL_REQUESTED, { targetAreaId })
+
+      this.scene.stop()
+      return
+    }
+
     // Resume the parent scene (WorldScene or BattleScene)
     const parentScene = this.scene.get(this.parentSceneKey)
     if (parentScene) {
@@ -617,5 +666,25 @@ export class DialogScene extends Phaser.Scene {
     }
 
     this.scene.stop()
+  }
+
+  /**
+   * Filter hub dialog choices to only show unlocked destinations
+   */
+  private filterHubChoices(choices: ReadonlyArray<DialogChoice>): ReadonlyArray<DialogChoice> {
+    if (this.unlockedDestinations.length === 0) {
+      return choices
+    }
+
+    const unlockedAreaIds = new Set(this.unlockedDestinations.map((d) => d.areaId))
+
+    return choices.filter((choice) => {
+      // If it's a fast_travel action, check if destination is unlocked
+      if (choice.action === 'fast_travel' && choice.actionData) {
+        return unlockedAreaIds.has(choice.actionData)
+      }
+      // Keep non-fast-travel choices (like "Stay here")
+      return true
+    })
   }
 }
