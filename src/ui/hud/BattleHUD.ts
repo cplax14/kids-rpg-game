@@ -683,7 +683,7 @@ export class BattleHUD {
 
   private createMessageBox(): Phaser.GameObjects.Container {
     // Position in upper right area (raised to avoid overlapping turn indicator)
-    const container = this.scene.add.container(GAME_WIDTH - 620, 225)
+    const container = this.scene.add.container(GAME_WIDTH - 620, 180)
     container.setDepth(DEPTH.UI + 10)
 
     const bg = this.scene.add.graphics()
