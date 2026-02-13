@@ -92,7 +92,7 @@ import {
 } from '../systems/FastTravelSystem'
 import { generateMap, getCollisionTiles } from '../utils/mapGenerator'
 import { initAudioSystem, playMusic, crossfadeMusic, playSfx, stopMusic, MUSIC_KEYS, SFX_KEYS } from '../systems/AudioSystem'
-import { loadTutorialData, checkAndShowTutorial, isTutorialComplete } from '../systems/TutorialSystem'
+import { loadTutorialData, checkAndShowTutorial, isTutorialComplete, resetAllTutorials } from '../systems/TutorialSystem'
 import { initDebug } from '../utils/debug'
 import { autoSave } from '../systems/SaveSystem'
 import {
@@ -189,6 +189,8 @@ export class WorldScene extends Phaser.Scene {
     // (not when loading a save - data.newGame is false when loading)
     if (data.newGame) {
       this.giveStarterContent()
+      // Reset tutorial completion state so first battle tutorials trigger again
+      resetAllTutorials()
     }
 
     // Apply boss defeat rewards if returning from boss battle
