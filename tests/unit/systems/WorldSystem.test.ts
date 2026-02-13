@@ -324,6 +324,32 @@ describe('WorldSystem', () => {
       expect(gotTwoEnemies).toBe(true)
       expect(gotOneEnemy).toBe(true)
     })
+
+    it('should default to normal behavior when options not provided', () => {
+      // Without options, should behave like isFirstBattle: false
+      let gotTwoEnemies = false
+
+      for (let i = 0; i < 100; i++) {
+        const encounter = generateAreaEncounter('test-area')
+        if (encounter?.combatants.length === 2) {
+          gotTwoEnemies = true
+          break
+        }
+      }
+
+      // Should be possible to get 2 enemies without options
+      expect(gotTwoEnemies).toBe(true)
+    })
+
+    it('should generate capturable enemies for first battle', () => {
+      const encounter = generateAreaEncounter('test-area', { isFirstBattle: true })
+      expect(encounter).not.toBeNull()
+
+      // All enemies should be capturable
+      encounter?.combatants.forEach((combatant) => {
+        expect(combatant.capturable).toBe(true)
+      })
+    })
   })
 
   describe('Boss Encounter', () => {
