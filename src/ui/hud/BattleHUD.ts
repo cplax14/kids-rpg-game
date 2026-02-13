@@ -15,6 +15,13 @@ interface HudElements {
   readonly activeTurnIndicator: Phaser.GameObjects.Container | null
 }
 
+interface ButtonRef {
+  readonly x: number
+  readonly y: number
+  readonly width: number
+  readonly height: number
+}
+
 export class BattleHUD {
   private scene: Phaser.Scene
   private elements: HudElements
@@ -22,6 +29,9 @@ export class BattleHUD {
   private messageText!: Phaser.GameObjects.Text
   private targetSelector: TargetSelector
   private activeCombatantId: string | null = null
+  private commandButtonRefs: Map<CommandChoice, ButtonRef> = new Map()
+  private highlightGraphics: Phaser.GameObjects.Graphics | null = null
+  private highlightTween: Phaser.Tweens.Tween | null = null
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene
@@ -634,6 +644,14 @@ export class BattleHUD {
       const x = 15 + col * (btnWidth + 10)
       const y = 12 + row * btnSpacing
 
+      // Store button reference for highlighting
+      this.commandButtonRefs.set(cmd.command, {
+        x,
+        y,
+        width: btnWidth,
+        height: btnHeight,
+      })
+
       const btnBg = this.scene.add.graphics()
       btnBg.fillStyle(COLORS.SECONDARY, 0.4)
       btnBg.fillRoundedRect(x, y, btnWidth, btnHeight, 8)
@@ -874,6 +892,100 @@ export class BattleHUD {
         container.add(hpFill)
       }
     })
+  }
+
+  /**
+   * Highlight a command button with a pulsing glow effect
+   * Used for tutorial guidance (e.g., highlighting Capture button)
+   */
+  highlightButton(command: CommandChoice): void {
+    this.clearHighlight()
+
+    const buttonRef = this.commandButtonRefs.get(command)
+    if (!buttonRef) return
+
+    // Get command menu position
+    const menuX = this.elements.commandMenu.x
+    const menuY = this.elements.commandMenu.y
+
+    // Create highlight graphics
+    this.highlightGraphics = this.scene.add.graphics()
+    this.highlightGraphics.setDepth(DEPTH.UI + 5)
+
+    const { x, y, width, height } = buttonRef
+    const padding = 6
+
+    // Draw initial highlight
+    const drawHighlight = (alpha: number, scale: number): void => {
+      if (!this.highlightGraphics) return
+      this.highlightGraphics.clear()
+
+      // Outer glow
+      this.highlightGraphics.lineStyle(4 * scale, COLORS.GOLD, alpha * 0.6)
+      this.highlightGraphics.strokeRoundedRect(
+        menuX + x - padding * scale,
+        menuY + y - padding * scale,
+        width + padding * 2 * scale,
+        height + padding * 2 * scale,
+        12,
+      )
+
+      // Inner glow
+      this.highlightGraphics.lineStyle(2, COLORS.WARNING, alpha)
+      this.highlightGraphics.strokeRoundedRect(
+        menuX + x - padding / 2,
+        menuY + y - padding / 2,
+        width + padding,
+        height + padding,
+        10,
+      )
+    }
+
+    drawHighlight(1, 1)
+
+    // Create pulsing animation
+    const pulseObj = { alpha: 1, scale: 1 }
+    this.highlightTween = this.scene.tweens.add({
+      targets: pulseObj,
+      alpha: 0.5,
+      scale: 1.2,
+      duration: 600,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+      onUpdate: () => drawHighlight(pulseObj.alpha, pulseObj.scale),
+    })
+  }
+
+  /**
+   * Remove the button highlight effect
+   */
+  clearHighlight(): void {
+    if (this.highlightTween) {
+      this.highlightTween.stop()
+      this.highlightTween = null
+    }
+    if (this.highlightGraphics) {
+      this.highlightGraphics.destroy()
+      this.highlightGraphics = null
+    }
+  }
+
+  /**
+   * Get the screen position of a command button center
+   * Used for positioning tooltips near buttons
+   */
+  getButtonPosition(command: CommandChoice): { x: number; y: number } | null {
+    const buttonRef = this.commandButtonRefs.get(command)
+    if (!buttonRef) return null
+
+    const menuX = this.elements.commandMenu.x
+    const menuY = this.elements.commandMenu.y
+
+    return {
+      x: menuX + buttonRef.x + buttonRef.width / 2,
+      y: menuY + buttonRef.y + buttonRef.height / 2,
+    }
   }
 
   private getElementColor(element: string): number {

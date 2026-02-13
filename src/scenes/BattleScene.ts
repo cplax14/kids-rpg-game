@@ -1435,13 +1435,9 @@ export class BattleScene extends Phaser.Scene {
     // Show the capture hint!
     this.captureHintShown = true
 
-    // Calculate position of the Capture button in the command menu
-    // Command menu is at (20, GAME_HEIGHT - 260)
-    // Capture button is at index 3: col=1, row=1
-    // x = 15 + 1 * (125 + 10) = 150, y = 12 + 1 * 60 = 72
-    // Button center: x + 125/2 = 212.5, y + 52/2 = 98
-    const captureButtonX = 20 + 150 + 62.5 // menu X + button X + half width
-    const captureButtonY = GAME_HEIGHT - 260 + 72 + 26 // menu Y + button Y + half height
+    // Get the Capture button position from the HUD
+    const buttonPos = this.hud.getButtonPosition('capture')
+    if (!buttonPos) return
 
     // Delay slightly so it appears after the damage animation
     this.time.delayedCall(800, () => {
@@ -1450,18 +1446,22 @@ export class BattleScene extends Phaser.Scene {
         this.activeTooltip.destroy()
       }
 
+      // Highlight the Capture button
+      this.hud.highlightButton('capture')
+
       this.activeTooltip = new BattleTooltip(this, {
         message: "The monster is getting tired! Try using Capture to make it your friend!",
-        targetX: captureButtonX,
-        targetY: captureButtonY,
+        targetX: buttonPos.x,
+        targetY: buttonPos.y,
         position: 'above',
         autoDismissMs: 8000,
         showArrow: true,
-        pulseTarget: true,
+        pulseTarget: false, // HUD provides its own highlight
       })
 
       this.activeTooltip.setOnDismiss(() => {
         this.activeTooltip = null
+        this.hud.clearHighlight()
       })
     })
   }
