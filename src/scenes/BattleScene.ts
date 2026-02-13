@@ -1414,15 +1414,16 @@ export class BattleScene extends Phaser.Scene {
   }
 
   /**
-   * Check if we should show the capture hint tooltip during first battle
+   * Check if we should show the capture hint tooltip
    * Shows when an enemy's HP drops below 50% for the first time
+   * Only shows until player has successfully captured their first monster
    */
   private checkAndShowCaptureHint(targetId: string): void {
     // Only show once per battle
     if (this.captureHintShown) return
 
-    // Only show during first battle (tutorial not complete)
-    if (isTutorialComplete('tutorial-first-battle')) return
+    // Only show until player has captured their first monster
+    if (isTutorialComplete('tutorial-first-capture')) return
 
     // Find the enemy that was just hit
     const enemy = this.battle.enemySquad.find((e) => e.combatantId === targetId)
