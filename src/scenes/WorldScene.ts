@@ -53,6 +53,8 @@ import {
   updateCurrentArea,
   updateActiveQuests,
   addVisitedArea,
+  updateAchievementStats,
+  updateAchievements,
   type GameState,
 } from '../systems/GameStateManager'
 import { createSquadCombatants } from '../systems/SquadSystem'
@@ -101,7 +103,11 @@ import {
   trackItemCollection,
   getQuestsForNpc,
 } from '../systems/QuestSystem'
-import { loadAchievementData } from '../systems/AchievementSystem'
+import {
+  loadAchievementData,
+  incrementStat,
+  checkAndUnlockAchievements,
+} from '../systems/AchievementSystem'
 import type { QuestDefinition, AchievementDefinition } from '../models/types'
 import { QuestTrackerHUD } from '../ui/hud/QuestTrackerHUD'
 import type { QuestIndicatorType } from '../entities/NPC'
@@ -267,10 +273,33 @@ export class WorldScene extends Phaser.Scene {
     }
     EventBus.on(GAME_EVENTS.ITEM_ADDED, itemAddedHandler, this)
 
+    // Listen for monster captures to track achievement progress
+    const monsterCapturedHandler = () => {
+      try {
+        let state = getGameState(this)
+        const updatedStats = incrementStat(state.achievementStats, 'monstersCaptured', 1)
+        state = updateAchievementStats(state, updatedStats)
+
+        // Check for newly unlocked achievements
+        const { newlyUnlocked, achievements: updatedProgress } = checkAndUnlockAchievements(
+          state.achievements,
+          updatedStats,
+        )
+        if (newlyUnlocked.length > 0) {
+          state = updateAchievements(state, updatedProgress)
+        }
+        setGameState(this, state)
+      } catch {
+        // No game state yet
+      }
+    }
+    EventBus.on(GAME_EVENTS.MONSTER_CAPTURED, monsterCapturedHandler, this)
+
     // Clean up event listeners when scene shuts down
     this.events.once('shutdown', () => {
       EventBus.off(GAME_EVENTS.FAST_TRAVEL_REQUESTED, fastTravelHandler, this)
       EventBus.off(GAME_EVENTS.ITEM_ADDED, itemAddedHandler, this)
+      EventBus.off(GAME_EVENTS.MONSTER_CAPTURED, monsterCapturedHandler, this)
     })
   }
 
@@ -2035,6 +2064,19 @@ export class WorldScene extends Phaser.Scene {
         return result.monster
       })
       state = updateMonsterStorage(state, updatedStorage)
+    }
+
+    // Track achievement progress - increment battlesWon
+    const updatedStats = incrementStat(state.achievementStats, 'battlesWon', 1)
+    state = updateAchievementStats(state, updatedStats)
+
+    // Check for newly unlocked achievements
+    const { newlyUnlocked, achievements: updatedProgress } = checkAndUnlockAchievements(
+      state.achievements,
+      updatedStats,
+    )
+    if (newlyUnlocked.length > 0) {
+      state = updateAchievements(state, updatedProgress)
     }
 
     setGameState(this, state)
