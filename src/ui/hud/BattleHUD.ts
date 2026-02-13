@@ -302,8 +302,8 @@ export class BattleHUD {
   private calculateSquadPositions(squadCount: number): Array<{ x: number; y: number }> {
     // Match the layout from BattleScene
     const centerX = 950
-    const topRowY = GAME_HEIGHT * 0.54 + 30  // Below top row sprites
-    const bottomRowY = GAME_HEIGHT * 0.78 + 30  // Below bottom row sprites
+    const topRowY = GAME_HEIGHT * 0.54 + 55  // Below top row sprites
+    const bottomRowY = GAME_HEIGHT * 0.78 + 55  // Below bottom row sprites
     const spacing = 180
 
     let topRowCount: number
@@ -682,8 +682,8 @@ export class BattleHUD {
   }
 
   private createMessageBox(): Phaser.GameObjects.Container {
-    // Position in upper right area
-    const container = this.scene.add.container(GAME_WIDTH - 620, 260)
+    // Position in upper right area (raised to avoid overlapping turn indicator)
+    const container = this.scene.add.container(GAME_WIDTH - 620, 225)
     container.setDepth(DEPTH.UI + 10)
 
     const bg = this.scene.add.graphics()
