@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import {
   gatherCaptureModifiers,
+  attemptCapture,
   attemptCaptureWithRoll,
   calculateShakeCount,
   createCapturedMonster,
@@ -375,6 +376,80 @@ describe('createCapturedMonster', () => {
     expect(monster!.capturedAt).toBeDefined()
     expect(monster!.capturedAt >= before).toBe(true)
     expect(monster!.capturedAt <= after).toBe(true)
+  })
+})
+
+describe('attemptCapture with guaranteeSuccess', () => {
+  it('always succeeds when guaranteeSuccess is true', () => {
+    // Use conditions that would normally fail: full HP, difficult species
+    const target = createMockCombatant({
+      stats: { ...createMockCombatant().stats, currentHp: 100, maxHp: 100 },
+    })
+    const device = createMockCaptureDevice(0.1) // Weak device
+
+    // Run multiple times - all should succeed
+    for (let i = 0; i < 20; i++) {
+      const attempt = attemptCapture(target, device, 0, 0.99, { guaranteeSuccess: true })
+      expect(attempt.succeeded).toBe(true)
+    }
+  })
+
+  it('uses normal probability when guaranteeSuccess is false', () => {
+    // Use conditions that would normally have low success rate
+    const target = createMockCombatant({
+      stats: { ...createMockCombatant().stats, currentHp: 100, maxHp: 100 },
+    })
+    const device = createMockCaptureDevice(0.5)
+
+    // Run multiple times - some should fail
+    let failCount = 0
+    for (let i = 0; i < 50; i++) {
+      const attempt = attemptCapture(target, device, 0, 0.8, { guaranteeSuccess: false })
+      if (!attempt.succeeded) failCount++
+    }
+
+    // Should have at least some failures given the low success conditions
+    expect(failCount).toBeGreaterThan(0)
+  })
+
+  it('uses normal probability when options not provided', () => {
+    // Use conditions that would normally have low success rate
+    const target = createMockCombatant({
+      stats: { ...createMockCombatant().stats, currentHp: 100, maxHp: 100 },
+    })
+    const device = createMockCaptureDevice(0.5)
+
+    // Run multiple times - some should fail
+    let failCount = 0
+    for (let i = 0; i < 50; i++) {
+      const attempt = attemptCapture(target, device, 0, 0.8)
+      if (!attempt.succeeded) failCount++
+    }
+
+    // Should have at least some failures
+    expect(failCount).toBeGreaterThan(0)
+  })
+
+  it('still calculates modifiers correctly with guaranteeSuccess', () => {
+    const target = createMockCombatant({
+      stats: { ...createMockCombatant().stats, currentHp: 10, maxHp: 100 },
+      statusEffects: [
+        {
+          effect: { id: 'sleep', name: 'Sleep', type: 'sleep', duration: 3, magnitude: 1 },
+          turnsRemaining: 2,
+          appliedBy: 'player',
+        },
+      ],
+    })
+    const device = createMockCaptureDevice(1.5)
+
+    const attempt = attemptCapture(target, device, 15, 0.5, { guaranteeSuccess: true })
+
+    // Should still have modifiers even though success is guaranteed
+    expect(attempt.modifiers.length).toBeGreaterThanOrEqual(3)
+    expect(attempt.modifiers.some((m) => m.source === 'low_hp')).toBe(true)
+    expect(attempt.modifiers.some((m) => m.source === 'status_sleep')).toBe(true)
+    expect(attempt.succeeded).toBe(true)
   })
 })
 

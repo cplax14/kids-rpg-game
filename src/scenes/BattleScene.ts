@@ -16,6 +16,7 @@ import {
   calculateTurnOrder,
   getCurrentCombatant,
   type ActionResult,
+  type ActionOptions,
 } from '../systems/CombatSystem'
 import { BattleHUD, type CommandChoice } from '../ui/hud/BattleHUD'
 import { EventBus } from '../events/EventBus'
@@ -1216,11 +1217,14 @@ export class BattleScene extends Phaser.Scene {
       }
 
       // Perform capture attempt
+      // Guarantee success for first capture (tutorial experience)
+      const isFirstCapture = !isTutorialComplete('tutorial-first-capture')
       const captureAttempt = attemptCapture(
         target,
         deviceSlot.item,
         actor.stats.luck,
         baseDifficulty,
+        { guaranteeSuccess: isFirstCapture },
       )
 
       const shakeCount = calculateShakeCount(captureAttempt)
@@ -1369,7 +1373,12 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private executeActionAndAnimate(action: BattleAction): void {
-    const result = executeAction(this.battle, action)
+    // For the first battle (before first capture), protect enemies from being killed
+    // so the player can successfully capture their first monster
+    const isFirstBattle = !isTutorialComplete('tutorial-first-capture')
+    const options: ActionOptions | undefined = isFirstBattle ? { enemyMinHp: 5 } : undefined
+
+    const result = executeAction(this.battle, action, options)
     this.battle = result.battle
 
     // Track last targeted enemy for default target selection

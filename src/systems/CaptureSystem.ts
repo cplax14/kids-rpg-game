@@ -69,11 +69,17 @@ export function gatherCaptureModifiers(
 
 // ── Capture Attempt ──
 
+export interface CaptureOptions {
+  /** If true, capture always succeeds (for first battle tutorial) */
+  readonly guaranteeSuccess?: boolean
+}
+
 export function attemptCapture(
   target: BattleCombatant,
   captureDevice: Item,
   playerLuck: number,
   speciesDifficulty: number,
+  options?: CaptureOptions,
 ): CaptureAttempt {
   const hpPercent = target.stats.currentHp / target.stats.maxHp
   const statusBonus = hasStatusEffect(target, 'sleep') ? SLEEP_CAPTURE_BONUS : 1.0
@@ -89,7 +95,9 @@ export function attemptCapture(
 
   const modifiers = gatherCaptureModifiers(target, captureDevice, playerLuck)
   const finalSuccessRate = Math.min(CAPTURE_MAX_RATE, Math.max(CAPTURE_MIN_RATE, baseSuccessRate))
-  const succeeded = randomChance(finalSuccessRate)
+
+  // Guarantee success for first battle tutorial
+  const succeeded = options?.guaranteeSuccess ? true : randomChance(finalSuccessRate)
 
   return {
     targetMonster: target,

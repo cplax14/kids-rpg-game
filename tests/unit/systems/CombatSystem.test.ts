@@ -933,6 +933,93 @@ describe('status ability edge cases', () => {
   })
 })
 
+describe('executeAction - enemy HP protection (tutorial mode)', () => {
+  it('basic attack respects enemyMinHp option for enemies', () => {
+    // Create a weak enemy that would normally die
+    const strongStats = makeStats({ attack: 999 })
+    const player = createCombatantFromPlayer('Hero', strongStats, [tackleAbility])
+    const weakStats = makeStats({ maxHp: 50, currentHp: 50, defense: 1 })
+    const enemy = createCombatantFromEnemy('Weak', weakStats, 'neutral', [tackleAbility])
+    const battle = createBattle([player], [enemy])
+
+    const action: BattleAction = {
+      type: 'attack',
+      actorId: battle.playerSquad[0].combatantId,
+      targetId: battle.enemySquad[0].combatantId,
+      abilityId: null,
+      itemId: null,
+    }
+
+    // With enemyMinHp: 5, enemy should never go below 5 HP
+    const result = executeAction(battle, action, { enemyMinHp: 5 })
+    expect(result.battle.enemySquad[0].stats.currentHp).toBe(5)
+    // Battle should NOT end in victory since enemy is still alive
+    expect(checkBattleEnd(result.battle)).not.toBe('victory')
+  })
+
+  it('ability attack respects enemyMinHp option for enemies', () => {
+    const strongStats = makeStats({ attack: 999, magicAttack: 999, currentMp: 50 })
+    const player = createCombatantFromPlayer('Hero', strongStats, [fireAbility])
+    const weakStats = makeStats({ maxHp: 50, currentHp: 50, defense: 1, magicDefense: 1 })
+    const enemy = createCombatantFromEnemy('Weak', weakStats, 'neutral', [tackleAbility])
+    const battle = createBattle([player], [enemy])
+
+    const action: BattleAction = {
+      type: 'ability',
+      actorId: battle.playerSquad[0].combatantId,
+      targetId: battle.enemySquad[0].combatantId,
+      abilityId: 'ember',
+      itemId: null,
+    }
+
+    // With enemyMinHp: 5, enemy should never go below 5 HP
+    const result = executeAction(battle, action, { enemyMinHp: 5 })
+    expect(result.battle.enemySquad[0].stats.currentHp).toBe(5)
+  })
+
+  it('does not apply enemyMinHp protection to player combatants', () => {
+    const strongStats = makeStats({ attack: 999 })
+    const weakStats = makeStats({ maxHp: 50, currentHp: 50, defense: 1 })
+    const player = createCombatantFromPlayer('Weak Hero', weakStats, [tackleAbility])
+    const enemy = createCombatantFromEnemy('Strong', strongStats, 'neutral', [tackleAbility])
+    const battle = createBattle([player], [enemy])
+
+    const action: BattleAction = {
+      type: 'attack',
+      actorId: battle.enemySquad[0].combatantId,
+      targetId: battle.playerSquad[0].combatantId,
+      abilityId: null,
+      itemId: null,
+    }
+
+    // enemyMinHp should NOT protect the player
+    const result = executeAction(battle, action, { enemyMinHp: 5 })
+    expect(result.battle.playerSquad[0].stats.currentHp).toBe(0)
+    expect(checkBattleEnd(result.battle)).toBe('defeat')
+  })
+
+  it('without options, enemy HP can go to 0', () => {
+    const strongStats = makeStats({ attack: 999 })
+    const player = createCombatantFromPlayer('Hero', strongStats, [tackleAbility])
+    const weakStats = makeStats({ maxHp: 1, currentHp: 1, defense: 1 })
+    const enemy = createCombatantFromEnemy('Weak', weakStats, 'neutral', [tackleAbility])
+    const battle = createBattle([player], [enemy])
+
+    const action: BattleAction = {
+      type: 'attack',
+      actorId: battle.playerSquad[0].combatantId,
+      targetId: battle.enemySquad[0].combatantId,
+      abilityId: null,
+      itemId: null,
+    }
+
+    // Without options, enemy can die
+    const result = executeAction(battle, action)
+    expect(result.battle.enemySquad[0].stats.currentHp).toBe(0)
+    expect(checkBattleEnd(result.battle)).toBe('victory')
+  })
+})
+
 describe('integration - full battle turn', () => {
   it('player attacks enemy, enemy attacks back, HP changes persist', () => {
     const battle = makeBattle()
