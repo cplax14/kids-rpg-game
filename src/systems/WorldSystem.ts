@@ -51,7 +51,14 @@ export interface AreaEncounterResult {
   readonly speciesIds: ReadonlyArray<string>
 }
 
-export function generateAreaEncounter(areaId: string): AreaEncounterResult | null {
+export interface EncounterOptions {
+  readonly isFirstBattle?: boolean
+}
+
+export function generateAreaEncounter(
+  areaId: string,
+  options?: EncounterOptions,
+): AreaEncounterResult | null {
   const area = getArea(areaId)
   if (!area || area.encounters.length === 0) {
     return null
@@ -68,8 +75,9 @@ export function generateAreaEncounter(areaId: string): AreaEncounterResult | nul
     return null
   }
 
-  // Pick 1-2 enemies
-  const enemyCount = Math.random() < 0.3 ? 2 : 1
+  // First battle always has exactly 1 enemy for a gentler introduction
+  // Normal battles have 30% chance of 2 enemies
+  const enemyCount = options?.isFirstBattle ? 1 : Math.random() < 0.3 ? 2 : 1
   const enemies: BattleCombatant[] = []
   const speciesIds: string[] = []
 

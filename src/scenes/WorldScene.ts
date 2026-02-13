@@ -92,7 +92,7 @@ import {
 } from '../systems/FastTravelSystem'
 import { generateMap, getCollisionTiles } from '../utils/mapGenerator'
 import { initAudioSystem, playMusic, crossfadeMusic, playSfx, stopMusic, MUSIC_KEYS, SFX_KEYS } from '../systems/AudioSystem'
-import { loadTutorialData, checkAndShowTutorial } from '../systems/TutorialSystem'
+import { loadTutorialData, checkAndShowTutorial, isTutorialComplete } from '../systems/TutorialSystem'
 import { initDebug } from '../utils/debug'
 import { autoSave } from '../systems/SaveSystem'
 import {
@@ -1934,7 +1934,9 @@ export class WorldScene extends Phaser.Scene {
     this.cameras.main.flash(300, 255, 255, 255)
 
     this.time.delayedCall(400, () => {
-      const encounter = generateAreaEncounter(this.currentAreaId)
+      // First battle has single enemy for gentler introduction
+      const isFirstBattle = !isTutorialComplete('tutorial-first-battle')
+      const encounter = generateAreaEncounter(this.currentAreaId, { isFirstBattle })
       if (!encounter) {
         this.inputSystem.setEnabled(true)
         return
