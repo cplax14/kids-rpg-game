@@ -2,15 +2,15 @@
   {
     "id": "tutorial-first-battle",
     "trigger": "first_battle",
-    "title": "Battle Basics",
-    "message": "Choose Attack to deal damage, Ability for special moves (costs MP), or Item to use potions. You can also try to Capture weakened monsters!",
+    "title": "Your First Battle!",
+    "message": "Time to battle! Use Attack to hurt the monster. When its health gets low, try Capture to make it your friend!",
     "position": "top"
   },
   {
     "id": "tutorial-first-capture",
     "trigger": "first_capture",
-    "title": "Capturing Monsters",
-    "message": "Lower a monster's HP to increase capture chances. Different capture devices have different success rates. Captured monsters join your squad!",
+    "title": "You Caught a Monster!",
+    "message": "Great job! Your new monster friend joins your squad. The weaker a monster is, the easier it is to catch!",
     "position": "center"
   },
   {

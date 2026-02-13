@@ -53,6 +53,8 @@ import {
   updateCurrentArea,
   updateActiveQuests,
   addVisitedArea,
+  updateAchievementStats,
+  updateAchievements,
   type GameState,
 } from '../systems/GameStateManager'
 import { createSquadCombatants } from '../systems/SquadSystem'
@@ -92,7 +94,7 @@ import {
 } from '../systems/FastTravelSystem'
 import { generateMap, getCollisionTiles } from '../utils/mapGenerator'
 import { initAudioSystem, playMusic, crossfadeMusic, playSfx, stopMusic, MUSIC_KEYS, SFX_KEYS } from '../systems/AudioSystem'
-import { loadTutorialData, checkAndShowTutorial } from '../systems/TutorialSystem'
+import { loadTutorialData, checkAndShowTutorial, isTutorialComplete, resetAllTutorials } from '../systems/TutorialSystem'
 import { initDebug } from '../utils/debug'
 import { autoSave } from '../systems/SaveSystem'
 import {
@@ -101,7 +103,11 @@ import {
   trackItemCollection,
   getQuestsForNpc,
 } from '../systems/QuestSystem'
-import { loadAchievementData } from '../systems/AchievementSystem'
+import {
+  loadAchievementData,
+  incrementStat,
+  checkAndUnlockAchievements,
+} from '../systems/AchievementSystem'
 import type { QuestDefinition, AchievementDefinition } from '../models/types'
 import { QuestTrackerHUD } from '../ui/hud/QuestTrackerHUD'
 import type { QuestIndicatorType } from '../entities/NPC'
@@ -189,6 +195,8 @@ export class WorldScene extends Phaser.Scene {
     // (not when loading a save - data.newGame is false when loading)
     if (data.newGame) {
       this.giveStarterContent()
+      // Reset tutorial completion state so first battle tutorials trigger again
+      resetAllTutorials()
     }
 
     // Apply boss defeat rewards if returning from boss battle
@@ -265,10 +273,33 @@ export class WorldScene extends Phaser.Scene {
     }
     EventBus.on(GAME_EVENTS.ITEM_ADDED, itemAddedHandler, this)
 
+    // Listen for monster captures to track achievement progress
+    const monsterCapturedHandler = () => {
+      try {
+        let state = getGameState(this)
+        const updatedStats = incrementStat(state.achievementStats, 'monstersCaptured', 1)
+        state = updateAchievementStats(state, updatedStats)
+
+        // Check for newly unlocked achievements
+        const { newlyUnlocked, achievements: updatedProgress } = checkAndUnlockAchievements(
+          state.achievements,
+          updatedStats,
+        )
+        if (newlyUnlocked.length > 0) {
+          state = updateAchievements(state, updatedProgress)
+        }
+        setGameState(this, state)
+      } catch {
+        // No game state yet
+      }
+    }
+    EventBus.on(GAME_EVENTS.MONSTER_CAPTURED, monsterCapturedHandler, this)
+
     // Clean up event listeners when scene shuts down
     this.events.once('shutdown', () => {
       EventBus.off(GAME_EVENTS.FAST_TRAVEL_REQUESTED, fastTravelHandler, this)
       EventBus.off(GAME_EVENTS.ITEM_ADDED, itemAddedHandler, this)
+      EventBus.off(GAME_EVENTS.MONSTER_CAPTURED, monsterCapturedHandler, this)
     })
   }
 
@@ -1934,7 +1965,9 @@ export class WorldScene extends Phaser.Scene {
     this.cameras.main.flash(300, 255, 255, 255)
 
     this.time.delayedCall(400, () => {
-      const encounter = generateAreaEncounter(this.currentAreaId)
+      // First battle has single enemy for gentler introduction
+      const isFirstBattle = !isTutorialComplete('tutorial-first-battle')
+      const encounter = generateAreaEncounter(this.currentAreaId, { isFirstBattle })
       if (!encounter) {
         this.inputSystem.setEnabled(true)
         return
@@ -2031,6 +2064,19 @@ export class WorldScene extends Phaser.Scene {
         return result.monster
       })
       state = updateMonsterStorage(state, updatedStorage)
+    }
+
+    // Track achievement progress - increment battlesWon
+    const updatedStats = incrementStat(state.achievementStats, 'battlesWon', 1)
+    state = updateAchievementStats(state, updatedStats)
+
+    // Check for newly unlocked achievements
+    const { newlyUnlocked, achievements: updatedProgress } = checkAndUnlockAchievements(
+      state.achievements,
+      updatedStats,
+    )
+    if (newlyUnlocked.length > 0) {
+      state = updateAchievements(state, updatedProgress)
     }
 
     setGameState(this, state)

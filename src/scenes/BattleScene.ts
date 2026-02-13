@@ -3,7 +3,8 @@ import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS, DEPTH, TEXT_STYLES } from 
 import { getMonsterFrame, getMonsterIconKey } from '../config/spriteMapping'
 import type { Battle, BattleCombatant, BattleAction, MonsterElement, ItemDrop, MonsterInstance, BossDefinition } from '../models/types'
 import { initAudioSystem, playMusic, crossfadeMusic, playSfx, stopMusic, MUSIC_KEYS, SFX_KEYS } from '../systems/AudioSystem'
-import { checkAndShowTutorial } from '../systems/TutorialSystem'
+import { checkAndShowTutorial, isTutorialComplete } from '../systems/TutorialSystem'
+import { BattleTooltip } from '../ui/components/BattleTooltip'
 import {
   createBattle,
   executeAction,
@@ -15,6 +16,7 @@ import {
   calculateTurnOrder,
   getCurrentCombatant,
   type ActionResult,
+  type ActionOptions,
 } from '../systems/CombatSystem'
 import { BattleHUD, type CommandChoice } from '../ui/hud/BattleHUD'
 import { EventBus } from '../events/EventBus'
@@ -88,6 +90,8 @@ export class BattleScene extends Phaser.Scene {
   private lastCommandTime: number = 0
   private lastCommandChoice: CommandChoice | null = null
   private lastCommandAbilityId: string | null = null
+  private captureHintShown: boolean = false
+  private activeTooltip: BattleTooltip | null = null
 
   constructor() {
     super({ key: SCENE_KEYS.BATTLE })
@@ -100,6 +104,8 @@ export class BattleScene extends Phaser.Scene {
     this.bossData = data.bossData ?? null
     this.playerPosition = data.playerPosition ?? null
     this.areaId = data.areaId ?? 'sunlit-village'
+    this.captureHintShown = false
+    this.activeTooltip = null
 
     // Initialize audio system
     initAudioSystem(this)
@@ -1211,11 +1217,14 @@ export class BattleScene extends Phaser.Scene {
       }
 
       // Perform capture attempt
+      // Guarantee success for first capture (tutorial experience)
+      const isFirstCapture = !isTutorialComplete('tutorial-first-capture')
       const captureAttempt = attemptCapture(
         target,
         deviceSlot.item,
         actor.stats.luck,
         baseDifficulty,
+        { guaranteeSuccess: isFirstCapture },
       )
 
       const shakeCount = calculateShakeCount(captureAttempt)
@@ -1364,7 +1373,12 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private executeActionAndAnimate(action: BattleAction): void {
-    const result = executeAction(this.battle, action)
+    // For the first battle (before first capture), protect enemies from being killed
+    // so the player can successfully capture their first monster
+    const isFirstBattle = !isTutorialComplete('tutorial-first-capture')
+    const options: ActionOptions | undefined = isFirstBattle ? { enemyMinHp: 5 } : undefined
+
+    const result = executeAction(this.battle, action, options)
     this.battle = result.battle
 
     // Track last targeted enemy for default target selection
@@ -1378,6 +1392,9 @@ export class BattleScene extends Phaser.Scene {
     // Animate attack
     if (result.damage > 0 && action.targetId) {
       this.animateAttack(action.actorId, action.targetId, result)
+
+      // Check if we should show capture hint (first battle only)
+      this.checkAndShowCaptureHint(action.targetId)
     }
 
     // Show message
@@ -1402,6 +1419,60 @@ export class BattleScene extends Phaser.Scene {
       }
 
       this.startNextTurn()
+    })
+  }
+
+  /**
+   * Check if we should show the capture hint tooltip
+   * Shows when an enemy's HP drops below 50% for the first time
+   * Only shows until player has successfully captured their first monster
+   */
+  private checkAndShowCaptureHint(targetId: string): void {
+    // Only show once per battle
+    if (this.captureHintShown) return
+
+    // Only show until player has captured their first monster
+    if (isTutorialComplete('tutorial-first-capture')) return
+
+    // Find the enemy that was just hit
+    const enemy = this.battle.enemySquad.find((e) => e.combatantId === targetId)
+    if (!enemy) return
+
+    // Check if enemy HP is below 50% and still alive
+    const hpRatio = enemy.stats.currentHp / enemy.stats.maxHp
+    if (hpRatio >= 0.5 || enemy.stats.currentHp <= 0) return
+
+    // Show the capture hint!
+    this.captureHintShown = true
+
+    // Get the Capture button position from the HUD
+    const buttonPos = this.hud.getButtonPosition('capture')
+    if (!buttonPos) return
+
+    // Delay slightly so it appears after the damage animation
+    this.time.delayedCall(800, () => {
+      // Clean up any existing tooltip
+      if (this.activeTooltip) {
+        this.activeTooltip.destroy()
+      }
+
+      // Highlight the Capture button
+      this.hud.highlightButton('capture')
+
+      this.activeTooltip = new BattleTooltip(this, {
+        message: "The monster is getting tired! Try using Capture to make it your friend!",
+        targetX: buttonPos.x,
+        targetY: buttonPos.y,
+        position: 'above',
+        autoDismissMs: 8000,
+        showArrow: true,
+        pulseTarget: false, // HUD provides its own highlight
+      })
+
+      this.activeTooltip.setOnDismiss(() => {
+        this.activeTooltip = null
+        this.hud.clearHighlight()
+      })
     })
   }
 

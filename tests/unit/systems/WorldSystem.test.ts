@@ -293,6 +293,63 @@ describe('WorldSystem', () => {
       // No wild species available, should return null
       expect(encounter).toBeNull()
     })
+
+    it('should generate exactly 1 enemy when isFirstBattle is true', () => {
+      // Run multiple times to ensure it's always 1 enemy
+      for (let i = 0; i < 20; i++) {
+        const encounter = generateAreaEncounter('test-area', { isFirstBattle: true })
+        expect(encounter).not.toBeNull()
+        expect(encounter?.combatants.length).toBe(1)
+        expect(encounter?.speciesIds.length).toBe(1)
+      }
+    })
+
+    it('should allow 1-2 enemies when isFirstBattle is false or not provided', () => {
+      // Run many times to verify we get some 2-enemy encounters
+      let gotTwoEnemies = false
+      let gotOneEnemy = false
+
+      for (let i = 0; i < 100; i++) {
+        const encounter = generateAreaEncounter('test-area', { isFirstBattle: false })
+        if (encounter?.combatants.length === 2) {
+          gotTwoEnemies = true
+        }
+        if (encounter?.combatants.length === 1) {
+          gotOneEnemy = true
+        }
+        if (gotTwoEnemies && gotOneEnemy) break
+      }
+
+      // With 30% chance for 2 enemies over 100 runs, we should see both
+      expect(gotTwoEnemies).toBe(true)
+      expect(gotOneEnemy).toBe(true)
+    })
+
+    it('should default to normal behavior when options not provided', () => {
+      // Without options, should behave like isFirstBattle: false
+      let gotTwoEnemies = false
+
+      for (let i = 0; i < 100; i++) {
+        const encounter = generateAreaEncounter('test-area')
+        if (encounter?.combatants.length === 2) {
+          gotTwoEnemies = true
+          break
+        }
+      }
+
+      // Should be possible to get 2 enemies without options
+      expect(gotTwoEnemies).toBe(true)
+    })
+
+    it('should generate capturable enemies for first battle', () => {
+      const encounter = generateAreaEncounter('test-area', { isFirstBattle: true })
+      expect(encounter).not.toBeNull()
+
+      // All enemies should be capturable
+      encounter?.combatants.forEach((combatant) => {
+        expect(combatant.capturable).toBe(true)
+      })
+    })
   })
 
   describe('Boss Encounter', () => {

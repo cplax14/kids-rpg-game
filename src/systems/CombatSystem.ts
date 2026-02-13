@@ -131,12 +131,21 @@ export interface ActionResult {
   readonly targetResults: ReadonlyArray<TargetResult> // Per-target results for multi-target abilities
 }
 
-export function executeAction(battle: Battle, action: BattleAction): ActionResult {
+export interface ActionOptions {
+  /** Minimum HP enemies can be reduced to (for tutorial protection) */
+  readonly enemyMinHp?: number
+}
+
+export function executeAction(
+  battle: Battle,
+  action: BattleAction,
+  options?: ActionOptions,
+): ActionResult {
   switch (action.type) {
     case 'attack':
-      return executeBasicAttack(battle, action)
+      return executeBasicAttack(battle, action, options)
     case 'ability':
-      return executeAbilityAction(battle, action)
+      return executeAbilityAction(battle, action, options)
     case 'defend':
       return executeDefend(battle, action)
     case 'flee':
@@ -185,7 +194,11 @@ function executeItemAction(battle: Battle, action: BattleAction): ActionResult {
   }
 }
 
-function executeBasicAttack(battle: Battle, action: BattleAction): ActionResult {
+function executeBasicAttack(
+  battle: Battle,
+  action: BattleAction,
+  options?: ActionOptions,
+): ActionResult {
   const attacker = findCombatant(battle, action.actorId)
   const target = findCombatant(battle, action.targetId ?? '')
 
@@ -205,7 +218,9 @@ function executeBasicAttack(battle: Battle, action: BattleAction): ActionResult 
     attacker.stats.luck,
   )
 
-  const updatedBattle = applyCombatantDamage(battle, target.combatantId, damage)
+  // Apply min HP protection for enemies (tutorial protection)
+  const minHp = !target.isPlayer && options?.enemyMinHp ? options.enemyMinHp : 0
+  const updatedBattle = applyCombatantDamage(battle, target.combatantId, damage, minHp)
 
   return {
     battle: updatedBattle,
@@ -223,7 +238,11 @@ function executeBasicAttack(battle: Battle, action: BattleAction): ActionResult 
   }
 }
 
-function executeAbilityAction(battle: Battle, action: BattleAction): ActionResult {
+function executeAbilityAction(
+  battle: Battle,
+  action: BattleAction,
+  options?: ActionOptions,
+): ActionResult {
   const attacker = findCombatant(battle, action.actorId)
   if (!attacker || !action.abilityId) {
     return createEmptyResult(battle, 'Invalid ability.')
@@ -268,7 +287,7 @@ function executeAbilityAction(battle: Battle, action: BattleAction): ActionResul
   }
 
   // Damage abilities
-  return executeDamageAbility(updatedBattle, attacker, ability, action)
+  return executeDamageAbility(updatedBattle, attacker, ability, action, options)
 }
 
 function executeDamageAbility(
@@ -276,6 +295,7 @@ function executeDamageAbility(
   attacker: BattleCombatant,
   ability: Ability,
   action: BattleAction,
+  options?: ActionOptions,
 ): ActionResult {
   const isPhysical = ability.type === 'physical'
   const attackStat = isPhysical ? getEffectiveAttack(attacker) : getEffectiveMagicAttack(attacker)
@@ -326,7 +346,9 @@ function executeDamageAbility(
     const effectiveness: 'super' | 'weak' | 'normal' =
       multiplier > 1.5 ? 'super' : multiplier < 0.75 ? 'weak' : 'normal'
 
-    updatedBattle = applyCombatantDamage(updatedBattle, target.combatantId, damage)
+    // Apply min HP protection for enemies (tutorial protection)
+    const minHp = !target.isPlayer && options?.enemyMinHp ? options.enemyMinHp : 0
+    updatedBattle = applyCombatantDamage(updatedBattle, target.combatantId, damage, minHp)
     totalDamage += damage
 
     if (isCritical) anyCritical = true
@@ -813,14 +835,20 @@ function findCombatant(battle: Battle, combatantId: string): BattleCombatant | u
   )
 }
 
-function applyCombatantDamage(battle: Battle, combatantId: string, damage: number): Battle {
+function applyCombatantDamage(
+  battle: Battle,
+  combatantId: string,
+  damage: number,
+  minHp: number = 0,
+): Battle {
   const update = (c: BattleCombatant): BattleCombatant => {
     if (c.combatantId !== combatantId) return c
     return {
       ...c,
       stats: {
         ...c.stats,
-        currentHp: Math.max(0, c.stats.currentHp - damage),
+        // Ensure HP doesn't go below minHp (used for tutorial protection)
+        currentHp: Math.max(minHp, c.stats.currentHp - damage),
       },
     }
   }
