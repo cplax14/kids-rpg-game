@@ -10,6 +10,10 @@ import * as WorldSystem from './systems/WorldSystem'
 import * as TraitSystem from './systems/TraitSystem'
 import * as CombatSystem from './systems/CombatSystem'
 import * as TargetingSystem from './systems/TargetingSystem'
+import * as MonsterGearSystem from './systems/MonsterGearSystem'
+import * as WaveChallengeSystem from './systems/WaveChallengeSystem'
+import * as BountySystem from './systems/BountySystem'
+import * as SquadSystem from './systems/SquadSystem'
 import * as Constants from './models/constants'
 
 // Type declaration for global test exports
@@ -22,6 +26,10 @@ declare global {
       TraitSystem: typeof TraitSystem
       CombatSystem: typeof CombatSystem
       TargetingSystem: typeof TargetingSystem
+      MonsterGearSystem: typeof MonsterGearSystem
+      WaveChallengeSystem: typeof WaveChallengeSystem
+      BountySystem: typeof BountySystem
+      SquadSystem: typeof SquadSystem
       Constants: typeof Constants
     }
   }
@@ -36,6 +44,10 @@ if (import.meta.env.DEV) {
     TraitSystem,
     CombatSystem,
     TargetingSystem,
+    MonsterGearSystem,
+    WaveChallengeSystem,
+    BountySystem,
+    SquadSystem,
     Constants,
   }
 }

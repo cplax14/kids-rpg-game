@@ -1,0 +1,250 @@
+{
+  "bounties": [
+    {
+      "bountyId": "defeat-3-fire",
+      "name": "Flame Tamer",
+      "description": "Defeat 3 fire-type monsters",
+      "tier": "easy",
+      "objectives": [
+        {
+          "objectiveId": "defeat-fire",
+          "type": "defeat",
+          "targetId": "element:fire",
+          "targetName": "Fire Monsters",
+          "requiredCount": 3,
+          "description": "Defeat 3 fire-type monsters"
+        }
+      ],
+      "baseRewards": {
+        "experience": 100,
+        "gold": 50,
+        "items": [{ "itemId": "potion", "quantity": 2 }],
+        "equipmentId": null
+      },
+      "poolId": "daily-easy"
+    },
+    {
+      "bountyId": "defeat-3-water",
+      "name": "Wave Rider",
+      "description": "Defeat 3 water-type monsters",
+      "tier": "easy",
+      "objectives": [
+        {
+          "objectiveId": "defeat-water",
+          "type": "defeat",
+          "targetId": "element:water",
+          "targetName": "Water Monsters",
+          "requiredCount": 3,
+          "description": "Defeat 3 water-type monsters"
+        }
+      ],
+      "baseRewards": {
+        "experience": 100,
+        "gold": 50,
+        "items": [{ "itemId": "potion", "quantity": 2 }],
+        "equipmentId": null
+      },
+      "poolId": "daily-easy"
+    },
+    {
+      "bountyId": "defeat-5-any",
+      "name": "Battle Practice",
+      "description": "Defeat 5 monsters of any type",
+      "tier": "easy",
+      "objectives": [
+        {
+          "objectiveId": "defeat-any",
+          "type": "defeat",
+          "targetId": "any",
+          "targetName": "Any Monsters",
+          "requiredCount": 5,
+          "description": "Defeat 5 monsters"
+        }
+      ],
+      "baseRewards": {
+        "experience": 80,
+        "gold": 40,
+        "items": [{ "itemId": "basic-ball", "quantity": 3 }],
+        "equipmentId": null
+      },
+      "poolId": "daily-easy"
+    },
+    {
+      "bountyId": "capture-2-monsters",
+      "name": "Monster Collector",
+      "description": "Capture 2 wild monsters",
+      "tier": "medium",
+      "objectives": [
+        {
+          "objectiveId": "capture-any",
+          "type": "collect",
+          "targetId": "capture:any",
+          "targetName": "Wild Monsters",
+          "requiredCount": 2,
+          "description": "Capture 2 monsters"
+        }
+      ],
+      "baseRewards": {
+        "experience": 150,
+        "gold": 80,
+        "items": [{ "itemId": "mega-ball", "quantity": 2 }],
+        "equipmentId": null
+      },
+      "poolId": "daily-medium"
+    },
+    {
+      "bountyId": "defeat-8-monsters",
+      "name": "Battle Veteran",
+      "description": "Defeat 8 monsters in battle",
+      "tier": "medium",
+      "objectives": [
+        {
+          "objectiveId": "defeat-many",
+          "type": "defeat",
+          "targetId": "any",
+          "targetName": "Any Monsters",
+          "requiredCount": 8,
+          "description": "Defeat 8 monsters"
+        }
+      ],
+      "baseRewards": {
+        "experience": 180,
+        "gold": 100,
+        "items": [{ "itemId": "super-potion", "quantity": 2 }],
+        "equipmentId": null
+      },
+      "poolId": "daily-medium"
+    },
+    {
+      "bountyId": "win-3-battles",
+      "name": "Victory Streak",
+      "description": "Win 3 battles without fleeing",
+      "tier": "medium",
+      "objectives": [
+        {
+          "objectiveId": "win-battles",
+          "type": "defeat",
+          "targetId": "battle:win",
+          "targetName": "Battles",
+          "requiredCount": 3,
+          "description": "Win 3 battles"
+        }
+      ],
+      "baseRewards": {
+        "experience": 200,
+        "gold": 120,
+        "items": [{ "itemId": "mana-potion", "quantity": 2 }],
+        "equipmentId": null
+      },
+      "poolId": "daily-medium"
+    },
+    {
+      "bountyId": "capture-rare",
+      "name": "Rare Find",
+      "description": "Capture an uncommon or rarer monster",
+      "tier": "hard",
+      "objectives": [
+        {
+          "objectiveId": "capture-rare",
+          "type": "collect",
+          "targetId": "capture:uncommon+",
+          "targetName": "Rare Monster",
+          "requiredCount": 1,
+          "description": "Capture an uncommon+ monster"
+        }
+      ],
+      "baseRewards": {
+        "experience": 300,
+        "gold": 200,
+        "items": [{ "itemId": "ultra-ball", "quantity": 2 }],
+        "equipmentId": null
+      },
+      "poolId": "daily-hard"
+    },
+    {
+      "bountyId": "defeat-12-monsters",
+      "name": "Monster Slayer",
+      "description": "Defeat 12 monsters in a single day",
+      "tier": "hard",
+      "objectives": [
+        {
+          "objectiveId": "defeat-many-hard",
+          "type": "defeat",
+          "targetId": "any",
+          "targetName": "Any Monsters",
+          "requiredCount": 12,
+          "description": "Defeat 12 monsters"
+        }
+      ],
+      "baseRewards": {
+        "experience": 350,
+        "gold": 180,
+        "items": [
+          { "itemId": "revive", "quantity": 1 },
+          { "itemId": "super-potion", "quantity": 3 }
+        ],
+        "equipmentId": null
+      },
+      "poolId": "daily-hard"
+    },
+    {
+      "bountyId": "elemental-mastery",
+      "name": "Elemental Mastery",
+      "description": "Defeat 2 fire, 2 water, and 2 earth monsters",
+      "tier": "hard",
+      "objectives": [
+        {
+          "objectiveId": "defeat-fire-2",
+          "type": "defeat",
+          "targetId": "element:fire",
+          "targetName": "Fire Monsters",
+          "requiredCount": 2,
+          "description": "Defeat 2 fire monsters"
+        },
+        {
+          "objectiveId": "defeat-water-2",
+          "type": "defeat",
+          "targetId": "element:water",
+          "targetName": "Water Monsters",
+          "requiredCount": 2,
+          "description": "Defeat 2 water monsters"
+        },
+        {
+          "objectiveId": "defeat-earth-2",
+          "type": "defeat",
+          "targetId": "element:earth",
+          "targetName": "Earth Monsters",
+          "requiredCount": 2,
+          "description": "Defeat 2 earth monsters"
+        }
+      ],
+      "baseRewards": {
+        "experience": 400,
+        "gold": 250,
+        "items": [{ "itemId": "trait-crystal", "quantity": 1 }],
+        "equipmentId": null
+      },
+      "poolId": "daily-hard"
+    }
+  ],
+  "pools": [
+    {
+      "poolId": "daily-easy",
+      "name": "Easy Daily Bounties",
+      "bountyIds": ["defeat-3-fire", "defeat-3-water", "defeat-5-any"],
+      "tier": "easy"
+    },
+    {
+      "poolId": "daily-medium",
+      "name": "Medium Daily Bounties",
+      "bountyIds": ["capture-2-monsters", "defeat-8-monsters", "win-3-battles"],
+      "tier": "medium"
+    },
+    {
+      "poolId": "daily-hard",
+      "name": "Hard Daily Bounties",
+      "bountyIds": ["capture-rare", "defeat-12-monsters", "elemental-mastery"],
+      "tier": "hard"
+    }
+  ]
+}

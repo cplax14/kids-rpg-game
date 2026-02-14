@@ -467,15 +467,57 @@ export class TitleScene extends Phaser.Scene {
 
     this.settingsPanel = new SettingsPanel(this, GAME_WIDTH / 2 - 300, GAME_HEIGHT / 2 - 200)
 
-    // Close button
-    const closeBtn = this.add.text(GAME_WIDTH / 2 + 270, GAME_HEIGHT / 2 - 190, 'X', {
-      ...TEXT_STYLES.HEADING,
-      fontSize: '24px',
-      color: '#ef5350',
+    // Close button - red rectangle with "Close" text
+    const closeBtnX = GAME_WIDTH / 2 + 220
+    const closeBtnY = GAME_HEIGHT / 2 - 195
+    const closeBtnWidth = 80
+    const closeBtnHeight = 36
+
+    const closeBtnBg = this.add.graphics()
+    closeBtnBg.fillStyle(COLORS.DANGER, 0.9)
+    closeBtnBg.fillRoundedRect(closeBtnX, closeBtnY, closeBtnWidth, closeBtnHeight, 8)
+    closeBtnBg.lineStyle(2, 0xffffff, 0.3)
+    closeBtnBg.strokeRoundedRect(closeBtnX, closeBtnY, closeBtnWidth, closeBtnHeight, 8)
+
+    const closeBtnText = this.add.text(
+      closeBtnX + closeBtnWidth / 2,
+      closeBtnY + closeBtnHeight / 2,
+      'Close',
+      {
+        ...TEXT_STYLES.BUTTON,
+        fontSize: '16px',
+        color: '#ffffff',
+      },
+    )
+    closeBtnText.setOrigin(0.5)
+
+    const closeBtnHitArea = this.add.rectangle(
+      closeBtnX + closeBtnWidth / 2,
+      closeBtnY + closeBtnHeight / 2,
+      closeBtnWidth,
+      closeBtnHeight,
+    )
+    closeBtnHitArea.setInteractive({ useHandCursor: true })
+    closeBtnHitArea.on('pointerover', () => {
+      closeBtnBg.clear()
+      closeBtnBg.fillStyle(COLORS.DANGER, 1)
+      closeBtnBg.fillRoundedRect(closeBtnX, closeBtnY, closeBtnWidth, closeBtnHeight, 8)
+      closeBtnBg.lineStyle(2, 0xffffff, 0.5)
+      closeBtnBg.strokeRoundedRect(closeBtnX, closeBtnY, closeBtnWidth, closeBtnHeight, 8)
     })
-    closeBtn.setInteractive({ useHandCursor: true })
-    closeBtn.on('pointerdown', () => {
+    closeBtnHitArea.on('pointerout', () => {
+      closeBtnBg.clear()
+      closeBtnBg.fillStyle(COLORS.DANGER, 0.9)
+      closeBtnBg.fillRoundedRect(closeBtnX, closeBtnY, closeBtnWidth, closeBtnHeight, 8)
+      closeBtnBg.lineStyle(2, 0xffffff, 0.3)
+      closeBtnBg.strokeRoundedRect(closeBtnX, closeBtnY, closeBtnWidth, closeBtnHeight, 8)
+    })
+    closeBtnHitArea.on('pointerdown', () => {
+      playSfx(SFX_KEYS.MENU_SELECT)
       settingsContainer.destroy()
+      closeBtnBg.destroy()
+      closeBtnText.destroy()
+      closeBtnHitArea.destroy()
       this.settingsPanel?.destroy()
       this.settingsPanel = null
       if (this.mainMenuContainer) {

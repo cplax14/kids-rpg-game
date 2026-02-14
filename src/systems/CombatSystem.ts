@@ -6,6 +6,7 @@ import type {
   BattleRewards,
   ActiveStatusEffect,
   Ability,
+  AbilityCooldown,
   CharacterStats,
   ItemDrop,
   MonsterElement,
@@ -31,6 +32,9 @@ import {
   SHIELD_DEFENSE_MULTIPLIER,
   ATTACK_UP_MULTIPLIER,
   DEFENSE_UP_MULTIPLIER,
+  BATTLE_SPIRIT_MAX,
+  BATTLE_SPIRIT_DAMAGE_BONUS,
+  BATTLE_SPIRIT_ACCURACY_BONUS,
 } from '../models/constants'
 import { generateId } from '../utils/id'
 
@@ -54,7 +58,38 @@ export function createBattle(
     canFlee: true,
     backgroundKey,
     rewards: null,
+    battleSpirit: 0,
   }
+}
+
+// ── Battle Spirit ──
+
+/**
+ * Increment battle spirit at the start of a new round.
+ * Spirit level caps at BATTLE_SPIRIT_MAX.
+ */
+export function incrementBattleSpirit(battle: Battle): Battle {
+  const newSpirit = Math.min(battle.battleSpirit + 1, BATTLE_SPIRIT_MAX)
+  return {
+    ...battle,
+    battleSpirit: newSpirit,
+  }
+}
+
+/**
+ * Get the damage multiplier from battle spirit for player attacks.
+ * Returns 1.0 + (spiritLevel * BATTLE_SPIRIT_DAMAGE_BONUS)
+ */
+export function getBattleSpiritDamageMultiplier(battle: Battle): number {
+  return 1.0 + battle.battleSpirit * BATTLE_SPIRIT_DAMAGE_BONUS
+}
+
+/**
+ * Get the accuracy bonus from battle spirit for player attacks.
+ * Returns spiritLevel * BATTLE_SPIRIT_ACCURACY_BONUS
+ */
+export function getBattleSpiritAccuracyBonus(battle: Battle): number {
+  return battle.battleSpirit * BATTLE_SPIRIT_ACCURACY_BONUS
 }
 
 // ── Turn Order ──
@@ -88,10 +123,16 @@ export function advanceTurn(battle: Battle): Battle {
   const nextIndex = (battle.currentTurnIndex + 1) % battle.turnOrder.length
   const isNewRound = nextIndex === 0
 
+  // Increment battle spirit at the start of each new round
+  const newSpirit = isNewRound
+    ? Math.min(battle.battleSpirit + 1, BATTLE_SPIRIT_MAX)
+    : battle.battleSpirit
+
   return {
     ...battle,
     currentTurnIndex: nextIndex,
     turnCount: isNewRound ? battle.turnCount + 1 : battle.turnCount,
+    battleSpirit: newSpirit,
     state: determineNextState(battle),
   }
 }
@@ -209,7 +250,7 @@ function executeBasicAttack(
   const attackStat = getEffectiveAttack(attacker)
   const defenseStat = getEffectiveDefense(target)
 
-  const { damage, isCritical } = calculateDamage(
+  const { damage: rawDamage, isCritical } = calculateDamage(
     attackStat,
     40, // base attack power
     defenseStat,
@@ -217,6 +258,10 @@ function executeBasicAttack(
     'neutral',
     attacker.stats.luck,
   )
+
+  // Apply battle spirit damage bonus for player attacks
+  const spiritMultiplier = attacker.isPlayer ? getBattleSpiritDamageMultiplier(battle) : 1.0
+  const damage = Math.floor(rawDamage * spiritMultiplier)
 
   // Apply min HP protection for enemies (tutorial protection)
   const minHp = !target.isPlayer && options?.enemyMinHp ? options.enemyMinHp : 0
@@ -253,6 +298,12 @@ function executeAbilityAction(
     return createEmptyResult(battle, 'Unknown ability.')
   }
 
+  // Check cooldown
+  if (isAbilityOnCooldown(attacker, ability.abilityId)) {
+    const turnsLeft = getAbilityCooldown(attacker, ability.abilityId)
+    return createEmptyResult(battle, `${ability.name} is recharging! (${turnsLeft} turn${turnsLeft > 1 ? 's' : ''} left)`)
+  }
+
   // Check MP
   if (attacker.stats.currentMp < ability.mpCost) {
     return createEmptyResult(battle, `${attacker.name} doesn't have enough MP!`)
@@ -264,8 +315,13 @@ function executeAbilityAction(
     currentMp: attacker.stats.currentMp - ability.mpCost,
   })
 
-  // Check accuracy
-  if (!randomChance(ability.accuracy / 100)) {
+  // Start cooldown for this ability (if it has one)
+  updatedBattle = startCooldownForCombatant(updatedBattle, attacker.combatantId, ability)
+
+  // Check accuracy (player attacks get battle spirit bonus)
+  const spiritAccuracyBonus = attacker.isPlayer ? getBattleSpiritAccuracyBonus(updatedBattle) : 0
+  const effectiveAccuracy = Math.min(100, ability.accuracy + spiritAccuracyBonus)
+  if (!randomChance(effectiveAccuracy / 100)) {
     return {
       battle: updatedBattle,
       damage: 0,
@@ -339,8 +395,11 @@ function executeDamageAbility(
       attacker.stats.luck,
     )
 
-    // Apply multi-target damage reduction
-    const damage = Math.floor(rawDamage * damageMultiplier)
+    // Apply battle spirit damage bonus for player attacks
+    const spiritMultiplier = attacker.isPlayer ? getBattleSpiritDamageMultiplier(battle) : 1.0
+
+    // Apply multi-target damage reduction and spirit bonus
+    const damage = Math.floor(rawDamage * damageMultiplier * spiritMultiplier)
 
     const multiplier = getElementMultiplier(attackerElement, defenderElement)
     const effectiveness: 'super' | 'weak' | 'normal' =
@@ -684,6 +743,93 @@ export function isSleeping(combatant: BattleCombatant): boolean {
   return combatant.statusEffects.some((se) => se.effect.type === 'sleep')
 }
 
+// ── Ability Cooldowns ──
+
+/**
+ * Check if an ability is currently on cooldown for a combatant.
+ */
+export function isAbilityOnCooldown(combatant: BattleCombatant, abilityId: string): boolean {
+  return combatant.cooldowns.some((cd) => cd.abilityId === abilityId && cd.turnsRemaining > 0)
+}
+
+/**
+ * Get the remaining cooldown turns for an ability.
+ * Returns 0 if the ability is not on cooldown.
+ */
+export function getAbilityCooldown(combatant: BattleCombatant, abilityId: string): number {
+  const cooldown = combatant.cooldowns.find((cd) => cd.abilityId === abilityId)
+  return cooldown?.turnsRemaining ?? 0
+}
+
+/**
+ * Start the cooldown for an ability after it's used.
+ * Only starts cooldown if the ability has cooldownTurns > 0.
+ */
+export function startAbilityCooldown(combatant: BattleCombatant, ability: Ability): BattleCombatant {
+  const cooldownTurns = ability.cooldownTurns ?? 0
+  if (cooldownTurns <= 0) {
+    return combatant
+  }
+
+  // Remove any existing cooldown for this ability and add new one
+  const filteredCooldowns = combatant.cooldowns.filter((cd) => cd.abilityId !== ability.abilityId)
+  const newCooldown: AbilityCooldown = {
+    abilityId: ability.abilityId,
+    turnsRemaining: cooldownTurns,
+  }
+
+  return {
+    ...combatant,
+    cooldowns: [...filteredCooldowns, newCooldown],
+  }
+}
+
+/**
+ * Tick all cooldowns for a combatant, reducing turnsRemaining by 1.
+ * Removes cooldowns that reach 0.
+ */
+export function tickCooldowns(combatant: BattleCombatant): BattleCombatant {
+  const updatedCooldowns = combatant.cooldowns
+    .map((cd) => ({ ...cd, turnsRemaining: cd.turnsRemaining - 1 }))
+    .filter((cd) => cd.turnsRemaining > 0)
+
+  return {
+    ...combatant,
+    cooldowns: updatedCooldowns,
+  }
+}
+
+/**
+ * Get all abilities that are currently usable (not on cooldown, has MP).
+ */
+export function getUsableAbilities(
+  combatant: BattleCombatant,
+): ReadonlyArray<Ability> {
+  return combatant.abilities.filter((ability) => {
+    const hasMp = combatant.stats.currentMp >= ability.mpCost
+    const notOnCooldown = !isAbilityOnCooldown(combatant, ability.abilityId)
+    return hasMp && notOnCooldown
+  })
+}
+
+/**
+ * Tick cooldowns for all combatants in the battle.
+ * Call this at the start of a combatant's turn.
+ */
+export function tickCombatantCooldowns(battle: Battle, combatantId: string): Battle {
+  const updateCooldowns = (c: BattleCombatant): BattleCombatant => {
+    if (c.combatantId !== combatantId) return c
+    return tickCooldowns(c)
+  }
+
+  return {
+    ...battle,
+    playerSquad: battle.playerSquad.map(updateCooldowns),
+    enemySquad: battle.enemySquad.map(updateCooldowns),
+    turnOrder: battle.turnOrder.map(updateCooldowns),
+  }
+}
+
 // ── Enemy AI ──
 
 export function getEnemyAction(battle: Battle, enemy: BattleCombatant): BattleAction {
@@ -695,7 +841,11 @@ export function getEnemyAction(battle: Battle, enemy: BattleCombatant): BattleAc
   // If HP is low and has healing, heal
   const hpPercent = enemy.stats.currentHp / enemy.stats.maxHp
   if (hpPercent < 0.3) {
-    const healAbility = enemy.abilities.find((a) => a.type === 'healing' && enemy.stats.currentMp >= a.mpCost)
+    const healAbility = enemy.abilities.find(
+      (a) => a.type === 'healing' &&
+        enemy.stats.currentMp >= a.mpCost &&
+        !isAbilityOnCooldown(enemy, a.abilityId)
+    )
     if (healAbility) {
       return {
         type: 'ability',
@@ -708,12 +858,13 @@ export function getEnemyAction(battle: Battle, enemy: BattleCombatant): BattleAc
     }
   }
 
-  // Try to use a damaging ability if MP available
+  // Try to use a damaging ability if MP available and not on cooldown
   const usableAbilities = enemy.abilities.filter(
     (a) =>
       (a.type === 'physical' || a.type === 'magical') &&
       a.power > 0 &&
-      enemy.stats.currentMp >= a.mpCost,
+      enemy.stats.currentMp >= a.mpCost &&
+      !isAbilityOnCooldown(enemy, a.abilityId),
   )
 
   if (usableAbilities.length > 0 && randomChance(0.6)) {
@@ -802,6 +953,7 @@ export function createCombatantFromPlayer(
     abilities,
     statusEffects: [],
     capturable: false,
+    cooldowns: [],
   }
 }
 
@@ -823,6 +975,7 @@ export function createCombatantFromEnemy(
     abilities,
     statusEffects: [],
     capturable,
+    cooldowns: [],
   }
 }
 
@@ -890,6 +1043,24 @@ function applyStatusEffect(
       ...c,
       statusEffects: [...c.statusEffects, effect],
     }
+  }
+
+  return {
+    ...battle,
+    playerSquad: battle.playerSquad.map(update),
+    enemySquad: battle.enemySquad.map(update),
+    turnOrder: battle.turnOrder.map(update),
+  }
+}
+
+function startCooldownForCombatant(
+  battle: Battle,
+  combatantId: string,
+  ability: Ability,
+): Battle {
+  const update = (c: BattleCombatant): BattleCombatant => {
+    if (c.combatantId !== combatantId) return c
+    return startAbilityCooldown(c, ability)
   }
 
   return {

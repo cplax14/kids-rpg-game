@@ -1,4 +1,13 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+
+// Mock EventBus to prevent Phaser dependency
+vi.mock('../../../src/events/EventBus', () => ({
+  EventBus: {
+    emit: vi.fn(),
+    on: vi.fn(),
+    off: vi.fn(),
+  },
+}))
 import {
   isSquadFull,
   getSquadCount,
@@ -32,6 +41,7 @@ const mockAbility: Ability = {
   targetType: 'single_enemy',
   statusEffect: null,
   animation: 'slash',
+  cooldownTurns: 0,
 }
 
 const mockSpecies: MonsterSpecies = {
@@ -67,6 +77,7 @@ const mockSpecies: MonsterSpecies = {
   evolutionChain: null,
   breedingGroup: 'beast',
   breedingTraits: ['fire-affinity'],
+  obtainableVia: 'wild',
 }
 
 const createMockMonster = (overrides: Partial<MonsterInstance> = {}): MonsterInstance => ({
@@ -93,6 +104,16 @@ const createMockMonster = (overrides: Partial<MonsterInstance> = {}): MonsterIns
   isInSquad: false,
   capturedAt: new Date().toISOString(),
   bondLevel: 0,
+  generation: 0,
+  inheritedStatBonus: {},
+  legacyAbilities: [],
+  isPerfect: false,
+  equippedGear: {
+    collar: null,
+    saddle: null,
+    charm: null,
+    claws: null,
+  },
   ...overrides,
 })
 
