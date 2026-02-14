@@ -165,6 +165,15 @@ export const GENERATION_STAT_CEILING: Record<number, number> = {
   2: 1.2, // G2+: 120% max
 }
 
+// ── Battle Spirit Constants ──
+
+/** Maximum battle spirit level (escalation die) */
+export const BATTLE_SPIRIT_MAX = 5
+/** Damage bonus per spirit level (+8% per level) */
+export const BATTLE_SPIRIT_DAMAGE_BONUS = 0.08
+/** Accuracy bonus per spirit level (+3% per level) */
+export const BATTLE_SPIRIT_ACCURACY_BONUS = 3
+
 // ── Status Effect Constants ──
 
 export const POISON_DAMAGE_PERCENT = 0.1

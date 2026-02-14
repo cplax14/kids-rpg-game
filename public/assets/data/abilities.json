@@ -10,7 +10,8 @@
     "mpCost": 0,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "tackle"
+    "animation": "tackle",
+    "cooldownTurns": 0
   },
   {
     "abilityId": "scratch",
@@ -23,7 +24,8 @@
     "mpCost": 0,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "scratch"
+    "animation": "scratch",
+    "cooldownTurns": 0
   },
   {
     "abilityId": "bite",
@@ -36,7 +38,8 @@
     "mpCost": 0,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "bite"
+    "animation": "bite",
+    "cooldownTurns": 0
   },
   {
     "abilityId": "slam",
@@ -49,7 +52,8 @@
     "mpCost": 3,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "slam"
+    "animation": "slam",
+    "cooldownTurns": 1
   },
   {
     "abilityId": "ember",
@@ -62,7 +66,8 @@
     "mpCost": 4,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "ember"
+    "animation": "ember",
+    "cooldownTurns": 0
   },
   {
     "abilityId": "fireball",
@@ -75,7 +80,8 @@
     "mpCost": 8,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "fireball"
+    "animation": "fireball",
+    "cooldownTurns": 2
   },
   {
     "abilityId": "flame-burst",
@@ -88,7 +94,8 @@
     "mpCost": 12,
     "targetType": "all_enemies",
     "statusEffect": null,
-    "animation": "flame-burst"
+    "animation": "flame-burst",
+    "cooldownTurns": 3
   },
   {
     "abilityId": "water-splash",
@@ -101,7 +108,8 @@
     "mpCost": 4,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "water-splash"
+    "animation": "water-splash",
+    "cooldownTurns": 0
   },
   {
     "abilityId": "tidal-wave",
@@ -114,7 +122,8 @@
     "mpCost": 10,
     "targetType": "all_enemies",
     "statusEffect": null,
-    "animation": "tidal-wave"
+    "animation": "tidal-wave",
+    "cooldownTurns": 3
   },
   {
     "abilityId": "ice-shard",
@@ -127,7 +136,8 @@
     "mpCost": 7,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "ice-shard"
+    "animation": "ice-shard",
+    "cooldownTurns": 2
   },
   {
     "abilityId": "rock-throw",
@@ -140,7 +150,8 @@
     "mpCost": 3,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "rock-throw"
+    "animation": "rock-throw",
+    "cooldownTurns": 0
   },
   {
     "abilityId": "earthquake",
@@ -153,7 +164,8 @@
     "mpCost": 12,
     "targetType": "all_enemies",
     "statusEffect": null,
-    "animation": "earthquake"
+    "animation": "earthquake",
+    "cooldownTurns": 4
   },
   {
     "abilityId": "vine-whip",
@@ -166,7 +178,8 @@
     "mpCost": 4,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "vine-whip"
+    "animation": "vine-whip",
+    "cooldownTurns": 0
   },
   {
     "abilityId": "gust",
@@ -179,7 +192,8 @@
     "mpCost": 4,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "gust"
+    "animation": "gust",
+    "cooldownTurns": 0
   },
   {
     "abilityId": "tornado",
@@ -192,7 +206,8 @@
     "mpCost": 11,
     "targetType": "all_enemies",
     "statusEffect": null,
-    "animation": "tornado"
+    "animation": "tornado",
+    "cooldownTurns": 3
   },
   {
     "abilityId": "wind-blade",
@@ -205,7 +220,8 @@
     "mpCost": 7,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "wind-blade"
+    "animation": "wind-blade",
+    "cooldownTurns": 2
   },
   {
     "abilityId": "light-beam",
@@ -218,7 +234,8 @@
     "mpCost": 6,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "light-beam"
+    "animation": "light-beam",
+    "cooldownTurns": 1
   },
   {
     "abilityId": "radiance",
@@ -231,7 +248,8 @@
     "mpCost": 10,
     "targetType": "all_enemies",
     "statusEffect": null,
-    "animation": "radiance"
+    "animation": "radiance",
+    "cooldownTurns": 3
   },
   {
     "abilityId": "shadow-strike",
@@ -244,7 +262,8 @@
     "mpCost": 5,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "shadow-strike"
+    "animation": "shadow-strike",
+    "cooldownTurns": 1
   },
   {
     "abilityId": "dark-pulse",
@@ -257,7 +276,8 @@
     "mpCost": 10,
     "targetType": "all_enemies",
     "statusEffect": null,
-    "animation": "dark-pulse"
+    "animation": "dark-pulse",
+    "cooldownTurns": 3
   },
   {
     "abilityId": "heal",
@@ -270,7 +290,8 @@
     "mpCost": 5,
     "targetType": "single_ally",
     "statusEffect": null,
-    "animation": "heal"
+    "animation": "heal",
+    "cooldownTurns": 1
   },
   {
     "abilityId": "group-heal",
@@ -283,7 +304,8 @@
     "mpCost": 10,
     "targetType": "all_allies",
     "statusEffect": null,
-    "animation": "group-heal"
+    "animation": "group-heal",
+    "cooldownTurns": 3
   },
   {
     "abilityId": "poison-sting",
@@ -302,7 +324,8 @@
       "duration": 3,
       "magnitude": 0.1
     },
-    "animation": "poison-sting"
+    "animation": "poison-sting",
+    "cooldownTurns": 1
   },
   {
     "abilityId": "lullaby",
@@ -321,7 +344,8 @@
       "duration": 2,
       "magnitude": 0
     },
-    "animation": "lullaby"
+    "animation": "lullaby",
+    "cooldownTurns": 2
   },
   {
     "abilityId": "war-cry",
@@ -340,7 +364,8 @@
       "duration": 3,
       "magnitude": 0.3
     },
-    "animation": "war-cry"
+    "animation": "war-cry",
+    "cooldownTurns": 2
   },
   {
     "abilityId": "shield-wall",
@@ -359,7 +384,8 @@
       "duration": 3,
       "magnitude": 0.5
     },
-    "animation": "shield-wall"
+    "animation": "shield-wall",
+    "cooldownTurns": 2
   },
   {
     "abilityId": "quick-step",
@@ -378,7 +404,8 @@
       "duration": 3,
       "magnitude": 0.5
     },
-    "animation": "quick-step"
+    "animation": "quick-step",
+    "cooldownTurns": 2
   },
   {
     "abilityId": "slow-fog",
@@ -397,7 +424,8 @@
       "duration": 3,
       "magnitude": 0.5
     },
-    "animation": "slow-fog"
+    "animation": "slow-fog",
+    "cooldownTurns": 2
   },
   {
     "abilityId": "regen",
@@ -416,7 +444,8 @@
       "duration": 4,
       "magnitude": 0.08
     },
-    "animation": "regen"
+    "animation": "regen",
+    "cooldownTurns": 2
   },
   {
     "abilityId": "defense-boost",
@@ -435,7 +464,8 @@
       "duration": 3,
       "magnitude": 0.3
     },
-    "animation": "fortify"
+    "animation": "fortify",
+    "cooldownTurns": 2
   },
   {
     "abilityId": "power-strike",
@@ -448,7 +478,8 @@
     "mpCost": 6,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "power-strike"
+    "animation": "power-strike",
+    "cooldownTurns": 2
   },
   {
     "abilityId": "inferno",
@@ -461,7 +492,8 @@
     "mpCost": 14,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "inferno"
+    "animation": "inferno",
+    "cooldownTurns": 4
   },
   {
     "abilityId": "blizzard",
@@ -474,7 +506,8 @@
     "mpCost": 14,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "blizzard"
+    "animation": "blizzard",
+    "cooldownTurns": 4
   },
   {
     "abilityId": "boulder-crush",
@@ -487,7 +520,8 @@
     "mpCost": 12,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "boulder-crush"
+    "animation": "boulder-crush",
+    "cooldownTurns": 4
   },
   {
     "abilityId": "hurricane",
@@ -500,7 +534,8 @@
     "mpCost": 14,
     "targetType": "single_enemy",
     "statusEffect": null,
-    "animation": "hurricane"
+    "animation": "hurricane",
+    "cooldownTurns": 4
   },
   {
     "abilityId": "cleave",
@@ -513,7 +548,8 @@
     "mpCost": 5,
     "targetType": "adjacent_enemies",
     "statusEffect": null,
-    "animation": "cleave"
+    "animation": "cleave",
+    "cooldownTurns": 2
   },
   {
     "abilityId": "scatter-shot",
@@ -526,7 +562,8 @@
     "mpCost": 6,
     "targetType": "random_enemies_2",
     "statusEffect": null,
-    "animation": "scatter-shot"
+    "animation": "scatter-shot",
+    "cooldownTurns": 2
   },
   {
     "abilityId": "triple-strike",
@@ -539,7 +576,8 @@
     "mpCost": 8,
     "targetType": "random_enemies_3",
     "statusEffect": null,
-    "animation": "triple-strike"
+    "animation": "triple-strike",
+    "cooldownTurns": 3
   },
   {
     "abilityId": "flame-sweep",
@@ -552,7 +590,8 @@
     "mpCost": 7,
     "targetType": "adjacent_enemies",
     "statusEffect": null,
-    "animation": "flame-sweep"
+    "animation": "flame-sweep",
+    "cooldownTurns": 2
   },
   {
     "abilityId": "chain-lightning",
@@ -565,6 +604,7 @@
     "mpCost": 6,
     "targetType": "random_enemies_2",
     "statusEffect": null,
-    "animation": "chain-lightning"
+    "animation": "chain-lightning",
+    "cooldownTurns": 2
   }
 ]

@@ -12,8 +12,18 @@ import {
   createCombatantFromEnemy,
   getCurrentCombatant,
   advanceTurn,
+  incrementBattleSpirit,
+  getBattleSpiritDamageMultiplier,
+  getBattleSpiritAccuracyBonus,
+  isAbilityOnCooldown,
+  getAbilityCooldown,
+  startAbilityCooldown,
+  tickCooldowns,
+  getUsableAbilities,
+  tickCombatantCooldowns,
   type ActionResult,
 } from '../../../src/systems/CombatSystem'
+import { BATTLE_SPIRIT_MAX, BATTLE_SPIRIT_DAMAGE_BONUS, BATTLE_SPIRIT_ACCURACY_BONUS } from '../../../src/models/constants'
 import type { Battle, BattleCombatant, BattleAction, Ability, CharacterStats } from '../../../src/models/types'
 
 function makeStats(overrides?: Partial<CharacterStats>): CharacterStats {
@@ -44,6 +54,7 @@ const tackleAbility: Ability = {
   targetType: 'single_enemy',
   statusEffect: null,
   animation: 'tackle',
+  cooldownTurns: 0,
 }
 
 const healAbility: Ability = {
@@ -58,6 +69,7 @@ const healAbility: Ability = {
   targetType: 'self',
   statusEffect: null,
   animation: 'glow',
+  cooldownTurns: 1,
 }
 
 const fireAbility: Ability = {
@@ -72,6 +84,7 @@ const fireAbility: Ability = {
   targetType: 'single_enemy',
   statusEffect: null,
   animation: 'fire',
+  cooldownTurns: 0,
 }
 
 const poisonAbility: Ability = {
@@ -92,6 +105,7 @@ const poisonAbility: Ability = {
     magnitude: 0.1,
   },
   animation: 'poison',
+  cooldownTurns: 1,
 }
 
 const aoeAbility: Ability = {
@@ -106,6 +120,23 @@ const aoeAbility: Ability = {
   targetType: 'all_enemies',
   statusEffect: null,
   animation: 'quake',
+  cooldownTurns: 3,
+}
+
+// Ability with cooldown for testing cooldown system
+const fireballAbility: Ability = {
+  abilityId: 'fireball',
+  name: 'Fireball',
+  description: 'A powerful fire attack',
+  element: 'fire',
+  type: 'magical',
+  power: 70,
+  accuracy: 100,
+  mpCost: 8,
+  targetType: 'single_enemy',
+  statusEffect: null,
+  animation: 'fireball',
+  cooldownTurns: 2,
 }
 
 function makePlayer(overrides?: Partial<BattleCombatant>): BattleCombatant {
@@ -1098,5 +1129,466 @@ describe('integration - full battle turn', () => {
     const result = executeAction(battle, action)
     expect(result.battle.enemySquad[0].stats.currentHp).toBe(0)
     expect(checkBattleEnd(result.battle)).toBe('victory')
+  })
+})
+
+// ── Battle Spirit (Escalation Die) Tests ──
+
+describe('Battle Spirit - createBattle', () => {
+  it('initializes battleSpirit to 0', () => {
+    const battle = makeBattle()
+    expect(battle.battleSpirit).toBe(0)
+  })
+})
+
+describe('Battle Spirit - incrementBattleSpirit', () => {
+  it('increments battleSpirit by 1', () => {
+    const battle = makeBattle()
+    const updated = incrementBattleSpirit(battle)
+    expect(updated.battleSpirit).toBe(1)
+  })
+
+  it('caps battleSpirit at BATTLE_SPIRIT_MAX', () => {
+    let battle = { ...makeBattle(), battleSpirit: BATTLE_SPIRIT_MAX - 1 }
+    battle = incrementBattleSpirit(battle)
+    expect(battle.battleSpirit).toBe(BATTLE_SPIRIT_MAX)
+
+    // Should not exceed max
+    battle = incrementBattleSpirit(battle)
+    expect(battle.battleSpirit).toBe(BATTLE_SPIRIT_MAX)
+  })
+
+  it('does not mutate original battle', () => {
+    const battle = makeBattle()
+    incrementBattleSpirit(battle)
+    expect(battle.battleSpirit).toBe(0)
+  })
+})
+
+describe('Battle Spirit - getBattleSpiritDamageMultiplier', () => {
+  it('returns 1.0 when spirit is 0', () => {
+    const battle = makeBattle()
+    expect(getBattleSpiritDamageMultiplier(battle)).toBe(1.0)
+  })
+
+  it('returns correct multiplier for each spirit level', () => {
+    for (let level = 0; level <= BATTLE_SPIRIT_MAX; level++) {
+      const battle = { ...makeBattle(), battleSpirit: level }
+      const expected = 1.0 + level * BATTLE_SPIRIT_DAMAGE_BONUS
+      expect(getBattleSpiritDamageMultiplier(battle)).toBeCloseTo(expected)
+    }
+  })
+
+  it('returns 1.4 (40% bonus) at max spirit', () => {
+    const battle = { ...makeBattle(), battleSpirit: BATTLE_SPIRIT_MAX }
+    expect(getBattleSpiritDamageMultiplier(battle)).toBeCloseTo(1.4)
+  })
+})
+
+describe('Battle Spirit - getBattleSpiritAccuracyBonus', () => {
+  it('returns 0 when spirit is 0', () => {
+    const battle = makeBattle()
+    expect(getBattleSpiritAccuracyBonus(battle)).toBe(0)
+  })
+
+  it('returns correct bonus for each spirit level', () => {
+    for (let level = 0; level <= BATTLE_SPIRIT_MAX; level++) {
+      const battle = { ...makeBattle(), battleSpirit: level }
+      const expected = level * BATTLE_SPIRIT_ACCURACY_BONUS
+      expect(getBattleSpiritAccuracyBonus(battle)).toBe(expected)
+    }
+  })
+
+  it('returns 15 (15% bonus) at max spirit', () => {
+    const battle = { ...makeBattle(), battleSpirit: BATTLE_SPIRIT_MAX }
+    expect(getBattleSpiritAccuracyBonus(battle)).toBe(15)
+  })
+})
+
+describe('Battle Spirit - advanceTurn spirit increment', () => {
+  it('increments battleSpirit when wrapping to new round', () => {
+    const battle = { ...makeBattle(), currentTurnIndex: 1, battleSpirit: 0 }
+    // Turn order has 2 combatants (player + enemy)
+    const advanced = advanceTurn(battle)
+    expect(advanced.currentTurnIndex).toBe(0) // Wrapped around
+    expect(advanced.battleSpirit).toBe(1) // Spirit increased
+  })
+
+  it('does not increment battleSpirit during same round', () => {
+    const battle = { ...makeBattle(), currentTurnIndex: 0, battleSpirit: 0 }
+    const advanced = advanceTurn(battle)
+    expect(advanced.currentTurnIndex).toBe(1) // Advanced within round
+    expect(advanced.battleSpirit).toBe(0) // Spirit unchanged
+  })
+
+  it('caps battleSpirit at max on round advance', () => {
+    const battle = { ...makeBattle(), currentTurnIndex: 1, battleSpirit: BATTLE_SPIRIT_MAX }
+    const advanced = advanceTurn(battle)
+    expect(advanced.battleSpirit).toBe(BATTLE_SPIRIT_MAX)
+  })
+})
+
+describe('Battle Spirit - damage bonus application', () => {
+  it('player attack deals more damage with higher spirit', () => {
+    const battle = makeBattle()
+    const player = battle.playerSquad[0]
+    const enemy = battle.enemySquad[0]
+
+    const action: BattleAction = {
+      type: 'attack',
+      actorId: player.combatantId,
+      targetId: enemy.combatantId,
+      abilityId: null,
+      itemId: null,
+    }
+
+    // Run multiple trials to compare average damage at different spirit levels
+    const trials = 50
+    let totalDamageSpirit0 = 0
+    let totalDamageSpirit5 = 0
+
+    for (let i = 0; i < trials; i++) {
+      const result0 = executeAction({ ...battle, battleSpirit: 0 }, action)
+      totalDamageSpirit0 += result0.damage
+
+      const result5 = executeAction({ ...battle, battleSpirit: 5 }, action)
+      totalDamageSpirit5 += result5.damage
+    }
+
+    // Spirit 5 should deal significantly more damage than spirit 0
+    expect(totalDamageSpirit5 / trials).toBeGreaterThan(totalDamageSpirit0 / trials)
+  })
+
+  it('enemy attack damage is NOT affected by battle spirit', () => {
+    const battle = makeBattle()
+    const enemy = battle.enemySquad[0]
+    const player = battle.playerSquad[0]
+
+    const action: BattleAction = {
+      type: 'attack',
+      actorId: enemy.combatantId,
+      targetId: player.combatantId,
+      abilityId: null,
+      itemId: null,
+    }
+
+    // Run multiple trials - damage should be similar regardless of spirit
+    const trials = 50
+    let totalDamageSpirit0 = 0
+    let totalDamageSpirit5 = 0
+
+    for (let i = 0; i < trials; i++) {
+      const result0 = executeAction({ ...battle, battleSpirit: 0 }, action)
+      totalDamageSpirit0 += result0.damage
+
+      const result5 = executeAction({ ...battle, battleSpirit: 5 }, action)
+      totalDamageSpirit5 += result5.damage
+    }
+
+    // Average damage should be very similar (within 20% variance)
+    const avgDamage0 = totalDamageSpirit0 / trials
+    const avgDamage5 = totalDamageSpirit5 / trials
+    const ratio = avgDamage5 / avgDamage0
+    expect(ratio).toBeGreaterThan(0.8)
+    expect(ratio).toBeLessThan(1.2)
+  })
+})
+
+// ── Ability Cooldown Tests ──
+
+describe('Ability Cooldowns - isAbilityOnCooldown', () => {
+  it('returns false when combatant has no cooldowns', () => {
+    const combatant = createCombatantFromPlayer('Hero', makeStats(), [fireballAbility])
+    expect(isAbilityOnCooldown(combatant, 'fireball')).toBe(false)
+  })
+
+  it('returns true when ability is on cooldown', () => {
+    const combatant: BattleCombatant = {
+      ...createCombatantFromPlayer('Hero', makeStats(), [fireballAbility]),
+      cooldowns: [{ abilityId: 'fireball', turnsRemaining: 2 }],
+    }
+    expect(isAbilityOnCooldown(combatant, 'fireball')).toBe(true)
+  })
+
+  it('returns false when ability cooldown has reached 0', () => {
+    const combatant: BattleCombatant = {
+      ...createCombatantFromPlayer('Hero', makeStats(), [fireballAbility]),
+      cooldowns: [{ abilityId: 'fireball', turnsRemaining: 0 }],
+    }
+    expect(isAbilityOnCooldown(combatant, 'fireball')).toBe(false)
+  })
+
+  it('returns false for abilities not in cooldown list', () => {
+    const combatant: BattleCombatant = {
+      ...createCombatantFromPlayer('Hero', makeStats(), [fireballAbility, tackleAbility]),
+      cooldowns: [{ abilityId: 'fireball', turnsRemaining: 2 }],
+    }
+    expect(isAbilityOnCooldown(combatant, 'tackle')).toBe(false)
+  })
+})
+
+describe('Ability Cooldowns - getAbilityCooldown', () => {
+  it('returns 0 when ability is not on cooldown', () => {
+    const combatant = createCombatantFromPlayer('Hero', makeStats(), [fireballAbility])
+    expect(getAbilityCooldown(combatant, 'fireball')).toBe(0)
+  })
+
+  it('returns remaining turns when ability is on cooldown', () => {
+    const combatant: BattleCombatant = {
+      ...createCombatantFromPlayer('Hero', makeStats(), [fireballAbility]),
+      cooldowns: [{ abilityId: 'fireball', turnsRemaining: 3 }],
+    }
+    expect(getAbilityCooldown(combatant, 'fireball')).toBe(3)
+  })
+})
+
+describe('Ability Cooldowns - startAbilityCooldown', () => {
+  it('does not add cooldown for abilities with cooldownTurns 0', () => {
+    const combatant = createCombatantFromPlayer('Hero', makeStats(), [tackleAbility])
+    const updated = startAbilityCooldown(combatant, tackleAbility)
+    expect(updated.cooldowns).toHaveLength(0)
+  })
+
+  it('adds cooldown for abilities with cooldownTurns > 0', () => {
+    const combatant = createCombatantFromPlayer('Hero', makeStats(), [fireballAbility])
+    const updated = startAbilityCooldown(combatant, fireballAbility)
+    expect(updated.cooldowns).toHaveLength(1)
+    expect(updated.cooldowns[0].abilityId).toBe('fireball')
+    expect(updated.cooldowns[0].turnsRemaining).toBe(2)
+  })
+
+  it('replaces existing cooldown for same ability', () => {
+    const combatant: BattleCombatant = {
+      ...createCombatantFromPlayer('Hero', makeStats(), [fireballAbility]),
+      cooldowns: [{ abilityId: 'fireball', turnsRemaining: 1 }],
+    }
+    const updated = startAbilityCooldown(combatant, fireballAbility)
+    expect(updated.cooldowns).toHaveLength(1)
+    expect(updated.cooldowns[0].turnsRemaining).toBe(2)
+  })
+
+  it('does not mutate original combatant', () => {
+    const combatant = createCombatantFromPlayer('Hero', makeStats(), [fireballAbility])
+    startAbilityCooldown(combatant, fireballAbility)
+    expect(combatant.cooldowns).toHaveLength(0)
+  })
+})
+
+describe('Ability Cooldowns - tickCooldowns', () => {
+  it('decrements all cooldowns by 1', () => {
+    const combatant: BattleCombatant = {
+      ...createCombatantFromPlayer('Hero', makeStats(), [fireballAbility, aoeAbility]),
+      cooldowns: [
+        { abilityId: 'fireball', turnsRemaining: 2 },
+        { abilityId: 'quake', turnsRemaining: 3 },
+      ],
+    }
+    const updated = tickCooldowns(combatant)
+    expect(updated.cooldowns.find((cd) => cd.abilityId === 'fireball')?.turnsRemaining).toBe(1)
+    expect(updated.cooldowns.find((cd) => cd.abilityId === 'quake')?.turnsRemaining).toBe(2)
+  })
+
+  it('removes cooldowns that reach 0', () => {
+    const combatant: BattleCombatant = {
+      ...createCombatantFromPlayer('Hero', makeStats(), [fireballAbility]),
+      cooldowns: [{ abilityId: 'fireball', turnsRemaining: 1 }],
+    }
+    const updated = tickCooldowns(combatant)
+    expect(updated.cooldowns).toHaveLength(0)
+  })
+
+  it('does not mutate original combatant', () => {
+    const combatant: BattleCombatant = {
+      ...createCombatantFromPlayer('Hero', makeStats(), [fireballAbility]),
+      cooldowns: [{ abilityId: 'fireball', turnsRemaining: 2 }],
+    }
+    tickCooldowns(combatant)
+    expect(combatant.cooldowns[0].turnsRemaining).toBe(2)
+  })
+})
+
+describe('Ability Cooldowns - getUsableAbilities', () => {
+  it('returns all abilities when none are on cooldown and has MP', () => {
+    const combatant = createCombatantFromPlayer('Hero', makeStats({ currentMp: 50 }), [tackleAbility, fireballAbility])
+    const usable = getUsableAbilities(combatant)
+    expect(usable).toHaveLength(2)
+  })
+
+  it('excludes abilities on cooldown', () => {
+    const combatant: BattleCombatant = {
+      ...createCombatantFromPlayer('Hero', makeStats({ currentMp: 50 }), [tackleAbility, fireballAbility]),
+      cooldowns: [{ abilityId: 'fireball', turnsRemaining: 2 }],
+    }
+    const usable = getUsableAbilities(combatant)
+    expect(usable).toHaveLength(1)
+    expect(usable[0].abilityId).toBe('tackle')
+  })
+
+  it('excludes abilities without enough MP', () => {
+    const combatant = createCombatantFromPlayer('Hero', makeStats({ currentMp: 0 }), [tackleAbility, fireballAbility])
+    const usable = getUsableAbilities(combatant)
+    expect(usable).toHaveLength(1)
+    expect(usable[0].abilityId).toBe('tackle')
+  })
+
+  it('returns empty array when all abilities are on cooldown or no MP', () => {
+    const combatant: BattleCombatant = {
+      ...createCombatantFromPlayer('Hero', makeStats({ currentMp: 0 }), [fireballAbility]),
+      cooldowns: [{ abilityId: 'fireball', turnsRemaining: 2 }],
+    }
+    const usable = getUsableAbilities(combatant)
+    expect(usable).toHaveLength(0)
+  })
+})
+
+describe('Ability Cooldowns - tickCombatantCooldowns', () => {
+  it('ticks cooldowns for specified combatant in battle', () => {
+    const player = createCombatantFromPlayer('Hero', makeStats(), [fireballAbility])
+    const playerWithCooldown: BattleCombatant = {
+      ...player,
+      cooldowns: [{ abilityId: 'fireball', turnsRemaining: 2 }],
+    }
+    const enemy = createCombatantFromEnemy('Slime', makeStats(), 'neutral', [tackleAbility])
+    const battle = createBattle([playerWithCooldown], [enemy])
+
+    const updatedBattle = tickCombatantCooldowns(battle, playerWithCooldown.combatantId)
+    const updatedPlayer = updatedBattle.playerSquad[0]
+    expect(updatedPlayer.cooldowns[0].turnsRemaining).toBe(1)
+  })
+
+  it('does not tick cooldowns for other combatants', () => {
+    const player: BattleCombatant = {
+      ...createCombatantFromPlayer('Hero', makeStats(), [fireballAbility]),
+      cooldowns: [{ abilityId: 'fireball', turnsRemaining: 2 }],
+    }
+    const enemy: BattleCombatant = {
+      ...createCombatantFromEnemy('Slime', makeStats(), 'neutral', [fireballAbility]),
+      cooldowns: [{ abilityId: 'fireball', turnsRemaining: 3 }],
+    }
+    const battle = createBattle([player], [enemy])
+
+    const updatedBattle = tickCombatantCooldowns(battle, player.combatantId)
+    const updatedEnemy = updatedBattle.enemySquad[0]
+    expect(updatedEnemy.cooldowns[0].turnsRemaining).toBe(3) // Unchanged
+  })
+})
+
+describe('Ability Cooldowns - executeAction with cooldowns', () => {
+  it('blocks ability use when on cooldown', () => {
+    const player: BattleCombatant = {
+      ...createCombatantFromPlayer('Hero', makeStats({ currentMp: 50 }), [fireballAbility]),
+      cooldowns: [{ abilityId: 'fireball', turnsRemaining: 2 }],
+    }
+    const enemy = createCombatantFromEnemy('Slime', makeStats(), 'neutral', [tackleAbility])
+    const battle = createBattle([player], [enemy])
+
+    const action: BattleAction = {
+      type: 'ability',
+      actorId: player.combatantId,
+      targetId: enemy.combatantId,
+      targetIds: [],
+      abilityId: 'fireball',
+      itemId: null,
+    }
+
+    const result = executeAction(battle, action)
+    expect(result.message).toContain('recharging')
+    expect(result.message).toContain('2')
+    expect(result.damage).toBe(0)
+  })
+
+  it('allows ability use when not on cooldown', () => {
+    const player = createCombatantFromPlayer('Hero', makeStats({ currentMp: 50 }), [fireballAbility])
+    const enemy = createCombatantFromEnemy('Slime', makeStats(), 'neutral', [tackleAbility])
+    const battle = createBattle([player], [enemy])
+
+    const action: BattleAction = {
+      type: 'ability',
+      actorId: player.combatantId,
+      targetId: enemy.combatantId,
+      targetIds: [],
+      abilityId: 'fireball',
+      itemId: null,
+    }
+
+    const result = executeAction(battle, action)
+    expect(result.damage).toBeGreaterThan(0)
+  })
+
+  it('starts cooldown after successful ability use', () => {
+    const player = createCombatantFromPlayer('Hero', makeStats({ currentMp: 50 }), [fireballAbility])
+    const enemy = createCombatantFromEnemy('Slime', makeStats(), 'neutral', [tackleAbility])
+    const battle = createBattle([player], [enemy])
+
+    const action: BattleAction = {
+      type: 'ability',
+      actorId: player.combatantId,
+      targetId: enemy.combatantId,
+      targetIds: [],
+      abilityId: 'fireball',
+      itemId: null,
+    }
+
+    const result = executeAction(battle, action)
+    const updatedPlayer = result.battle.playerSquad[0]
+    expect(updatedPlayer.cooldowns).toHaveLength(1)
+    expect(updatedPlayer.cooldowns[0].abilityId).toBe('fireball')
+    expect(updatedPlayer.cooldowns[0].turnsRemaining).toBe(2)
+  })
+
+  it('does not start cooldown for abilities with cooldownTurns 0', () => {
+    const player = createCombatantFromPlayer('Hero', makeStats({ currentMp: 50 }), [tackleAbility, fireAbility])
+    const enemy = createCombatantFromEnemy('Slime', makeStats(), 'neutral', [tackleAbility])
+    const battle = createBattle([player], [enemy])
+
+    const action: BattleAction = {
+      type: 'ability',
+      actorId: player.combatantId,
+      targetId: enemy.combatantId,
+      targetIds: [],
+      abilityId: 'ember',
+      itemId: null,
+    }
+
+    const result = executeAction(battle, action)
+    const updatedPlayer = result.battle.playerSquad[0]
+    expect(updatedPlayer.cooldowns).toHaveLength(0)
+  })
+})
+
+describe('Ability Cooldowns - createCombatantFromPlayer', () => {
+  it('initializes with empty cooldowns array', () => {
+    const combatant = createCombatantFromPlayer('Hero', makeStats(), [tackleAbility])
+    expect(combatant.cooldowns).toEqual([])
+  })
+})
+
+describe('Ability Cooldowns - createCombatantFromEnemy', () => {
+  it('initializes with empty cooldowns array', () => {
+    const combatant = createCombatantFromEnemy('Slime', makeStats(), 'neutral', [tackleAbility])
+    expect(combatant.cooldowns).toEqual([])
+  })
+})
+
+describe('Ability Cooldowns - enemy AI respects cooldowns', () => {
+  it('enemy AI does not use abilities on cooldown', () => {
+    const player = createCombatantFromPlayer('Hero', makeStats(), [tackleAbility])
+    const enemy: BattleCombatant = {
+      ...createCombatantFromEnemy('Slime', makeStats({ currentMp: 50 }), 'neutral', [healAbility, tackleAbility]),
+      stats: { ...makeStats({ currentMp: 50, currentHp: 10 }) }, // Low HP to trigger heal priority
+      cooldowns: [{ abilityId: 'heal', turnsRemaining: 2 }],
+    }
+    const battle = createBattle([player], [enemy])
+
+    // Run multiple times to verify heal is never used when on cooldown
+    let usedHeal = false
+    for (let i = 0; i < 50; i++) {
+      const action = getEnemyAction(battle, battle.enemySquad[0])
+      if (action.type === 'ability' && action.abilityId === 'heal') {
+        usedHeal = true
+        break
+      }
+    }
+    expect(usedHeal).toBe(false)
   })
 })

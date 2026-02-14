@@ -59,6 +59,31 @@ export interface Equipment {
   readonly specialEffect: string | null
 }
 
+// ── Monster Gear ──
+
+export type MonsterGearSlot = 'collar' | 'saddle' | 'charm' | 'claws'
+export type GearRarity = 'common' | 'uncommon' | 'rare' | 'epic'
+
+export interface MonsterGear {
+  readonly gearId: string
+  readonly name: string
+  readonly description: string
+  readonly slot: MonsterGearSlot
+  readonly rarity: GearRarity
+  readonly statModifiers: Partial<CharacterStats>
+  readonly levelRequirement: number
+  readonly iconKey: string
+  readonly buyPrice: number
+  readonly sellPrice: number
+}
+
+export interface MonsterGearSlots {
+  readonly collar: MonsterGear | null
+  readonly saddle: MonsterGear | null
+  readonly charm: MonsterGear | null
+  readonly claws: MonsterGear | null
+}
+
 // ── Player Character ──
 
 export interface PlayerCharacter {
@@ -99,6 +124,15 @@ export interface Ability {
   readonly targetType: TargetType
   readonly statusEffect: StatusEffect | null
   readonly animation: string
+  /** Turns before ability can be reused (0 = no cooldown) */
+  readonly cooldownTurns: number
+}
+
+// ── Ability Cooldowns ──
+
+export interface AbilityCooldown {
+  readonly abilityId: string
+  readonly turnsRemaining: number
 }
 
 export interface LearnableAbility {
@@ -177,6 +211,8 @@ export interface MonsterInstance {
   readonly inheritedStatBonus: Partial<CharacterStats> // Bonus from parent stats
   readonly legacyAbilities: ReadonlyArray<string> // Ability IDs inherited from parents
   readonly isPerfect: boolean // Rare perfect offspring flag
+  // Monster Gear
+  readonly equippedGear: MonsterGearSlots
 }
 
 // ── Items ──
@@ -248,6 +284,8 @@ export interface BattleCombatant {
   readonly abilities: ReadonlyArray<Ability>
   readonly statusEffects: ReadonlyArray<ActiveStatusEffect>
   readonly capturable: boolean
+  /** Active ability cooldowns for this combatant */
+  readonly cooldowns: ReadonlyArray<AbilityCooldown>
 }
 
 export type BattleActionType = 'attack' | 'ability' | 'item' | 'capture' | 'flee' | 'defend'
@@ -283,6 +321,8 @@ export interface Battle {
   readonly canFlee: boolean
   readonly backgroundKey: string
   readonly rewards: BattleRewards | null
+  /** Battle Spirit level (0-5). Increases each round, gives player bonuses. */
+  readonly battleSpirit: number
 }
 
 // ── Capture ──
@@ -659,4 +699,93 @@ export interface AchievementStats {
   readonly speciesDiscovered: number
   readonly monstersBreed: number
   readonly highestPlayerLevel: number
+}
+
+// ── Progress Clocks ──
+
+export type ClockType = 'quest' | 'event' | 'ability' | 'boss'
+export type ClockSegments = 4 | 6 | 8
+
+export interface ProgressClock {
+  readonly clockId: string
+  readonly name: string
+  readonly segments: ClockSegments
+  readonly filled: number
+  readonly clockType: ClockType
+  readonly iconKey?: string
+}
+
+// ── Wave Mode ──
+
+export interface WaveEnemyEntry {
+  readonly speciesId: string
+  readonly level: number
+  readonly count: number
+}
+
+export interface WaveDefinition {
+  readonly waveNumber: number
+  readonly enemies: ReadonlyArray<WaveEnemyEntry>
+  readonly difficultyMultiplier: number // 1.0, 1.2, 1.5
+  readonly rewards: QuestRewards
+}
+
+export interface WaveChallengeDefinition {
+  readonly challengeId: string
+  readonly name: string
+  readonly description: string
+  readonly recommendedLevel: number
+  readonly waves: ReadonlyArray<WaveDefinition>
+  readonly finalRewards: QuestRewards
+  readonly backgroundKey: string
+}
+
+export interface WaveBattleState {
+  readonly challengeId: string
+  readonly currentWave: number
+  readonly totalWaves: number
+  readonly accumulatedRewards: QuestRewards
+}
+
+// ── Bounty Board System ──
+
+export type BountyTier = 'easy' | 'medium' | 'hard'
+
+export interface BountyDefinition {
+  readonly bountyId: string
+  readonly name: string
+  readonly description: string
+  readonly tier: BountyTier
+  readonly objectives: ReadonlyArray<QuestObjective>
+  readonly baseRewards: QuestRewards
+  readonly poolId: string
+}
+
+export interface BountyPool {
+  readonly poolId: string
+  readonly name: string
+  readonly bountyIds: ReadonlyArray<string>
+  readonly tier: BountyTier
+}
+
+export interface BountyProgress {
+  readonly bountyId: string
+  readonly status: 'active' | 'completed' | 'claimed'
+  readonly objectiveProgress: Record<string, number>
+  readonly acceptedAt: string
+}
+
+export interface BountyBoardState {
+  readonly lastRefreshDate: string // ISO date (YYYY-MM-DD)
+  readonly availableBounties: ReadonlyArray<string>
+  readonly activeBounty: BountyProgress | null
+  readonly completedToday: ReadonlyArray<string>
+  readonly streakCount: number
+  readonly lastStreakDate: string | null
+}
+
+export interface StreakReward {
+  readonly streakDays: number
+  readonly goldMultiplier: number
+  readonly bonusItems: ReadonlyArray<QuestRewardItem>
 }

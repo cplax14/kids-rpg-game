@@ -15,6 +15,8 @@ import {
   checkBattleEnd,
   calculateTurnOrder,
   getCurrentCombatant,
+  incrementBattleSpirit,
+  tickCombatantCooldowns,
   type ActionResult,
   type ActionOptions,
 } from '../systems/CombatSystem'
@@ -92,6 +94,7 @@ export class BattleScene extends Phaser.Scene {
   private lastCommandAbilityId: string | null = null
   private captureHintShown: boolean = false
   private activeTooltip: BattleTooltip | null = null
+  private lastRoundNumber: number = 1
 
   constructor() {
     super({ key: SCENE_KEYS.BATTLE })
@@ -133,6 +136,8 @@ export class BattleScene extends Phaser.Scene {
 
     this.hud.updatePlayerStats(this.battle.playerSquad)
     this.hud.updateEnemyStats(this.battle.enemySquad, this.isBossBattle)
+    this.hud.updateBattleSpirit(this.battle.battleSpirit, false)
+    this.lastRoundNumber = this.battle.turnCount
 
     // Intro sequence
     this.cameras.main.fadeIn(300)
@@ -725,6 +730,14 @@ export class BattleScene extends Phaser.Scene {
         ...this.battle,
         turnOrder: calculateTurnOrder([...this.battle.playerSquad, ...this.battle.enemySquad]),
       }
+
+      // Increment Battle Spirit at the start of each new round (after round 1)
+      if (this.battle.turnCount > this.lastRoundNumber) {
+        this.battle = incrementBattleSpirit(this.battle)
+        this.lastRoundNumber = this.battle.turnCount
+        this.hud.updateBattleSpirit(this.battle.battleSpirit, true)
+        this.hud.showSpiritIncrease(this.battle.battleSpirit)
+      }
     }
 
     // Check for battle end
@@ -747,6 +760,10 @@ export class BattleScene extends Phaser.Scene {
 
     // Process status effects at start of turn
     this.battle = processStatusEffects(this.battle, current.combatantId)
+
+    // Tick cooldowns for this combatant (reduce by 1 turn)
+    this.battle = tickCombatantCooldowns(this.battle, current.combatantId)
+
     this.hud.updatePlayerStats(this.battle.playerSquad)
     this.hud.updateEnemyStats(this.battle.enemySquad, this.isBossBattle)
 
@@ -943,7 +960,7 @@ export class BattleScene extends Phaser.Scene {
     if (choice === 'ability' && !abilityId) {
       // Show ability submenu
       this.hud.hideCommandMenu()
-      this.hud.showAbilityMenu(current.abilities, current.stats.currentMp)
+      this.hud.showAbilityMenu(current.abilities, current.stats.currentMp, current.cooldowns)
       return
     }
 
@@ -1794,5 +1811,6 @@ export class BattleScene extends Phaser.Scene {
     this.lastCommandTime = 0
     this.lastCommandChoice = null
     this.lastCommandAbilityId = null
+    this.lastRoundNumber = 1
   }
 }

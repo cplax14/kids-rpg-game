@@ -4,6 +4,7 @@ import type {
   Ability,
   CharacterStats,
   LearnableAbility,
+  MonsterGearSlots,
 } from '../models/types'
 import { generateMonsterId } from '../utils/id'
 import { clamp } from '../utils/math'
@@ -185,6 +186,13 @@ export function createMonsterInstance(
     inheritedStatBonus: options?.inheritedStatBonus ?? {},
     legacyAbilities: options?.legacyAbilities ?? [],
     isPerfect: options?.isPerfect ?? false,
+    // Monster Gear (all slots empty by default)
+    equippedGear: {
+      collar: null,
+      saddle: null,
+      charm: null,
+      claws: null,
+    },
   }
 }
 

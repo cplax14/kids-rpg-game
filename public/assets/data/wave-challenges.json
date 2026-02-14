@@ -1,0 +1,224 @@
+[
+  {
+    "challengeId": "forest-gauntlet",
+    "name": "Forest Gauntlet",
+    "description": "Battle through waves of forest creatures!",
+    "recommendedLevel": 5,
+    "backgroundKey": "battle-forest",
+    "waves": [
+      {
+        "waveNumber": 1,
+        "enemies": [
+          { "speciesId": "flamepup", "level": 3, "count": 2 }
+        ],
+        "difficultyMultiplier": 1.0,
+        "rewards": {
+          "experience": 50,
+          "gold": 20,
+          "items": [],
+          "equipmentId": null
+        }
+      },
+      {
+        "waveNumber": 2,
+        "enemies": [
+          { "speciesId": "flamepup", "level": 4, "count": 2 },
+          { "speciesId": "bubblefin", "level": 4, "count": 1 }
+        ],
+        "difficultyMultiplier": 1.1,
+        "rewards": {
+          "experience": 75,
+          "gold": 30,
+          "items": [{ "itemId": "potion", "quantity": 1 }],
+          "equipmentId": null
+        }
+      },
+      {
+        "waveNumber": 3,
+        "enemies": [
+          { "speciesId": "stoneling", "level": 5, "count": 2 },
+          { "speciesId": "flamepup", "level": 5, "count": 1 }
+        ],
+        "difficultyMultiplier": 1.2,
+        "rewards": {
+          "experience": 100,
+          "gold": 50,
+          "items": [{ "itemId": "super-potion", "quantity": 1 }],
+          "equipmentId": null
+        }
+      }
+    ],
+    "finalRewards": {
+      "experience": 200,
+      "gold": 150,
+      "items": [
+        { "itemId": "mega-ball", "quantity": 3 },
+        { "itemId": "revive", "quantity": 1 }
+      ],
+      "equipmentId": null
+    }
+  },
+  {
+    "challengeId": "cave-conquest",
+    "name": "Cave Conquest",
+    "description": "Delve deep into the caves and face their denizens!",
+    "recommendedLevel": 10,
+    "backgroundKey": "battle-cave",
+    "waves": [
+      {
+        "waveNumber": 1,
+        "enemies": [
+          { "speciesId": "stoneling", "level": 8, "count": 2 }
+        ],
+        "difficultyMultiplier": 1.0,
+        "rewards": {
+          "experience": 80,
+          "gold": 40,
+          "items": [],
+          "equipmentId": null
+        }
+      },
+      {
+        "waveNumber": 2,
+        "enemies": [
+          { "speciesId": "stoneling", "level": 9, "count": 2 },
+          { "speciesId": "breezling", "level": 9, "count": 1 }
+        ],
+        "difficultyMultiplier": 1.1,
+        "rewards": {
+          "experience": 100,
+          "gold": 50,
+          "items": [{ "itemId": "mana-potion", "quantity": 1 }],
+          "equipmentId": null
+        }
+      },
+      {
+        "waveNumber": 3,
+        "enemies": [
+          { "speciesId": "rockhound", "level": 10, "count": 1 },
+          { "speciesId": "stoneling", "level": 10, "count": 2 }
+        ],
+        "difficultyMultiplier": 1.2,
+        "rewards": {
+          "experience": 150,
+          "gold": 75,
+          "items": [{ "itemId": "super-potion", "quantity": 2 }],
+          "equipmentId": null
+        }
+      },
+      {
+        "waveNumber": 4,
+        "enemies": [
+          { "speciesId": "rockhound", "level": 11, "count": 2 },
+          { "speciesId": "breezling", "level": 10, "count": 1 }
+        ],
+        "difficultyMultiplier": 1.3,
+        "rewards": {
+          "experience": 200,
+          "gold": 100,
+          "items": [{ "itemId": "revive", "quantity": 1 }],
+          "equipmentId": null
+        }
+      }
+    ],
+    "finalRewards": {
+      "experience": 400,
+      "gold": 300,
+      "items": [
+        { "itemId": "ultra-ball", "quantity": 2 },
+        { "itemId": "max-revive", "quantity": 1 }
+      ],
+      "equipmentId": null
+    }
+  },
+  {
+    "challengeId": "elemental-trial",
+    "name": "Elemental Trial",
+    "description": "Face monsters of all elements in this grueling challenge!",
+    "recommendedLevel": 15,
+    "backgroundKey": "battle-volcano",
+    "waves": [
+      {
+        "waveNumber": 1,
+        "enemies": [
+          { "speciesId": "flamepup", "level": 13, "count": 2 },
+          { "speciesId": "bubblefin", "level": 13, "count": 1 }
+        ],
+        "difficultyMultiplier": 1.0,
+        "rewards": {
+          "experience": 120,
+          "gold": 60,
+          "items": [{ "itemId": "potion", "quantity": 2 }],
+          "equipmentId": null
+        }
+      },
+      {
+        "waveNumber": 2,
+        "enemies": [
+          { "speciesId": "stoneling", "level": 14, "count": 2 },
+          { "speciesId": "breezling", "level": 14, "count": 2 }
+        ],
+        "difficultyMultiplier": 1.1,
+        "rewards": {
+          "experience": 150,
+          "gold": 80,
+          "items": [{ "itemId": "mana-potion", "quantity": 2 }],
+          "equipmentId": null
+        }
+      },
+      {
+        "waveNumber": 3,
+        "enemies": [
+          { "speciesId": "infernox", "level": 15, "count": 1 },
+          { "speciesId": "aquaflux", "level": 15, "count": 1 }
+        ],
+        "difficultyMultiplier": 1.2,
+        "rewards": {
+          "experience": 200,
+          "gold": 100,
+          "items": [{ "itemId": "super-potion", "quantity": 2 }],
+          "equipmentId": null
+        }
+      },
+      {
+        "waveNumber": 4,
+        "enemies": [
+          { "speciesId": "rockhound", "level": 15, "count": 1 },
+          { "speciesId": "galebird", "level": 15, "count": 1 },
+          { "speciesId": "stoneling", "level": 14, "count": 1 }
+        ],
+        "difficultyMultiplier": 1.3,
+        "rewards": {
+          "experience": 250,
+          "gold": 120,
+          "items": [{ "itemId": "revive", "quantity": 1 }],
+          "equipmentId": null
+        }
+      },
+      {
+        "waveNumber": 5,
+        "enemies": [
+          { "speciesId": "infernox", "level": 16, "count": 1 },
+          { "speciesId": "aquaflux", "level": 16, "count": 1 },
+          { "speciesId": "galebird", "level": 16, "count": 1 }
+        ],
+        "difficultyMultiplier": 1.5,
+        "rewards": {
+          "experience": 350,
+          "gold": 200,
+          "items": [{ "itemId": "max-revive", "quantity": 1 }],
+          "equipmentId": null
+        }
+      }
+    ],
+    "finalRewards": {
+      "experience": 800,
+      "gold": 500,
+      "items": [
+        { "itemId": "master-ball", "quantity": 1 },
+        { "itemId": "trait-crystal", "quantity": 1 }
+      ],
+      "equipmentId": null
+    }
+  }
+]

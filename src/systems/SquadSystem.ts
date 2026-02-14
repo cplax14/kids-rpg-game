@@ -13,6 +13,7 @@ import {
 import { clamp } from '../utils/math'
 import { setMonsterInSquad, increaseBondLevel, getSpecies } from './MonsterSystem'
 import { generateId } from '../utils/id'
+import { applyGearStats } from './MonsterGearSystem'
 
 // ── Squad Queries ──
 
@@ -154,7 +155,9 @@ export function createSquadCombatants(
     .filter((monster) => monster.stats.currentHp > 0)
     .map((monster) => {
       const species = getSpecies(monster.speciesId)
+      // Apply bond bonus first, then gear stats
       const bondedStats = applyBondBonus(monster)
+      const finalStats = applyGearStats(bondedStats, monster.equippedGear)
 
       return {
         combatantId: `squad-${monster.instanceId}`,
@@ -162,9 +165,10 @@ export function createSquadCombatants(
         isPlayer: true,
         isMonster: true,
         speciesId: monster.speciesId,
-        stats: bondedStats,
+        stats: finalStats,
         abilities: monster.learnedAbilities,
         statusEffects: [],
+        cooldowns: [],
         capturable: false, // Player's monsters cannot be captured
       }
     })
@@ -175,16 +179,19 @@ export function createCombatantFromMonster(
   useBondBonus: boolean = true,
 ): BattleCombatant {
   const species = getSpecies(monster.speciesId)
-  const stats = useBondBonus ? applyBondBonus(monster) : monster.stats
+  // Apply bond bonus first, then gear stats
+  const baseStats = useBondBonus ? applyBondBonus(monster) : monster.stats
+  const finalStats = applyGearStats(baseStats, monster.equippedGear)
 
   return {
     combatantId: `squad-${monster.instanceId}`,
     name: monster.nickname ?? species?.name ?? 'Monster',
     isPlayer: true,
     isMonster: true,
-    stats,
+    stats: finalStats,
     abilities: monster.learnedAbilities,
     statusEffects: [],
+    cooldowns: [],
     capturable: false,
   }
 }

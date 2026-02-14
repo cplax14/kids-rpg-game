@@ -10,6 +10,13 @@ import type {
   QuestRewards,
   AchievementDefinition,
   AchievementProgress,
+  MonsterGear,
+  MonsterGearSlot,
+  WaveChallengeDefinition,
+  WaveBattleState,
+  BountyDefinition,
+  BountyProgress,
+  StreakReward,
 } from '../models/types'
 
 export const GAME_EVENTS = {
@@ -56,6 +63,22 @@ export const GAME_EVENTS = {
   SQUAD_CHANGED: 'squad:changed',
   SQUAD_MONSTER_ADDED: 'squad:monster_added',
   SQUAD_MONSTER_REMOVED: 'squad:monster_removed',
+
+  // Monster Gear
+  MONSTER_GEAR_EQUIPPED: 'monster:gear_equipped',
+  MONSTER_GEAR_UNEQUIPPED: 'monster:gear_unequipped',
+
+  // Wave Mode
+  WAVE_COMPLETED: 'wave:completed',
+  WAVE_CHALLENGE_COMPLETED: 'wave:challenge_completed',
+  WAVE_CHALLENGE_FAILED: 'wave:challenge_failed',
+
+  // Bounty Board
+  BOUNTY_ACCEPTED: 'bounty:accepted',
+  BOUNTY_COMPLETED: 'bounty:completed',
+  BOUNTY_CLAIMED: 'bounty:claimed',
+  BOUNTY_BOARD_REFRESHED: 'bounty:board_refreshed',
+  BOUNTY_STREAK_UPDATED: 'bounty:streak_updated',
 
   // Breeding
   BREEDING_STARTED: 'breeding:started',
@@ -148,4 +171,20 @@ export interface GameEventPayloads {
 
   // Fast travel events
   [GAME_EVENTS.FAST_TRAVEL_REQUESTED]: { targetAreaId: string }
+
+  // Monster gear events
+  [GAME_EVENTS.MONSTER_GEAR_EQUIPPED]: { monster: MonsterInstance; gear: MonsterGear; slot: MonsterGearSlot }
+  [GAME_EVENTS.MONSTER_GEAR_UNEQUIPPED]: { monster: MonsterInstance; gear: MonsterGear; slot: MonsterGearSlot }
+
+  // Wave mode events
+  [GAME_EVENTS.WAVE_COMPLETED]: { waveNumber: number; totalWaves: number; rewards: QuestRewards }
+  [GAME_EVENTS.WAVE_CHALLENGE_COMPLETED]: { challenge: WaveChallengeDefinition; state: WaveBattleState; totalRewards: QuestRewards }
+  [GAME_EVENTS.WAVE_CHALLENGE_FAILED]: { challenge: WaveChallengeDefinition; state: WaveBattleState; waveReached: number }
+
+  // Bounty board events
+  [GAME_EVENTS.BOUNTY_ACCEPTED]: { bounty: BountyDefinition; progress: BountyProgress }
+  [GAME_EVENTS.BOUNTY_COMPLETED]: { bounty: BountyDefinition; progress: BountyProgress }
+  [GAME_EVENTS.BOUNTY_CLAIMED]: { bounty: BountyDefinition; rewards: QuestRewards; streak: StreakReward | null }
+  [GAME_EVENTS.BOUNTY_BOARD_REFRESHED]: { availableBounties: ReadonlyArray<string>; date: string }
+  [GAME_EVENTS.BOUNTY_STREAK_UPDATED]: { previousStreak: number; newStreak: number; streakReward: StreakReward | null }
 }

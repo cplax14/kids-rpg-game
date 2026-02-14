@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
-import type { BattleCombatant, Ability, InventorySlot, MonsterElement } from '../../models/types'
+import type { BattleCombatant, Ability, InventorySlot, MonsterElement, AbilityCooldown } from '../../models/types'
+import { BATTLE_SPIRIT_MAX } from '../../models/constants'
 import { GAME_WIDTH, GAME_HEIGHT, COLORS, TEXT_STYLES, DEPTH } from '../../config'
 import { drawElementIndicator, ELEMENT_INDICATORS } from '../../utils/accessibility'
 import { TargetSelector, type TargetPosition } from './TargetSelector'
@@ -13,6 +14,7 @@ interface HudElements {
   readonly messageBox: Phaser.GameObjects.Container
   readonly abilityMenu: Phaser.GameObjects.Container | null
   readonly activeTurnIndicator: Phaser.GameObjects.Container | null
+  readonly battleSpiritIndicator: Phaser.GameObjects.Container
 }
 
 interface ButtonRef {
@@ -43,6 +45,7 @@ export class BattleHUD {
       messageBox: this.createMessageBox(),
       abilityMenu: null,
       activeTurnIndicator: null,
+      battleSpiritIndicator: this.createBattleSpiritIndicator(),
     }
     this.hideAll()
   }
@@ -62,7 +65,11 @@ export class BattleHUD {
     this.elements.commandMenu.setVisible(false)
   }
 
-  showAbilityMenu(abilities: ReadonlyArray<Ability>, actorMp: number): void {
+  showAbilityMenu(
+    abilities: ReadonlyArray<Ability>,
+    actorMp: number,
+    cooldowns: ReadonlyArray<AbilityCooldown> = [],
+  ): void {
     this.hideAbilityMenu()
 
     const container = this.scene.add.container(GAME_WIDTH / 2 - 200, GAME_HEIGHT - 220)
@@ -78,11 +85,19 @@ export class BattleHUD {
 
     abilities.forEach((ability, index) => {
       const y = 10 + index * 45
-      const canUse = actorMp >= ability.mpCost
+      const cooldown = cooldowns.find((cd) => cd.abilityId === ability.abilityId)
+      const isOnCooldown = cooldown && cooldown.turnsRemaining > 0
+      const hasMp = actorMp >= ability.mpCost
+      const canUse = hasMp && !isOnCooldown
       const alpha = canUse ? 1.0 : 0.4
 
       const btn = this.scene.add.graphics()
-      btn.fillStyle(COLORS.SECONDARY, 0.3)
+      // Use different background color for cooldown abilities
+      if (isOnCooldown) {
+        btn.fillStyle(0x555555, 0.4)
+      } else {
+        btn.fillStyle(COLORS.SECONDARY, 0.3)
+      }
       btn.fillRoundedRect(10, y, 380, 38, 8)
       container.add(btn)
 
@@ -93,11 +108,34 @@ export class BattleHUD {
       nameText.setAlpha(alpha)
       container.add(nameText)
 
-      const mpText = this.scene.add.text(280, y + 8, `MP: ${ability.mpCost}`, {
-        ...TEXT_STYLES.SMALL,
-        color: canUse ? '#42a5f5' : '#ef5350',
-      })
-      container.add(mpText)
+      // Show cooldown badge or MP cost
+      if (isOnCooldown) {
+        // Cooldown badge with turns remaining
+        const cdBadge = this.scene.add.graphics()
+        cdBadge.fillStyle(0xff6b00, 0.9)
+        cdBadge.fillRoundedRect(260, y + 4, 60, 24, 4)
+        container.add(cdBadge)
+
+        const cdText = this.scene.add.text(290, y + 8, `${cooldown!.turnsRemaining}`, {
+          fontFamily: 'Arial Black, Arial, sans-serif',
+          fontSize: '14px',
+          color: '#ffffff',
+        })
+        cdText.setOrigin(0.5, 0)
+        container.add(cdText)
+
+        // Show hourglass icon or "CD" label
+        const cdLabel = this.scene.add.text(270, y + 8, '\u23F3', {
+          fontSize: '12px',
+        })
+        container.add(cdLabel)
+      } else {
+        const mpText = this.scene.add.text(280, y + 8, `MP: ${ability.mpCost}`, {
+          ...TEXT_STYLES.SMALL,
+          color: hasMp ? '#42a5f5' : '#ef5350',
+        })
+        container.add(mpText)
+      }
 
       // Element indicator with shape for accessibility
       const elemIndicator = this.scene.add.graphics()
@@ -602,6 +640,7 @@ export class BattleHUD {
     this.elements.playerPanel.destroy()
     this.elements.enemyPanel.destroy()
     this.elements.messageBox.destroy()
+    this.elements.battleSpiritIndicator.destroy()
     this.hideAbilityMenu()
     this.hideActiveTurnIndicator()
     this.targetSelector.destroy()
@@ -999,5 +1038,143 @@ export class BattleHUD {
       neutral: 0xbdbdbd,
     }
     return colors[element] ?? 0xbdbdbd
+  }
+
+  /**
+   * Create the Battle Spirit indicator (glowing crystal that fills each round).
+   * Shows at top-left of the screen.
+   */
+  private createBattleSpiritIndicator(): Phaser.GameObjects.Container {
+    const container = this.scene.add.container(20, 20)
+    container.setDepth(DEPTH.UI)
+
+    // Background panel
+    const bg = this.scene.add.graphics()
+    bg.fillStyle(0x16213e, 0.9)
+    bg.fillRoundedRect(0, 0, 200, 60, 10)
+    bg.lineStyle(2, COLORS.GOLD, 0.8)
+    bg.strokeRoundedRect(0, 0, 200, 60, 10)
+    container.add(bg)
+
+    // "Battle Spirit" label
+    const label = this.scene.add.text(100, 8, 'Battle Spirit', {
+      ...TEXT_STYLES.SMALL,
+      fontSize: '12px',
+      color: '#ffd700',
+    })
+    label.setOrigin(0.5, 0)
+    container.add(label)
+
+    // Crystal gems (5 segments representing spirit levels 1-5)
+    const gemStartX = 22
+    const gemY = 38
+    const gemSpacing = 35
+    const gemRadius = 12
+
+    for (let i = 0; i < BATTLE_SPIRIT_MAX; i++) {
+      const x = gemStartX + i * gemSpacing
+
+      // Empty gem background
+      const gemBg = this.scene.add.graphics()
+      gemBg.fillStyle(0x333333, 0.8)
+      gemBg.fillCircle(x, gemY, gemRadius)
+      gemBg.lineStyle(2, 0x666666, 0.6)
+      gemBg.strokeCircle(x, gemY, gemRadius)
+      container.add(gemBg)
+    }
+
+    return container
+  }
+
+  /**
+   * Update the Battle Spirit indicator to show the current level.
+   * @param level Current spirit level (0-5)
+   * @param animate Whether to animate the new gem lighting up
+   */
+  updateBattleSpirit(level: number, animate: boolean = false): void {
+    const container = this.elements.battleSpiritIndicator
+
+    // Remove old filled gems (keeping background and label)
+    const toRemove = container.list.filter(
+      (obj) => obj.name === 'spiritGem',
+    )
+    toRemove.forEach((obj) => obj.destroy())
+
+    const gemStartX = 22
+    const gemY = 38
+    const gemSpacing = 35
+    const gemRadius = 12
+
+    // Draw filled gems for current spirit level
+    for (let i = 0; i < level && i < BATTLE_SPIRIT_MAX; i++) {
+      const x = gemStartX + i * gemSpacing
+
+      const gem = this.scene.add.graphics()
+      gem.name = 'spiritGem'
+
+      // Gradient-like effect with multiple fills
+      gem.fillStyle(0xff6b00, 1) // Orange core
+      gem.fillCircle(x, gemY, gemRadius - 2)
+      gem.fillStyle(0xffd700, 0.8) // Golden highlight
+      gem.fillCircle(x - 3, gemY - 3, 4)
+
+      // Glow effect
+      gem.fillStyle(0xffa500, 0.3)
+      gem.fillCircle(x, gemY, gemRadius + 3)
+
+      container.add(gem)
+
+      // Animate the newest gem
+      if (animate && i === level - 1) {
+        gem.setAlpha(0)
+        gem.setScale(0.5)
+        this.scene.tweens.add({
+          targets: gem,
+          alpha: 1,
+          scaleX: 1,
+          scaleY: 1,
+          duration: 400,
+          ease: 'Back.easeOut',
+        })
+
+        // Add pulse effect to the new gem
+        this.scene.tweens.add({
+          targets: gem,
+          scaleX: 1.2,
+          scaleY: 1.2,
+          duration: 200,
+          delay: 400,
+          yoyo: true,
+          ease: 'Sine.easeInOut',
+        })
+      }
+    }
+  }
+
+  /**
+   * Show a floating message when Battle Spirit increases.
+   * @param level The new spirit level
+   */
+  showSpiritIncrease(level: number): void {
+    const bonusPercent = level * 8
+    const text = this.scene.add.text(120, 70, `+${bonusPercent}% Power!`, {
+      fontFamily: 'Arial Black, Arial, sans-serif',
+      fontSize: '16px',
+      color: '#ffd700',
+      stroke: '#000000',
+      strokeThickness: 3,
+    })
+    text.setOrigin(0.5)
+    text.setDepth(DEPTH.UI + 5)
+
+    // Float up and fade out
+    this.scene.tweens.add({
+      targets: text,
+      y: 40,
+      alpha: 0,
+      duration: 1500,
+      ease: 'Power2',
+      onComplete: () => text.destroy(),
+    })
   }
 }

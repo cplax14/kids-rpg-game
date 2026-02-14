@@ -1,0 +1,242 @@
+[
+  {
+    "gearId": "leather-collar",
+    "name": "Leather Collar",
+    "description": "A simple leather collar that provides a small defense boost.",
+    "slot": "collar",
+    "rarity": "common",
+    "statModifiers": {
+      "defense": 2
+    },
+    "levelRequirement": 1,
+    "iconKey": "gear-collar-leather",
+    "buyPrice": 50,
+    "sellPrice": 25
+  },
+  {
+    "gearId": "iron-collar",
+    "name": "Iron Collar",
+    "description": "A sturdy iron collar that increases defense.",
+    "slot": "collar",
+    "rarity": "uncommon",
+    "statModifiers": {
+      "defense": 5,
+      "maxHp": 10
+    },
+    "levelRequirement": 5,
+    "iconKey": "gear-collar-iron",
+    "buyPrice": 150,
+    "sellPrice": 75
+  },
+  {
+    "gearId": "enchanted-collar",
+    "name": "Enchanted Collar",
+    "description": "A magical collar that enhances both physical and magical defenses.",
+    "slot": "collar",
+    "rarity": "rare",
+    "statModifiers": {
+      "defense": 8,
+      "magicDefense": 8,
+      "maxHp": 20
+    },
+    "levelRequirement": 10,
+    "iconKey": "gear-collar-enchanted",
+    "buyPrice": 400,
+    "sellPrice": 200
+  },
+  {
+    "gearId": "dragons-collar",
+    "name": "Dragon's Collar",
+    "description": "A legendary collar forged from dragon scales. Grants tremendous protection.",
+    "slot": "collar",
+    "rarity": "epic",
+    "statModifiers": {
+      "defense": 15,
+      "magicDefense": 15,
+      "maxHp": 50
+    },
+    "levelRequirement": 20,
+    "iconKey": "gear-collar-dragon",
+    "buyPrice": 1500,
+    "sellPrice": 750
+  },
+  {
+    "gearId": "training-saddle",
+    "name": "Training Saddle",
+    "description": "A basic saddle that slightly increases speed.",
+    "slot": "saddle",
+    "rarity": "common",
+    "statModifiers": {
+      "speed": 2
+    },
+    "levelRequirement": 1,
+    "iconKey": "gear-saddle-training",
+    "buyPrice": 50,
+    "sellPrice": 25
+  },
+  {
+    "gearId": "racing-saddle",
+    "name": "Racing Saddle",
+    "description": "A lightweight saddle designed for maximum speed.",
+    "slot": "saddle",
+    "rarity": "uncommon",
+    "statModifiers": {
+      "speed": 6
+    },
+    "levelRequirement": 5,
+    "iconKey": "gear-saddle-racing",
+    "buyPrice": 150,
+    "sellPrice": 75
+  },
+  {
+    "gearId": "battle-saddle",
+    "name": "Battle Saddle",
+    "description": "A reinforced saddle that balances speed with protection.",
+    "slot": "saddle",
+    "rarity": "rare",
+    "statModifiers": {
+      "speed": 8,
+      "defense": 5,
+      "maxHp": 15
+    },
+    "levelRequirement": 10,
+    "iconKey": "gear-saddle-battle",
+    "buyPrice": 400,
+    "sellPrice": 200
+  },
+  {
+    "gearId": "windrunner-saddle",
+    "name": "Windrunner Saddle",
+    "description": "An enchanted saddle that grants incredible swiftness.",
+    "slot": "saddle",
+    "rarity": "epic",
+    "statModifiers": {
+      "speed": 18,
+      "attack": 5
+    },
+    "levelRequirement": 20,
+    "iconKey": "gear-saddle-windrunner",
+    "buyPrice": 1500,
+    "sellPrice": 750
+  },
+  {
+    "gearId": "lucky-charm",
+    "name": "Lucky Charm",
+    "description": "A small trinket that brings good fortune.",
+    "slot": "charm",
+    "rarity": "common",
+    "statModifiers": {
+      "luck": 3
+    },
+    "levelRequirement": 1,
+    "iconKey": "gear-charm-lucky",
+    "buyPrice": 50,
+    "sellPrice": 25
+  },
+  {
+    "gearId": "focus-charm",
+    "name": "Focus Charm",
+    "description": "A charm that enhances magical abilities.",
+    "slot": "charm",
+    "rarity": "uncommon",
+    "statModifiers": {
+      "magicAttack": 5,
+      "maxMp": 10
+    },
+    "levelRequirement": 5,
+    "iconKey": "gear-charm-focus",
+    "buyPrice": 150,
+    "sellPrice": 75
+  },
+  {
+    "gearId": "spirit-charm",
+    "name": "Spirit Charm",
+    "description": "A mystical charm that amplifies magical power significantly.",
+    "slot": "charm",
+    "rarity": "rare",
+    "statModifiers": {
+      "magicAttack": 10,
+      "magicDefense": 5,
+      "maxMp": 20
+    },
+    "levelRequirement": 10,
+    "iconKey": "gear-charm-spirit",
+    "buyPrice": 400,
+    "sellPrice": 200
+  },
+  {
+    "gearId": "elemental-charm",
+    "name": "Elemental Charm",
+    "description": "An ancient charm pulsing with elemental energy.",
+    "slot": "charm",
+    "rarity": "epic",
+    "statModifiers": {
+      "magicAttack": 18,
+      "magicDefense": 10,
+      "maxMp": 40
+    },
+    "levelRequirement": 20,
+    "iconKey": "gear-charm-elemental",
+    "buyPrice": 1500,
+    "sellPrice": 750
+  },
+  {
+    "gearId": "sharpened-claws",
+    "name": "Sharpened Claws",
+    "description": "Claw covers that sharpen natural attacks.",
+    "slot": "claws",
+    "rarity": "common",
+    "statModifiers": {
+      "attack": 3
+    },
+    "levelRequirement": 1,
+    "iconKey": "gear-claws-sharpened",
+    "buyPrice": 50,
+    "sellPrice": 25
+  },
+  {
+    "gearId": "iron-claws",
+    "name": "Iron Claws",
+    "description": "Sturdy iron claw covers that increase attack power.",
+    "slot": "claws",
+    "rarity": "uncommon",
+    "statModifiers": {
+      "attack": 7
+    },
+    "levelRequirement": 5,
+    "iconKey": "gear-claws-iron",
+    "buyPrice": 150,
+    "sellPrice": 75
+  },
+  {
+    "gearId": "razor-claws",
+    "name": "Razor Claws",
+    "description": "Wickedly sharp claw covers that deal devastating damage.",
+    "slot": "claws",
+    "rarity": "rare",
+    "statModifiers": {
+      "attack": 12,
+      "speed": 3
+    },
+    "levelRequirement": 10,
+    "iconKey": "gear-claws-razor",
+    "buyPrice": 400,
+    "sellPrice": 200
+  },
+  {
+    "gearId": "titans-claws",
+    "name": "Titan's Claws",
+    "description": "Legendary claws said to have been worn by ancient beasts.",
+    "slot": "claws",
+    "rarity": "epic",
+    "statModifiers": {
+      "attack": 22,
+      "speed": 5,
+      "maxHp": 20
+    },
+    "levelRequirement": 20,
+    "iconKey": "gear-claws-titan",
+    "buyPrice": 1500,
+    "sellPrice": 750
+  }
+]
