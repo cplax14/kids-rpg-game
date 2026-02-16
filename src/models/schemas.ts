@@ -538,4 +538,5 @@ export const SaveGameSchema = z.object({
     monstersBreed: 0,
     highestPlayerLevel: 1,
   }),
+  completedGuidanceMilestones: z.array(z.string()).optional().default([]),
 })

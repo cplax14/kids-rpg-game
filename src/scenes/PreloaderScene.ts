@@ -71,6 +71,7 @@ export class PreloaderScene extends Phaser.Scene {
     // Load audio config and tutorial data
     this.load.json('audio-config', 'assets/data/audio-config.json')
     this.load.json('tutorials-data', 'assets/data/tutorials.json')
+    this.load.json('guidance-data', 'assets/data/guidance.json')
 
     // Load quest data
     this.load.json('quests-data', 'assets/data/quests.json')

@@ -62,6 +62,13 @@ export function shouldShowTouchControls(): boolean {
 }
 
 /**
+ * Get the platform-aware interact prompt text (e.g., "Press E" or "Tap A")
+ */
+export function getInteractPrompt(): string {
+  return shouldShowTouchControls() ? 'Tap A' : 'Press E'
+}
+
+/**
  * Get the current device orientation
  */
 export function getOrientation(): 'portrait' | 'landscape' {

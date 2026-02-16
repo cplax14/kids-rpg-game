@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import type { NpcDefinition, NpcType } from '../models/types'
 import { DEPTH, TILE_SIZE, TEXT_STYLES } from '../config'
+import { getInteractPrompt } from '../utils/mobile'
 
 // Fallback colors for procedural NPCs
 const NPC_COLORS: Readonly<Record<NpcType, number>> = {
@@ -107,8 +108,8 @@ export class NPC {
     this.nameLabel.setOrigin(0.5)
     this.nameLabel.setDepth(DEPTH.ABOVE_PLAYER)
 
-    // "Press E" prompt (hidden by default)
-    this.promptText = scene.add.text(x, y + promptOffsetY, 'Press E', {
+    // Interaction prompt (hidden by default, platform-aware)
+    this.promptText = scene.add.text(x, y + promptOffsetY, getInteractPrompt(), {
       ...TEXT_STYLES.SMALL,
       fontSize: '10px',
       color: '#ffd54f',

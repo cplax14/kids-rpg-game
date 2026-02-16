@@ -68,7 +68,7 @@ export function calculateDamage(
   defenderElement: MonsterElement,
   attackerLuck: number,
 ): { readonly damage: number; readonly isCritical: boolean } {
-  const baseDamage = (attackerAttack * abilityPower) / Math.max(defenderDefense * 0.5, 1)
+  const baseDamage = (attackerAttack * abilityPower) / Math.max(defenderDefense, 1)
   const elementMultiplier = getElementMultiplier(attackerElement, defenderElement)
   const variance = randomFloat(DAMAGE_VARIANCE_MIN, DAMAGE_VARIANCE_MAX)
 

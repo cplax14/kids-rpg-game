@@ -5,6 +5,7 @@ import type {
   QuestProgress,
   AchievementProgress,
   AchievementStats,
+  GuidanceMilestoneId,
 } from '../models/types'
 import { createNewPlayer } from './CharacterSystem'
 import { MAX_INVENTORY_SLOTS } from '../config'
@@ -25,6 +26,7 @@ export interface GameState {
   readonly completedQuestIds: ReadonlyArray<string>
   readonly achievements: ReadonlyArray<AchievementProgress>
   readonly achievementStats: AchievementStats
+  readonly completedGuidanceMilestones: ReadonlyArray<GuidanceMilestoneId>
 }
 
 const REGISTRY_KEY = 'gameState'
@@ -61,6 +63,7 @@ export function createInitialGameState(playerName: string): GameState {
       monstersBreed: 0,
       highestPlayerLevel: 1,
     },
+    completedGuidanceMilestones: [],
   }
 }
 
@@ -164,4 +167,17 @@ export function addVisitedArea(state: GameState, areaId: string): GameState {
     return state
   }
   return { ...state, visitedAreas: [...state.visitedAreas, areaId] }
+}
+
+export function addCompletedGuidanceMilestone(
+  state: GameState,
+  milestoneId: GuidanceMilestoneId,
+): GameState {
+  if (state.completedGuidanceMilestones.includes(milestoneId)) {
+    return state
+  }
+  return {
+    ...state,
+    completedGuidanceMilestones: [...state.completedGuidanceMilestones, milestoneId],
+  }
 }

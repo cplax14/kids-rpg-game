@@ -21,6 +21,7 @@ export const SCENE_KEYS = {
   DIALOG: 'DialogScene',
   TRANSITION: 'TransitionScene',
   GAME_OVER: 'GameOverScene',
+  DEFEAT_RECOVERY: 'DefeatRecoveryScene',
 } as const
 
 export const DEPTH = {

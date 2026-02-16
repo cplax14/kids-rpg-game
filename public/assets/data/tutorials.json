@@ -7,6 +7,13 @@
     "position": "top"
   },
   {
+    "id": "tutorial-first-save-reminder",
+    "trigger": "first_save_reminder",
+    "title": "Game Saved!",
+    "message": "Your adventure was saved! The game auto-saves after battles and when you travel to new areas. Press F5 anytime to quick-save!",
+    "position": "top"
+  },
+  {
     "id": "tutorial-first-capture",
     "trigger": "first_capture",
     "title": "You Caught a Monster!",

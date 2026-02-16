@@ -14,6 +14,10 @@ import * as MonsterGearSystem from './systems/MonsterGearSystem'
 import * as WaveChallengeSystem from './systems/WaveChallengeSystem'
 import * as BountySystem from './systems/BountySystem'
 import * as SquadSystem from './systems/SquadSystem'
+import * as RecoverySystem from './systems/RecoverySystem'
+import * as GuidanceSystem from './systems/GuidanceSystem'
+import * as SaveSystem from './systems/SaveSystem'
+import * as GameStateManager from './systems/GameStateManager'
 import * as Constants from './models/constants'
 
 // Type declaration for global test exports
@@ -30,6 +34,10 @@ declare global {
       WaveChallengeSystem: typeof WaveChallengeSystem
       BountySystem: typeof BountySystem
       SquadSystem: typeof SquadSystem
+      RecoverySystem: typeof RecoverySystem
+      GuidanceSystem: typeof GuidanceSystem
+      SaveSystem: typeof SaveSystem
+      GameStateManager: typeof GameStateManager
       Constants: typeof Constants
     }
   }
@@ -48,6 +56,10 @@ if (import.meta.env.DEV) {
     WaveChallengeSystem,
     BountySystem,
     SquadSystem,
+    RecoverySystem,
+    GuidanceSystem,
+    SaveSystem,
+    GameStateManager,
     Constants,
   }
 }

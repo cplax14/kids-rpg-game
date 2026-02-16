@@ -555,6 +555,7 @@ export type TutorialTrigger =
   | 'first_shop'
   | 'first_breeding'
   | 'first_area_transition'
+  | 'first_save_reminder'
 
 export interface TutorialStep {
   readonly id: string
@@ -562,6 +563,33 @@ export interface TutorialStep {
   readonly title: string
   readonly message: string
   readonly position: 'top' | 'bottom' | 'center'
+}
+
+// ── Guidance System ──
+
+export type GuidanceMilestoneId =
+  | 'talk-to-npc'
+  | 'leave-village'
+  | 'win-battle'
+  | 'capture-monster'
+  | 'open-menu'
+  | 'save-game'
+  | 'visit-shop'
+  | 'explore-new-area'
+
+export type GuidanceMilestoneTarget =
+  | 'npc'
+  | 'exit-south'
+  | 'menu-button'
+  | 'save-tab'
+  | 'shop'
+  | null
+
+export interface GuidanceMilestone {
+  readonly id: GuidanceMilestoneId
+  readonly message: string
+  readonly target: GuidanceMilestoneTarget
+  readonly celebrationMessage: string
 }
 
 // ── Save Game ──
@@ -592,6 +620,7 @@ export interface SaveGame {
   readonly completedQuestIds: ReadonlyArray<string>
   readonly achievements: ReadonlyArray<AchievementProgress>
   readonly achievementStats: AchievementStats
+  readonly completedGuidanceMilestones: ReadonlyArray<GuidanceMilestoneId>
 }
 
 // ── Quest System ──

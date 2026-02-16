@@ -1,0 +1,50 @@
+[
+  {
+    "id": "talk-to-npc",
+    "message": "Talk to the villagers to learn about monsters!",
+    "target": "npc",
+    "celebrationMessage": "Great job talking to the villagers!"
+  },
+  {
+    "id": "leave-village",
+    "message": "Explore outside the village to find wild monsters!",
+    "target": "exit-south",
+    "celebrationMessage": "Adventure awaits!"
+  },
+  {
+    "id": "win-battle",
+    "message": "Defeat the wild monster in battle!",
+    "target": null,
+    "celebrationMessage": "You won your first battle!"
+  },
+  {
+    "id": "capture-monster",
+    "message": "Weaken a monster and capture it!",
+    "target": null,
+    "celebrationMessage": "You caught a monster!"
+  },
+  {
+    "id": "open-menu",
+    "message": "Check your Squad in the menu! Press M",
+    "target": "menu-button",
+    "celebrationMessage": "Now you know how to manage your team!"
+  },
+  {
+    "id": "save-game",
+    "message": "Save your game! Press F5 or use the menu.",
+    "target": "save-tab",
+    "celebrationMessage": "Your progress is safe!"
+  },
+  {
+    "id": "visit-shop",
+    "message": "Visit the shop to buy supplies!",
+    "target": "shop",
+    "celebrationMessage": "Shopping unlocked!"
+  },
+  {
+    "id": "explore-new-area",
+    "message": "Explore the Whispering Woods for new monsters!",
+    "target": null,
+    "celebrationMessage": "Keep exploring to find rare monsters!"
+  }
+]

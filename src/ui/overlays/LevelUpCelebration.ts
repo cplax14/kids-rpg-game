@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 import type { Ability } from '../../models/types'
 import type { StatChange } from '../../systems/CharacterSystem'
-import { GAME_WIDTH, GAME_HEIGHT, COLORS, TEXT_STYLES, DEPTH } from '../../config'
+import { COLORS, TEXT_STYLES, DEPTH } from '../../config'
 import { playSfx, SFX_KEYS } from '../../systems/AudioSystem'
 
 const CONFETTI_COLORS = [
@@ -27,10 +27,12 @@ export class LevelUpCelebration {
   private container: Phaser.GameObjects.Container
   private confettiParticles: Phaser.GameObjects.Rectangle[] = []
   private onDismiss: () => void
+  private viewport: { width: number; height: number; offsetX: number; offsetY: number }
 
   constructor(scene: Phaser.Scene, data: LevelUpDisplayData, onDismiss: () => void) {
     this.scene = scene
     this.onDismiss = onDismiss
+    this.viewport = this.getVisibleViewport()
 
     this.container = scene.add.container(0, 0)
     this.container.setDepth(DEPTH.OVERLAY + 100)
@@ -53,18 +55,33 @@ export class LevelUpCelebration {
     })
   }
 
+  /**
+   * Get visible viewport dimensions accounting for camera zoom.
+   */
+  private getVisibleViewport(): { width: number; height: number; offsetX: number; offsetY: number } {
+    const camera = this.scene.cameras.main
+    const zoom = camera.zoom || 1
+
+    const visibleWidth = this.scene.scale.width / zoom
+    const visibleHeight = this.scene.scale.height / zoom
+    const offsetX = (this.scene.scale.width - visibleWidth) / 2
+    const offsetY = (this.scene.scale.height - visibleHeight) / 2
+
+    return { width: visibleWidth, height: visibleHeight, offsetX, offsetY }
+  }
+
   private createOverlay(): void {
     const overlay = this.scene.add.graphics()
     overlay.fillStyle(0x000000, 0.7)
-    overlay.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
+    overlay.fillRect(this.viewport.offsetX, this.viewport.offsetY, this.viewport.width, this.viewport.height)
     this.container.add(overlay)
   }
 
   private createConfetti(): void {
-    // Create falling confetti particles
+    // Create falling confetti particles within visible viewport
     for (let i = 0; i < 60; i++) {
-      const x = Phaser.Math.Between(0, GAME_WIDTH)
-      const startY = Phaser.Math.Between(-100, -20)
+      const x = this.viewport.offsetX + Phaser.Math.Between(0, this.viewport.width)
+      const startY = this.viewport.offsetY + Phaser.Math.Between(-100, -20)
       const color = CONFETTI_COLORS[Phaser.Math.Between(0, CONFETTI_COLORS.length - 1)]
       const width = Phaser.Math.Between(6, 12)
       const height = Phaser.Math.Between(4, 8)
@@ -77,9 +94,10 @@ export class LevelUpCelebration {
 
       // Animate falling
       const fallDuration = Phaser.Math.Between(2000, 4000)
-      const endY = GAME_HEIGHT + 50
+      const endY = this.viewport.offsetY + this.viewport.height + 50
       const sway = Phaser.Math.Between(-100, 100)
 
+      const viewport = this.viewport
       this.scene.tweens.add({
         targets: particle,
         y: endY,
@@ -90,8 +108,8 @@ export class LevelUpCelebration {
         ease: 'Sine.easeIn',
         repeat: -1,
         onRepeat: () => {
-          particle.setY(Phaser.Math.Between(-100, -20))
-          particle.setX(Phaser.Math.Between(0, GAME_WIDTH))
+          particle.setY(viewport.offsetY + Phaser.Math.Between(-100, -20))
+          particle.setX(viewport.offsetX + Phaser.Math.Between(0, viewport.width))
         },
       })
     }
@@ -102,14 +120,14 @@ export class LevelUpCelebration {
 
     // Calculate box height based on content
     const hasAbilities = newAbilities.length > 0
-    const boxWidth = 520
+    const boxWidth = Math.min(520, this.viewport.width - 40)
     const baseHeight = 280
     const statsHeight = Math.ceil(statChanges.length / 2) * 28
     const abilitiesHeight = hasAbilities ? 40 + newAbilities.length * 50 : 0
-    const boxHeight = Math.min(baseHeight + statsHeight + abilitiesHeight, GAME_HEIGHT - 80)
+    const boxHeight = Math.min(baseHeight + statsHeight + abilitiesHeight, this.viewport.height - 80)
 
-    const boxX = GAME_WIDTH / 2 - boxWidth / 2
-    const boxY = GAME_HEIGHT / 2 - boxHeight / 2
+    const boxX = this.viewport.offsetX + this.viewport.width / 2 - boxWidth / 2
+    const boxY = this.viewport.offsetY + this.viewport.height / 2 - boxHeight / 2
 
     // Box background with golden glow effect
     const glow = this.scene.add.graphics()

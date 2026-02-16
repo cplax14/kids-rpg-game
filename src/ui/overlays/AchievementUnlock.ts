@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import type { AchievementDefinition, AchievementProgress } from '../../models/types'
-import { GAME_WIDTH, COLORS, TEXT_STYLES, DEPTH } from '../../config'
+import { COLORS, TEXT_STYLES, DEPTH } from '../../config'
 import { playSfx, SFX_KEYS } from '../../systems/AudioSystem'
 
 const CONFETTI_COLORS = [0xffd54f, 0x66bb6a, 0x42a5f5, 0xef5350, 0x7e57c2, 0xffa726]
@@ -26,6 +26,7 @@ export class AchievementUnlock {
   private confettiParticles: Phaser.GameObjects.Rectangle[] = []
   private dismissTimer: Phaser.Time.TimerEvent | null = null
   private onDismiss: () => void
+  private viewport: { width: number; height: number; offsetX: number; offsetY: number }
 
   constructor(
     scene: Phaser.Scene,
@@ -35,9 +36,13 @@ export class AchievementUnlock {
   ) {
     this.scene = scene
     this.onDismiss = onDismiss
+    this.viewport = this.getVisibleViewport()
 
-    this.container = scene.add.container(GAME_WIDTH, 20)
+    // Position off-screen to the right, accounting for zoom
+    const startX = this.viewport.offsetX + this.viewport.width + 50
+    this.container = scene.add.container(startX, this.viewport.offsetY + 20)
     this.container.setDepth(DEPTH.OVERLAY + 200)
+    this.container.setScrollFactor(0)
 
     this.createNotification(achievement)
 
@@ -49,10 +54,11 @@ export class AchievementUnlock {
       this.createConfetti()
     }
 
-    // Slide in from right
+    // Slide in from right within visible viewport
+    const targetX = this.viewport.offsetX + this.viewport.width - 320
     scene.tweens.add({
       targets: this.container,
-      x: GAME_WIDTH - 320,
+      x: targetX,
       duration: 400,
       ease: 'Back.easeOut',
       onComplete: () => {
@@ -60,6 +66,21 @@ export class AchievementUnlock {
         this.setupInput()
       },
     })
+  }
+
+  /**
+   * Get visible viewport dimensions accounting for camera zoom.
+   */
+  private getVisibleViewport(): { width: number; height: number; offsetX: number; offsetY: number } {
+    const camera = this.scene.cameras.main
+    const zoom = camera.zoom || 1
+
+    const visibleWidth = this.scene.scale.width / zoom
+    const visibleHeight = this.scene.scale.height / zoom
+    const offsetX = (this.scene.scale.width - visibleWidth) / 2
+    const offsetY = (this.scene.scale.height - visibleHeight) / 2
+
+    return { width: visibleWidth, height: visibleHeight, offsetX, offsetY }
   }
 
   private createNotification(achievement: AchievementDefinition): void {
@@ -187,9 +208,11 @@ export class AchievementUnlock {
   }
 
   private dismiss(): void {
+    // Slide out to the right of the visible viewport
+    const exitX = this.viewport.offsetX + this.viewport.width + 50
     this.scene.tweens.add({
       targets: this.container,
-      x: GAME_WIDTH + 50,
+      x: exitX,
       alpha: 0,
       duration: 300,
       ease: 'Power2',
