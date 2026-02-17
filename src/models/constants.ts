@@ -110,7 +110,7 @@ export const ELEMENT_EFFECTIVENESS: ElementTable = {
 
 export const DAMAGE_VARIANCE_MIN = 0.85
 export const DAMAGE_VARIANCE_MAX = 1.15
-export const CRITICAL_HIT_MULTIPLIER = 2.0
+export const CRITICAL_HIT_MULTIPLIER = 1.5
 export const BASE_CRITICAL_RATE = 0.05
 export const LUCK_CRITICAL_BONUS = 0.003
 

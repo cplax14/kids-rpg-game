@@ -40,6 +40,7 @@ export function createSaveGame(state: GameState, settings: GameSettings, playTim
     completedQuestIds: [...state.completedQuestIds],
     achievements: [...state.achievements],
     achievementStats: state.achievementStats,
+    completedGuidanceMilestones: [...state.completedGuidanceMilestones],
   }
 }
 
@@ -158,6 +159,7 @@ export function gameStateFromSave(save: SaveGame): GameState {
     completedQuestIds: [...(save.completedQuestIds ?? [])],
     achievements: [...(save.achievements ?? [])],
     achievementStats: save.achievementStats ?? createInitialAchievementStats(),
+    completedGuidanceMilestones: [...(save.completedGuidanceMilestones ?? [])],
   }
 }
 

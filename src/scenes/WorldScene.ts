@@ -17,6 +17,8 @@ import type {
   FountainObject,
   WaypointObject,
   TutorialStep,
+  GuidanceMilestone,
+  GuidanceMilestoneId,
 } from '../models/types'
 import {
   loadSpeciesData,
@@ -55,6 +57,7 @@ import {
   addVisitedArea,
   updateAchievementStats,
   updateAchievements,
+  addCompletedGuidanceMilestone,
   type GameState,
 } from '../systems/GameStateManager'
 import { createSquadCombatants } from '../systems/SquadSystem'
@@ -94,7 +97,7 @@ import {
 } from '../systems/FastTravelSystem'
 import { generateMap, getCollisionTiles } from '../utils/mapGenerator'
 import { initAudioSystem, playMusic, crossfadeMusic, playSfx, stopMusic, MUSIC_KEYS, SFX_KEYS } from '../systems/AudioSystem'
-import { loadTutorialData, checkAndShowTutorial, isTutorialComplete, resetAllTutorials } from '../systems/TutorialSystem'
+import { loadTutorialData, checkAndShowTutorial, shouldShowTutorial, showTutorial, isTutorialComplete, resetAllTutorials } from '../systems/TutorialSystem'
 import { initDebug } from '../utils/debug'
 import { autoSave } from '../systems/SaveSystem'
 import {
@@ -110,6 +113,16 @@ import {
 } from '../systems/AchievementSystem'
 import type { QuestDefinition, AchievementDefinition } from '../models/types'
 import { QuestTrackerHUD } from '../ui/hud/QuestTrackerHUD'
+import { AutoSaveIndicator } from '../ui/components/AutoSaveIndicator'
+import { GuidanceHUD } from '../ui/hud/GuidanceHUD'
+import { ObjectiveMarker } from '../ui/components/ObjectiveMarker'
+import {
+  loadGuidanceData,
+  getAllMilestones,
+  getCurrentMilestone,
+  isMilestoneComplete,
+  getAutoCompletableMilestones,
+} from '../systems/GuidanceSystem'
 import type { QuestIndicatorType } from '../entities/NPC'
 
 interface WorldSceneData {
@@ -159,6 +172,10 @@ export class WorldScene extends Phaser.Scene {
   private playTimeStart: number = 0
   private currentSaveSlot: number = 0
   private questTrackerHUD: QuestTrackerHUD | null = null
+  private autoSaveIndicator: AutoSaveIndicator | null = null
+  private guidanceHUD: GuidanceHUD | null = null
+  private objectiveMarker: ObjectiveMarker | null = null
+  private tutorialActive: boolean = false
 
   constructor() {
     super({ key: SCENE_KEYS.WORLD })
@@ -227,9 +244,24 @@ export class WorldScene extends Phaser.Scene {
     this.questTrackerHUD = new QuestTrackerHUD(this)
     this.updateQuestTracker()
 
+    // Create auto-save indicator
+    this.autoSaveIndicator = new AutoSaveIndicator(this)
+
+    // Create guidance HUD for new player guidance
+    this.guidanceHUD = new GuidanceHUD(this)
+    this.guidanceHUD.setMilestones(getAllMilestones())
+    this.updateGuidance()
+
+    // Add quick-save hotkey (F5)
+    this.setupQuickSaveHotkey()
+
     // Apply battle rewards if returning from victory
     if (data.battleResult === 'victory' && data.rewards) {
       this.applyBattleRewards(data.rewards)
+      // Update guidance to check for battle-related milestone auto-completion
+      this.time.delayedCall(100, () => {
+        this.updateGuidance()
+      })
     }
 
     // Apply loot from battle
@@ -244,7 +276,7 @@ export class WorldScene extends Phaser.Scene {
     if (!data.newGame && this.currentAreaId !== 'village') {
       // Use setTimeout to ensure scene is fully ready before showing tutorial
       this.time.delayedCall(100, () => {
-        checkAndShowTutorial(this, 'first_area_transition')
+        this.showTutorialCoordinated('first_area_transition')
       })
     }
 
@@ -300,6 +332,20 @@ export class WorldScene extends Phaser.Scene {
       EventBus.off(GAME_EVENTS.FAST_TRAVEL_REQUESTED, fastTravelHandler, this)
       EventBus.off(GAME_EVENTS.ITEM_ADDED, itemAddedHandler, this)
       EventBus.off(GAME_EVENTS.MONSTER_CAPTURED, monsterCapturedHandler, this)
+
+      // Clean up HUD components
+      if (this.guidanceHUD) {
+        this.guidanceHUD.destroy()
+        this.guidanceHUD = null
+      }
+      if (this.objectiveMarker) {
+        this.objectiveMarker.destroy()
+        this.objectiveMarker = null
+      }
+      if (this.autoSaveIndicator) {
+        this.autoSaveIndicator.destroy()
+        this.autoSaveIndicator = null
+      }
     })
   }
 
@@ -345,6 +391,12 @@ export class WorldScene extends Phaser.Scene {
     // Open menu on ESC
     if (input.menu) {
       this.openMenu()
+    }
+
+    // Update objective marker visibility based on player distance
+    if (this.objectiveMarker && this.objectiveMarker.getIsVisible()) {
+      const playerPos = this.player.getPosition()
+      this.objectiveMarker.updateDistanceFromPlayer(playerPos.x, playerPos.y)
     }
   }
 
@@ -1390,8 +1442,8 @@ export class WorldScene extends Phaser.Scene {
     // Note: Tutorial for first area transition is shown in the new scene's create()
     // Don't show tutorials during transition as the scene is about to be destroyed
 
-    // Auto-save on area transition
-    autoSave(this, this.currentSaveSlot, this.getCurrentPlayTime())
+    // Auto-save on area transition (with visual indicator)
+    this.performAutoSave(true)
 
     // Fade out and transition to new area
     this.inputSystem.setEnabled(false)
@@ -1569,8 +1621,8 @@ export class WorldScene extends Phaser.Scene {
     // Get spawn position for target area
     const spawnPosition = getFastTravelSpawnPosition(targetAreaId)
 
-    // Auto-save before fast travel
-    autoSave(this, this.currentSaveSlot, this.getCurrentPlayTime())
+    // Auto-save before fast travel (with visual indicator)
+    this.performAutoSave(true)
 
     // Disable input during transition
     this.inputSystem.setEnabled(false)
@@ -1825,6 +1877,10 @@ export class WorldScene extends Phaser.Scene {
     const tutorialsData = this.cache.json.get('tutorials-data') as TutorialStep[] | undefined
     if (tutorialsData) loadTutorialData(tutorialsData)
 
+    // Load guidance data
+    const guidanceData = this.cache.json.get('guidance-data') as GuidanceMilestone[] | undefined
+    if (guidanceData) loadGuidanceData(guidanceData)
+
     // Load quest data
     const questsData = this.cache.json.get('quests-data') as QuestDefinition[] | undefined
     if (questsData) loadQuestData(questsData)
@@ -1841,6 +1897,156 @@ export class WorldScene extends Phaser.Scene {
       this.questTrackerHUD.update(state.activeQuests)
     } catch {
       // No game state yet
+    }
+  }
+
+  private updateGuidance(): void {
+    if (!this.guidanceHUD) return
+    try {
+      let state = getGameState(this)
+
+      // Auto-complete any milestones that should be completed based on game state
+      const autoCompletable = getAutoCompletableMilestones(state)
+      for (const milestoneId of autoCompletable) {
+        state = addCompletedGuidanceMilestone(state, milestoneId)
+      }
+      if (autoCompletable.length > 0) {
+        setGameState(this, state)
+      }
+
+      const milestone = getCurrentMilestone(state)
+      this.guidanceHUD.update(milestone, state.completedGuidanceMilestones)
+
+      // Update objective marker position
+      this.updateObjectiveMarker(milestone)
+    } catch {
+      // No game state yet
+    }
+  }
+
+  private completeMilestone(milestoneId: GuidanceMilestoneId): void {
+    try {
+      let state = getGameState(this)
+      if (isMilestoneComplete(state, milestoneId)) {
+        return // Already complete
+      }
+
+      const milestone = getCurrentMilestone(state)
+      const celebrationMessage = milestone?.celebrationMessage ?? 'Great job!'
+
+      // Mark milestone as complete
+      state = addCompletedGuidanceMilestone(state, milestoneId)
+      setGameState(this, state)
+
+      // Play celebration (skip if a tutorial overlay is active to avoid double feedback)
+      if (!this.tutorialActive) {
+        playSfx(SFX_KEYS.LEVEL_UP)
+        if (this.guidanceHUD) {
+          this.guidanceHUD.celebrate(celebrationMessage)
+        }
+      }
+
+      // Update guidance HUD with next milestone
+      this.time.delayedCall(500, () => {
+        this.updateGuidance()
+      })
+    } catch {
+      // No game state yet
+    }
+  }
+
+  /**
+   * Show a tutorial with GuidanceHUD coordination.
+   * Hides the guidance panel during the tutorial to prevent visual overlap,
+   * then restores it after the tutorial is dismissed.
+   */
+  private async showTutorialCoordinated(trigger: Parameters<typeof checkAndShowTutorial>[1]): Promise<boolean> {
+    const tutorial = shouldShowTutorial(trigger)
+    if (!tutorial) {
+      return false
+    }
+
+    this.tutorialActive = true
+    if (this.guidanceHUD) {
+      this.guidanceHUD.hide()
+    }
+
+    await showTutorial(this, tutorial)
+
+    this.tutorialActive = false
+    if (this.guidanceHUD) {
+      this.guidanceHUD.show()
+    }
+    this.updateGuidance()
+
+    return true
+  }
+
+  private updateObjectiveMarker(milestone: GuidanceMilestone | null): void {
+    // Hide marker if no milestone or no target
+    if (!milestone || !milestone.target) {
+      if (this.objectiveMarker) {
+        this.objectiveMarker.hide()
+      }
+      return
+    }
+
+    // Find target position based on milestone target type
+    const targetPos = this.findObjectiveTargetPosition(milestone.target)
+    if (!targetPos) {
+      if (this.objectiveMarker) {
+        this.objectiveMarker.hide()
+      }
+      return
+    }
+
+    // Create or update marker
+    if (!this.objectiveMarker) {
+      this.objectiveMarker = new ObjectiveMarker(this, targetPos.x, targetPos.y)
+    } else {
+      this.objectiveMarker.setTarget(targetPos.x, targetPos.y)
+      this.objectiveMarker.show()
+    }
+  }
+
+  private findObjectiveTargetPosition(
+    target: 'npc' | 'exit-south' | 'menu-button' | 'save-tab' | 'shop',
+  ): { x: number; y: number } | null {
+    switch (target) {
+      case 'npc':
+        // Find first NPC in the area
+        if (this.npcs.length > 0) {
+          const npc = this.npcs[0]
+          return npc.getPosition()
+        }
+        return null
+
+      case 'exit-south':
+        // Find transition zone to the south (or any exit)
+        for (const zone of this.transitionZones) {
+          if (zone.getData('direction') === 'south' || this.transitionZones.length === 1) {
+            return { x: zone.x, y: zone.y }
+          }
+        }
+        // Fallback: point to bottom of map
+        return { x: GAME_WIDTH / 2, y: GAME_HEIGHT - 50 }
+
+      case 'shop':
+        // Find shop NPC or interactable
+        for (const npc of this.npcs) {
+          if (npc.getNpcId().includes('shop')) {
+            return npc.getPosition()
+          }
+        }
+        return null
+
+      case 'menu-button':
+      case 'save-tab':
+        // These are UI elements, not world positions - hide marker for these
+        return null
+
+      default:
+        return null
     }
   }
 
@@ -2121,6 +2327,9 @@ export class WorldScene extends Phaser.Scene {
         this.showMonsterLevelUpNotifications(monsterLevelUps)
       })
     }
+
+    // Auto-save after battle victory (show indicator and first save tutorial)
+    this.performAutoSave(true, true)
   }
 
   private showMonsterLevelUpNotifications(
@@ -2272,6 +2481,14 @@ export class WorldScene extends Phaser.Scene {
       cancel: false,
     })
 
+    // Complete talk-to-npc milestone when talking to any NPC
+    this.completeMilestone('talk-to-npc')
+
+    // Check if this is a shop NPC
+    if (npc.getNpcId().includes('shop')) {
+      this.completeMilestone('visit-shop')
+    }
+
     this.scene.launch(SCENE_KEYS.DIALOG, {
       dialogTreeId: npc.getDialogTreeId(),
       npcName: npc.getNpcName(),
@@ -2288,12 +2505,16 @@ export class WorldScene extends Phaser.Scene {
       // Update quest-related state after dialog
       this.updateQuestTracker()
       this.updateNpcQuestIndicators()
+      this.updateGuidance()
     })
   }
 
   private openMenu(): void {
     playSfx(SFX_KEYS.MENU_SELECT)
-    checkAndShowTutorial(this, 'first_menu')
+    this.showTutorialCoordinated('first_menu')
+
+    // Complete open-menu milestone when opening menu
+    this.completeMilestone('open-menu')
 
     this.inputSystem.setEnabled(false)
     this.player.update({
@@ -2311,6 +2532,8 @@ export class WorldScene extends Phaser.Scene {
 
     this.events.once('resume', () => {
       this.inputSystem.setEnabled(true)
+      // Check if player saved while in menu
+      this.updateGuidance()
     })
   }
 
@@ -2363,6 +2586,53 @@ export class WorldScene extends Phaser.Scene {
 
   private setupInput(): void {
     this.inputSystem = new InputSystem(this)
+  }
+
+  /**
+   * Set up F5 quick-save hotkey
+   */
+  private setupQuickSaveHotkey(): void {
+    if (!this.input.keyboard) return
+
+    this.input.keyboard.on('keydown-F5', () => {
+      this.performAutoSave(true) // true = show indicator
+    })
+
+    // Also support Ctrl+S (common save shortcut)
+    this.input.keyboard.on('keydown-S', (event: KeyboardEvent) => {
+      if (event.ctrlKey || event.metaKey) {
+        event.preventDefault()
+        this.performAutoSave(true)
+      }
+    })
+  }
+
+  /**
+   * Perform auto-save with optional visual feedback
+   * @param showIndicator Whether to show the save indicator
+   * @param showTutorial Whether to show the first-save tutorial (only after first battle)
+   */
+  private performAutoSave(showIndicator: boolean = false, showTutorial: boolean = false): boolean {
+    const success = autoSave(this, this.currentSaveSlot, this.getCurrentPlayTime())
+
+    if (success) {
+      if (showIndicator && this.autoSaveIndicator) {
+        this.autoSaveIndicator.show()
+        playSfx(SFX_KEYS.MENU_CONFIRM)
+      }
+
+      if (showTutorial) {
+        // Show save tutorial after first battle victory
+        this.time.delayedCall(500, () => {
+          this.showTutorialCoordinated('first_save_reminder')
+        })
+      }
+
+      // Complete save-game milestone
+      this.completeMilestone('save-game')
+    }
+
+    return success
   }
 
   private showAreaName(name: string): void {

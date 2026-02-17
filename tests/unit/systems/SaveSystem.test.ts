@@ -110,6 +110,7 @@ describe('SaveSystem', () => {
       monstersBreed: 0,
       highestPlayerLevel: 1,
     },
+    completedGuidanceMilestones: [],
   }
 
   const mockSettings: GameSettings = {

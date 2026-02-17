@@ -33,7 +33,9 @@ import {
   updateDiscoveredSpecies,
   addDefeatedBoss,
   updateActiveQuests,
+  updateAchievementStats,
 } from '../systems/GameStateManager'
+import { incrementStat } from '../systems/AchievementSystem'
 import { trackDefeat, trackBossDefeat } from '../systems/QuestSystem'
 import { useItem, getConsumableItems, getCaptureDevices, getItem } from '../systems/InventorySystem'
 import { useItemOnCombatant } from '../systems/ItemEffectSystem'
@@ -1188,6 +1190,7 @@ export class BattleScene extends Phaser.Scene {
         ).length
         if (this.currentTurnIndex >= aliveCount) {
           this.currentTurnIndex = 0
+          this.battle = { ...this.battle, turnCount: this.battle.turnCount + 1 }
         }
         this.startNextTurn()
       })
@@ -1297,6 +1300,11 @@ export class BattleScene extends Phaser.Scene {
       const capturedMonster = createCapturedMonster(speciesId, enemyLevel)
 
       if (capturedMonster) {
+        // Increment monstersCaptured stat so guidance checklist auto-completes
+        const preState = getGameState(this)
+        const captureStats = incrementStat(preState.achievementStats, 'monstersCaptured', 1)
+        setGameState(this, updateAchievementStats(preState, captureStats))
+
         // Add to squad or storage
         const state = getGameState(this)
         const newSquad = addToSquad(state.squad, capturedMonster)
@@ -1373,6 +1381,7 @@ export class BattleScene extends Phaser.Scene {
     ).length
     if (this.currentTurnIndex >= aliveCount) {
       this.currentTurnIndex = 0
+      this.battle = { ...this.battle, turnCount: this.battle.turnCount + 1 }
     }
     this.startNextTurn()
   }
@@ -1433,6 +1442,7 @@ export class BattleScene extends Phaser.Scene {
       ).length
       if (this.currentTurnIndex >= aliveCount) {
         this.currentTurnIndex = 0
+        this.battle = { ...this.battle, turnCount: this.battle.turnCount + 1 }
       }
 
       this.startNextTurn()
@@ -1727,12 +1737,30 @@ export class BattleScene extends Phaser.Scene {
     this.hud.hideCommandMenu()
     this.hud.showMessage('Your party was defeated...').then(() => {
       this.time.delayedCall(1500, () => {
-        EventBus.emit(GAME_EVENTS.BATTLE_END, { result: 'defeat' })
+        // Get current game state for recovery scene
+        let gameState
+        try {
+          gameState = getGameState(this)
+        } catch {
+          // No game state, fallback to title
+          EventBus.emit(GAME_EVENTS.BATTLE_END, { result: 'defeat' })
+          this.cameras.main.fadeOut(800, 0, 0, 0)
+          this.cameras.main.once('camerafadeoutcomplete', () => {
+            this.cleanUp()
+            this.scene.start(SCENE_KEYS.TITLE)
+          })
+          return
+        }
 
         this.cameras.main.fadeOut(800, 0, 0, 0)
         this.cameras.main.once('camerafadeoutcomplete', () => {
           this.cleanUp()
-          this.scene.start(SCENE_KEYS.TITLE)
+          // Go to DefeatRecoveryScene instead of TitleScene
+          this.scene.start(SCENE_KEYS.DEFEAT_RECOVERY, {
+            gameState,
+            defeatAreaId: this.areaId,
+            defeatTimestamp: Date.now(),
+          })
         })
       })
     })

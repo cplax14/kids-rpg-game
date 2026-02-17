@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import type { InteractableObject, InteractableType } from '../models/types'
 import { DEPTH, TILE_SIZE, TEXT_STYLES } from '../config'
+import { getInteractPrompt } from '../utils/mobile'
 
 const INTERACTABLE_COLORS: Readonly<Record<InteractableType, number>> = {
   chest: 0xffd54f,
@@ -38,8 +39,8 @@ export class Interactable {
     this.drawSprite(color, size, x, y)
     this.sprite.setDepth(DEPTH.BELOW_PLAYER)
 
-    // "Press E" prompt (hidden by default)
-    this.promptText = scene.add.text(x, y - size.height - 10, 'Press E', {
+    // Interaction prompt (hidden by default, platform-aware)
+    this.promptText = scene.add.text(x, y - size.height - 10, getInteractPrompt(), {
       ...TEXT_STYLES.SMALL,
       fontSize: '10px',
       color: '#ffd54f',

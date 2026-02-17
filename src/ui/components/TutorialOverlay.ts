@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import type { TutorialStep } from '../../models/types'
-import { GAME_WIDTH, GAME_HEIGHT, COLORS, TEXT_STYLES, DEPTH } from '../../config'
+import { COLORS, TEXT_STYLES, DEPTH } from '../../config'
 import { playSfx, SFX_KEYS } from '../../systems/AudioSystem'
 
 export class TutorialOverlay {
@@ -14,38 +14,58 @@ export class TutorialOverlay {
 
     this.container = scene.add.container(0, 0)
     this.container.setDepth(DEPTH.OVERLAY + 50)
+    this.container.setScrollFactor(0) // Fixed to camera viewport
 
     this.createOverlay(step)
     this.createTutorialBox(step)
     this.setupInput()
   }
 
+  /**
+   * Get visible viewport dimensions accounting for camera zoom.
+   * With 1.5x zoom, visible area is smaller than canvas dimensions.
+   */
+  private getVisibleViewport(): { width: number; height: number; offsetX: number; offsetY: number } {
+    const camera = this.scene.cameras.main
+    const zoom = camera.zoom || 1
+
+    const visibleWidth = this.scene.scale.width / zoom
+    const visibleHeight = this.scene.scale.height / zoom
+    const offsetX = (this.scene.scale.width - visibleWidth) / 2
+    const offsetY = (this.scene.scale.height - visibleHeight) / 2
+
+    return { width: visibleWidth, height: visibleHeight, offsetX, offsetY }
+  }
+
   private createOverlay(step: TutorialStep): void {
-    // Semi-transparent background
+    const viewport = this.getVisibleViewport()
+
+    // Semi-transparent background covering visible area
     const overlay = this.scene.add.graphics()
     overlay.fillStyle(0x000000, 0.6)
-    overlay.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
+    overlay.fillRect(viewport.offsetX, viewport.offsetY, viewport.width, viewport.height)
     this.container.add(overlay)
   }
 
   private createTutorialBox(step: TutorialStep): void {
-    const boxWidth = 500
+    const viewport = this.getVisibleViewport()
+    const boxWidth = Math.min(500, viewport.width - 40) // Ensure box fits in viewport
     const boxHeight = 180
 
-    // Calculate position based on step.position
-    let boxX = GAME_WIDTH / 2 - boxWidth / 2
+    // Calculate position based on step.position within visible viewport
+    const boxX = viewport.offsetX + viewport.width / 2 - boxWidth / 2
     let boxY: number
 
     switch (step.position) {
       case 'top':
-        boxY = 60
+        boxY = viewport.offsetY + 60
         break
       case 'bottom':
-        boxY = GAME_HEIGHT - boxHeight - 60
+        boxY = viewport.offsetY + viewport.height - boxHeight - 60
         break
       case 'center':
       default:
-        boxY = GAME_HEIGHT / 2 - boxHeight / 2
+        boxY = viewport.offsetY + viewport.height / 2 - boxHeight / 2
         break
     }
 

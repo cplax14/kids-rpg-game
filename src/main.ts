@@ -12,6 +12,7 @@ import { MenuScene } from './scenes/MenuScene'
 import { DialogScene } from './scenes/DialogScene'
 import { ShopScene } from './scenes/ShopScene'
 import { BreedingScene } from './scenes/BreedingScene'
+import { DefeatRecoveryScene } from './scenes/DefeatRecoveryScene'
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -34,7 +35,7 @@ const config: Phaser.Types.Core.GameConfig = {
       height: 360,
     },
   },
-  scene: [BootScene, PreloaderScene, TitleScene, WorldScene, BattleScene, MenuScene, DialogScene, ShopScene, BreedingScene],
+  scene: [BootScene, PreloaderScene, TitleScene, WorldScene, BattleScene, MenuScene, DialogScene, ShopScene, BreedingScene, DefeatRecoveryScene],
 }
 
 const game = new Phaser.Game(config)
