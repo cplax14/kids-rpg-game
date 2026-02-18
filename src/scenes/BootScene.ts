@@ -9,6 +9,7 @@ export class BootScene extends Phaser.Scene {
 
   preload(): void {
     this.createPlaceholderTextures()
+    this.loadLoadingScreenSprites()
   }
 
   create(): void {
@@ -17,6 +18,23 @@ export class BootScene extends Phaser.Scene {
     applyAudioSettings(settings)
 
     this.scene.start(SCENE_KEYS.PRELOADER)
+  }
+
+  private loadLoadingScreenSprites(): void {
+    const spriteMap: ReadonlyArray<{ key: string; file: string }> = [
+      { key: 'loading-monster-1', file: 'Battle1.png' },
+      { key: 'loading-monster-2', file: 'Battle4.png' },
+      { key: 'loading-monster-3', file: 'Battle8.png' },
+      { key: 'loading-monster-4', file: 'Battle19.png' },
+      { key: 'loading-monster-5', file: 'Battle27.png' },
+      { key: 'loading-monster-6', file: 'Battle54.png' },
+      { key: 'loading-monster-7', file: 'Battle58.png' },
+      { key: 'loading-monster-8', file: 'Battle61.png' },
+    ]
+
+    spriteMap.forEach(({ key, file }) => {
+      this.load.image(key, `assets/sprites/monsters/battle/${file}`)
+    })
   }
 
   private createPlaceholderTextures(): void {

@@ -75,29 +75,86 @@ export class TitleScene extends Phaser.Scene {
   }
 
   private createBackground(): void {
-    const graphics = this.add.graphics()
-
-    // Gradient background
-    graphics.fillGradientStyle(0x1a1a2e, 0x1a1a2e, 0x16213e, 0x16213e)
-    graphics.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
-
-    // Decorative stars
-    for (let i = 0; i < 60; i++) {
-      const x = Phaser.Math.Between(0, GAME_WIDTH)
-      const y = Phaser.Math.Between(0, GAME_HEIGHT * 0.6)
-      const size = Phaser.Math.FloatBetween(1, 3)
-      const alpha = Phaser.Math.FloatBetween(0.3, 1.0)
-
-      graphics.fillStyle(0xffffff, alpha)
-      graphics.fillCircle(x, y, size)
+    // Battle background as base
+    if (this.textures.exists('battle-bg-forest')) {
+      const bg = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'battle-bg-forest')
+      bg.setDisplaySize(GAME_WIDTH, GAME_HEIGHT)
+      bg.setTint(0x666688)
+    } else {
+      const fallback = this.add.graphics()
+      fallback.fillGradientStyle(0x1a1a2e, 0x1a1a2e, 0x16213e, 0x16213e)
+      fallback.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
     }
 
-    // Ground area
-    graphics.fillStyle(0x2e7d32, 1)
-    graphics.fillRect(0, GAME_HEIGHT * 0.75, GAME_WIDTH, GAME_HEIGHT * 0.25)
+    this.createMonsterCollage()
 
-    graphics.fillStyle(0x4caf50, 1)
-    graphics.fillRect(0, GAME_HEIGHT * 0.75, GAME_WIDTH, 8)
+    // Dark center overlay so title + buttons stay readable
+    const overlay = this.add.graphics()
+    overlay.fillStyle(0x0a0a1a, 0.65)
+    overlay.fillRect(GAME_WIDTH / 2 - 250, 0, 500, GAME_HEIGHT)
+
+    // Soft edge fade: two gradient strips alongside the center band
+    const edgeWidth = 120
+    for (let i = 0; i < edgeWidth; i++) {
+      const alpha = 0.65 * (1 - i / edgeWidth)
+      overlay.fillStyle(0x0a0a1a, alpha)
+      overlay.fillRect(GAME_WIDTH / 2 - 250 - edgeWidth + i, 0, 1, GAME_HEIGHT)
+      overlay.fillRect(GAME_WIDTH / 2 + 250 + (edgeWidth - i), 0, 1, GAME_HEIGHT)
+    }
+  }
+
+  private createMonsterCollage(): void {
+    // Curated monster positions: placed around edges, avoiding center button column
+    const monsterLayout: ReadonlyArray<{
+      icon: number
+      x: number
+      y: number
+      scale: number
+      angle: number
+    }> = [
+      // Left side cluster
+      { icon: 1, x: 100, y: 160, scale: 1.1, angle: -5 },
+      { icon: 54, x: 80, y: 370, scale: 1.2, angle: 8 },
+      { icon: 61, x: 130, y: 560, scale: 1.0, angle: -3 },
+
+      // Far left
+      { icon: 27, x: 260, y: 80, scale: 0.9, angle: 4 },
+      { icon: 51, x: 250, y: 620, scale: 0.85, angle: -6 },
+
+      // Right side cluster
+      { icon: 4, x: 1180, y: 140, scale: 1.1, angle: 5 },
+      { icon: 58, x: 1160, y: 360, scale: 1.2, angle: -8 },
+      { icon: 8, x: 1150, y: 560, scale: 1.0, angle: 3 },
+
+      // Far right
+      { icon: 19, x: 1020, y: 80, scale: 0.9, angle: -4 },
+      { icon: 55, x: 1030, y: 630, scale: 0.85, angle: 6 },
+
+      // Top/bottom accent
+      { icon: 56, x: 50, y: 50, scale: 0.7, angle: 12 },
+      { icon: 52, x: 1230, y: 670, scale: 0.7, angle: -10 },
+    ]
+
+    monsterLayout.forEach(({ icon, x, y, scale, angle }, index) => {
+      const key = `monster-battle-${icon}`
+      if (!this.textures.exists(key)) return
+
+      const sprite = this.add.image(x, y, key)
+      sprite.setScale(scale)
+      sprite.setOrigin(0.5)
+      sprite.setAngle(angle)
+      sprite.setAlpha(0.85)
+
+      // Gentle floating bob
+      this.tweens.add({
+        targets: sprite,
+        y: y + (index % 2 === 0 ? 6 : -6),
+        duration: 2500 + index * 300,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      })
+    })
   }
 
   private createTitle(): void {
