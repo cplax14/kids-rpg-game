@@ -3,6 +3,9 @@ import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS, TEXT_STYLES } from '../con
 import { BATTLE_SPRITE_ICONS } from '../config/spriteMapping'
 
 export class PreloaderScene extends Phaser.Scene {
+  private revealsComplete = false
+  private loadingComplete = false
+
   constructor() {
     super({ key: SCENE_KEYS.PRELOADER })
   }
@@ -14,44 +17,235 @@ export class PreloaderScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.loadingComplete = true
     this.createPlayerAnimations()
     this.createNPCAnimations()
-    this.scene.start(SCENE_KEYS.TITLE)
+    this.tryTransition()
+  }
+
+  private tryTransition(): void {
+    if (this.loadingComplete && this.revealsComplete) {
+      this.scene.start(SCENE_KEYS.TITLE)
+    }
   }
 
   private createLoadingBar(): void {
-    const centerX = GAME_WIDTH / 2
-    const centerY = GAME_HEIGHT / 2
+    const MONSTER_COUNT = 8
+    const monsterY = 320
+    const barY = 520
+    const barWidth = 600
+    const barHeight = 24
+    const monsterScale = 0.8
+    const monsterSpacing = 140
+    const monsterStartX = (GAME_WIDTH - (MONSTER_COUNT - 1) * monsterSpacing) / 2
 
-    const title = this.add.text(centerX, centerY - 80, 'Monster Quest', {
+    this.createGradientBackground()
+
+    const title = this.add.text(GAME_WIDTH / 2, 80, 'Monster Quest', {
       ...TEXT_STYLES.HEADING,
-      fontSize: '48px',
+      fontSize: '52px',
     })
     title.setOrigin(0.5)
 
-    const subtitle = this.add.text(centerX, centerY - 30, 'Loading...', TEXT_STYLES.BODY)
-    subtitle.setOrigin(0.5)
-
-    const barWidth = 400
-    const barHeight = 30
+    const monsterSprites = this.createMonsterSilhouettes(
+      MONSTER_COUNT,
+      monsterStartX,
+      monsterY,
+      monsterSpacing,
+      monsterScale,
+    )
 
     const barBg = this.add.graphics()
-    barBg.fillStyle(0x333333, 1)
-    barBg.fillRoundedRect(centerX - barWidth / 2, centerY + 20, barWidth, barHeight, 8)
+    barBg.fillStyle(0x222233, 1)
+    barBg.fillRoundedRect(GAME_WIDTH / 2 - barWidth / 2, barY, barWidth, barHeight, 8)
+    barBg.lineStyle(1, 0x444466, 1)
+    barBg.strokeRoundedRect(GAME_WIDTH / 2 - barWidth / 2, barY, barWidth, barHeight, 8)
 
     const barFill = this.add.graphics()
+
+    const loadingText = this.add.text(GAME_WIDTH / 2, barY + barHeight + 24, 'Loading...', {
+      ...TEXT_STYLES.BODY,
+      fontSize: '16px',
+      color: '#8888aa',
+    })
+    loadingText.setOrigin(0.5)
+
+    const percentText = this.add.text(GAME_WIDTH / 2, barY + barHeight / 2, '0%', {
+      ...TEXT_STYLES.BODY,
+      fontSize: '14px',
+      color: '#ffffff',
+    })
+    percentText.setOrigin(0.5)
+
+    const revealQueue: number[] = []
+    let revealedCount = 0
+    let revealPlaying = false
+    const REVEAL_STAGGER_MS = 250
+    const POST_REVEAL_DELAY_MS = 600
+
+    const processRevealQueue = (): void => {
+      if (revealPlaying || revealQueue.length === 0) return
+      revealPlaying = true
+
+      const index = revealQueue.shift()!
+      this.revealMonster(monsterSprites[index], monsterScale)
+
+      this.time.delayedCall(REVEAL_STAGGER_MS, () => {
+        revealPlaying = false
+        if (revealQueue.length > 0) {
+          processRevealQueue()
+        } else {
+          this.time.delayedCall(POST_REVEAL_DELAY_MS, () => {
+            this.revealsComplete = true
+            this.tryTransition()
+          })
+        }
+      })
+    }
 
     this.load.on('progress', (value: number) => {
       barFill.clear()
       barFill.fillStyle(COLORS.PRIMARY, 1)
-      barFill.fillRoundedRect(
-        centerX - barWidth / 2 + 4,
-        centerY + 24,
-        (barWidth - 8) * value,
-        barHeight - 8,
-        6,
-      )
+      const fillWidth = Math.max(0, (barWidth - 8) * value)
+      if (fillWidth > 0) {
+        barFill.fillRoundedRect(
+          GAME_WIDTH / 2 - barWidth / 2 + 4,
+          barY + 4,
+          fillWidth,
+          barHeight - 8,
+          5,
+        )
+      }
+
+      percentText.setText(`${Math.floor(value * 100)}%`)
+
+      const shouldReveal = Math.floor(value * MONSTER_COUNT)
+      while (revealedCount < shouldReveal && revealedCount < monsterSprites.length) {
+        revealQueue.push(revealedCount)
+        revealedCount++
+      }
+      processRevealQueue()
     })
+
+    this.load.on('complete', () => {
+      while (revealedCount < monsterSprites.length) {
+        revealQueue.push(revealedCount)
+        revealedCount++
+      }
+      processRevealQueue()
+    })
+  }
+
+  private createGradientBackground(): void {
+    const bg = this.add.graphics()
+    const steps = 32
+    for (let i = 0; i < steps; i++) {
+      const t = i / steps
+      const r = Math.floor(0x0a + (0x16 - 0x0a) * t)
+      const g = Math.floor(0x0a + (0x12 - 0x0a) * t)
+      const b = Math.floor(0x1a + (0x3e - 0x1a) * t)
+      const color = (r << 16) | (g << 8) | b
+      const y = (GAME_HEIGHT / steps) * i
+      bg.fillStyle(color, 1)
+      bg.fillRect(0, y, GAME_WIDTH, GAME_HEIGHT / steps + 1)
+    }
+  }
+
+  private createMonsterSilhouettes(
+    count: number,
+    startX: number,
+    y: number,
+    spacing: number,
+    scale: number,
+  ): Phaser.GameObjects.Image[] {
+    const sprites: Phaser.GameObjects.Image[] = []
+
+    for (let i = 0; i < count; i++) {
+      const key = `loading-monster-${i + 1}`
+      if (!this.textures.exists(key)) continue
+
+      const x = startX + i * spacing
+      const sprite = this.add.image(x, y, key)
+      sprite.setScale(scale)
+      sprite.setOrigin(0.5)
+      sprite.setTint(0x000000)
+      sprite.setAlpha(0.4)
+
+      this.tweens.add({
+        targets: sprite,
+        y: y - 3,
+        duration: 1800 + i * 200,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      })
+
+      sprites.push(sprite)
+    }
+
+    return sprites
+  }
+
+  private revealMonster(sprite: Phaser.GameObjects.Image, baseScale: number): void {
+    sprite.clearTint()
+
+    this.tweens.add({
+      targets: sprite,
+      alpha: 1,
+      duration: 200,
+    })
+
+    this.tweens.add({
+      targets: sprite,
+      scaleX: baseScale * 1.15,
+      scaleY: baseScale * 1.15,
+      duration: 150,
+      yoyo: true,
+      ease: 'Back.easeOut',
+    })
+
+    const flash = this.add.image(sprite.x, sprite.y, sprite.texture.key)
+    flash.setScale(baseScale)
+    flash.setOrigin(0.5)
+    flash.setTint(0xffffff)
+    flash.setAlpha(0.8)
+    flash.setBlendMode(Phaser.BlendModes.ADD)
+
+    this.tweens.add({
+      targets: flash,
+      alpha: 0,
+      scaleX: baseScale * 1.3,
+      scaleY: baseScale * 1.3,
+      duration: 400,
+      ease: 'Power2',
+      onComplete: () => flash.destroy(),
+    })
+
+    this.createRevealParticles(sprite.x, sprite.y)
+  }
+
+  private createRevealParticles(x: number, y: number): void {
+    const particleCount = 6
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (i / particleCount) * Math.PI * 2
+      const dist = 20 + Math.random() * 30
+      const particle = this.add.graphics()
+      const size = 2 + Math.random() * 3
+      particle.fillStyle(0xffffff, 1)
+      particle.fillCircle(0, 0, size)
+      particle.setPosition(x, y)
+      particle.setAlpha(0.9)
+
+      this.tweens.add({
+        targets: particle,
+        x: x + Math.cos(angle) * dist,
+        y: y + Math.sin(angle) * dist,
+        alpha: 0,
+        duration: 400 + Math.random() * 200,
+        ease: 'Power2',
+        onComplete: () => particle.destroy(),
+      })
+    }
   }
 
   private loadAssets(): void {
