@@ -2157,5 +2157,539 @@
     "breedingGroup": "dragon",
     "breedingTraits": ["fierce", "tough", "iron-will"],
     "obtainableVia": "both"
+  },
+  {
+    "speciesId": "fireimp",
+    "name": "Fire Imp",
+    "description": "A mischievous little fire sprite that darts around leaving sparks. Its tiny body crackles with fiery energy and it giggles as it zaps foes.",
+    "element": "fire",
+    "rarity": "common",
+    "baseStats": {
+      "maxHp": 78,
+      "currentHp": 78,
+      "maxMp": 30,
+      "currentMp": 30,
+      "attack": 14,
+      "defense": 10,
+      "magicAttack": 18,
+      "magicDefense": 14,
+      "speed": 20,
+      "luck": 15
+    },
+    "statGrowth": {
+      "hp": 6,
+      "mp": 3,
+      "attack": 1,
+      "defense": 1,
+      "magicAttack": 3,
+      "magicDefense": 2,
+      "speed": 3
+    },
+    "abilities": [
+      { "abilityId": "scratch", "learnAtLevel": 1 },
+      { "abilityId": "ember", "learnAtLevel": 3 },
+      { "abilityId": "quick-step", "learnAtLevel": 7 },
+      { "abilityId": "fireball", "learnAtLevel": 12 },
+      { "abilityId": "flame-burst", "learnAtLevel": 18 }
+    ],
+    "captureBaseDifficulty": 0.28,
+    "spriteKey": "fireimp",
+    "evolutionChain": null,
+    "breedingGroup": "elemental",
+    "breedingTraits": ["fireproof", "nimble"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "aquawing",
+    "name": "Flying Water Tiger",
+    "description": "A majestic flying tiger with shimmering water wings. It soars through rainstorms and dives into lakes to hunt, leaving trails of mist.",
+    "element": "water",
+    "rarity": "rare",
+    "baseStats": {
+      "maxHp": 135,
+      "currentHp": 135,
+      "maxMp": 45,
+      "currentMp": 45,
+      "attack": 22,
+      "defense": 18,
+      "magicAttack": 24,
+      "magicDefense": 20,
+      "speed": 22,
+      "luck": 15
+    },
+    "statGrowth": {
+      "hp": 10,
+      "mp": 4,
+      "attack": 3,
+      "defense": 2,
+      "magicAttack": 3,
+      "magicDefense": 2,
+      "speed": 3
+    },
+    "abilities": [
+      { "abilityId": "bite", "learnAtLevel": 1 },
+      { "abilityId": "water-splash", "learnAtLevel": 3 },
+      { "abilityId": "gust", "learnAtLevel": 6 },
+      { "abilityId": "ice-shard", "learnAtLevel": 10 },
+      { "abilityId": "tidal-wave", "learnAtLevel": 16 }
+    ],
+    "captureBaseDifficulty": 0.58,
+    "spriteKey": "aquawing",
+    "evolutionChain": null,
+    "breedingGroup": "beast",
+    "breedingTraits": ["waterproof", "fierce", "nimble"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "madcheeks",
+    "name": "Chubby Mad Cheeks",
+    "description": "A round, puffy creature with permanently angry cheeks. Despite its grumpy face, it is surprisingly cuddly and packs a mean headbutt.",
+    "element": "neutral",
+    "rarity": "common",
+    "baseStats": {
+      "maxHp": 100,
+      "currentHp": 100,
+      "maxMp": 24,
+      "currentMp": 24,
+      "attack": 16,
+      "defense": 18,
+      "magicAttack": 12,
+      "magicDefense": 16,
+      "speed": 12,
+      "luck": 14
+    },
+    "statGrowth": {
+      "hp": 8,
+      "mp": 2,
+      "attack": 2,
+      "defense": 3,
+      "magicAttack": 1,
+      "magicDefense": 2,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "slam", "learnAtLevel": 4 },
+      { "abilityId": "war-cry", "learnAtLevel": 8 },
+      { "abilityId": "defense-boost", "learnAtLevel": 12 },
+      { "abilityId": "power-strike", "learnAtLevel": 17 }
+    ],
+    "captureBaseDifficulty": 0.22,
+    "spriteKey": "madcheeks",
+    "evolutionChain": null,
+    "breedingGroup": "beast",
+    "breedingTraits": ["tough", "thick-skin"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "chimeradrake",
+    "name": "Dragon Horn Tusk",
+    "description": "A legendary dragon with horns of ivory and tusks of flame. Its vast wings spread wide to block out the sun as it swoops into battle.",
+    "element": "fire",
+    "rarity": "rare",
+    "baseStats": {
+      "maxHp": 155,
+      "currentHp": 155,
+      "maxMp": 48,
+      "currentMp": 48,
+      "attack": 26,
+      "defense": 22,
+      "magicAttack": 28,
+      "magicDefense": 20,
+      "speed": 18,
+      "luck": 14
+    },
+    "statGrowth": {
+      "hp": 11,
+      "mp": 5,
+      "attack": 3,
+      "defense": 3,
+      "magicAttack": 3,
+      "magicDefense": 2,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "bite", "learnAtLevel": 1 },
+      { "abilityId": "ember", "learnAtLevel": 3 },
+      { "abilityId": "fireball", "learnAtLevel": 7 },
+      { "abilityId": "war-cry", "learnAtLevel": 12 },
+      { "abilityId": "inferno", "learnAtLevel": 16 },
+      { "abilityId": "flame-burst", "learnAtLevel": 20 }
+    ],
+    "captureBaseDifficulty": 0.65,
+    "spriteKey": "chimeradrake",
+    "evolutionChain": null,
+    "breedingGroup": "dragon",
+    "breedingTraits": ["fireproof", "fierce", "tough"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "emberwing",
+    "name": "Fire Dead X",
+    "description": "A fiery beast with smoldering wing-like appendages that spread from its body. It charges through flames unharmed, leaving scorched earth behind.",
+    "element": "fire",
+    "rarity": "uncommon",
+    "baseStats": {
+      "maxHp": 105,
+      "currentHp": 105,
+      "maxMp": 30,
+      "currentMp": 30,
+      "attack": 20,
+      "defense": 16,
+      "magicAttack": 18,
+      "magicDefense": 14,
+      "speed": 18,
+      "luck": 13
+    },
+    "statGrowth": {
+      "hp": 8,
+      "mp": 3,
+      "attack": 3,
+      "defense": 2,
+      "magicAttack": 2,
+      "magicDefense": 1,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "ember", "learnAtLevel": 3 },
+      { "abilityId": "fireball", "learnAtLevel": 8 },
+      { "abilityId": "quick-step", "learnAtLevel": 12 },
+      { "abilityId": "flame-burst", "learnAtLevel": 17 }
+    ],
+    "captureBaseDifficulty": 0.42,
+    "spriteKey": "emberwing",
+    "evolutionChain": null,
+    "breedingGroup": "beast",
+    "breedingTraits": ["fireproof", "fierce"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "blazecheetah",
+    "name": "Fire Roar Cheetah",
+    "description": "A fire cheetah that stands tall on its hind legs to roar. Its blazing speed and sharp claws make it one of the fastest hunters alive.",
+    "element": "fire",
+    "rarity": "uncommon",
+    "baseStats": {
+      "maxHp": 98,
+      "currentHp": 98,
+      "maxMp": 32,
+      "currentMp": 32,
+      "attack": 22,
+      "defense": 14,
+      "magicAttack": 16,
+      "magicDefense": 14,
+      "speed": 26,
+      "luck": 16
+    },
+    "statGrowth": {
+      "hp": 7,
+      "mp": 3,
+      "attack": 3,
+      "defense": 1,
+      "magicAttack": 2,
+      "magicDefense": 1,
+      "speed": 4
+    },
+    "abilities": [
+      { "abilityId": "scratch", "learnAtLevel": 1 },
+      { "abilityId": "ember", "learnAtLevel": 2 },
+      { "abilityId": "quick-step", "learnAtLevel": 6 },
+      { "abilityId": "fireball", "learnAtLevel": 10 },
+      { "abilityId": "flame-burst", "learnAtLevel": 16 }
+    ],
+    "captureBaseDifficulty": 0.44,
+    "spriteKey": "blazecheetah",
+    "evolutionChain": null,
+    "breedingGroup": "beast",
+    "breedingTraits": ["nimble", "fireproof", "fierce"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "frostfist",
+    "name": "Ice Arm Mad Face",
+    "description": "An ice creature with powerful arms extended in a fighting stance. Frost crystals form on everything it punches, and its angry face scares even brave adventurers.",
+    "element": "water",
+    "rarity": "uncommon",
+    "baseStats": {
+      "maxHp": 115,
+      "currentHp": 115,
+      "maxMp": 28,
+      "currentMp": 28,
+      "attack": 22,
+      "defense": 20,
+      "magicAttack": 16,
+      "magicDefense": 18,
+      "speed": 14,
+      "luck": 12
+    },
+    "statGrowth": {
+      "hp": 9,
+      "mp": 3,
+      "attack": 3,
+      "defense": 2,
+      "magicAttack": 2,
+      "magicDefense": 2,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "ice-shard", "learnAtLevel": 3 },
+      { "abilityId": "power-strike", "learnAtLevel": 7 },
+      { "abilityId": "shield-wall", "learnAtLevel": 11 },
+      { "abilityId": "blizzard", "learnAtLevel": 16 }
+    ],
+    "captureBaseDifficulty": 0.46,
+    "spriteKey": "frostfist",
+    "evolutionChain": null,
+    "breedingGroup": "elemental",
+    "breedingTraits": ["waterproof", "tough"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "iceboxer",
+    "name": "Ice Chunk Chunk Unbeatable Boxer",
+    "description": "A massive ice golem with oversized crystalline fists and a tiny angry face. It throws devastating punches that freeze anything they touch.",
+    "element": "water",
+    "rarity": "rare",
+    "baseStats": {
+      "maxHp": 165,
+      "currentHp": 165,
+      "maxMp": 32,
+      "currentMp": 32,
+      "attack": 28,
+      "defense": 26,
+      "magicAttack": 14,
+      "magicDefense": 22,
+      "speed": 10,
+      "luck": 10
+    },
+    "statGrowth": {
+      "hp": 13,
+      "mp": 3,
+      "attack": 4,
+      "defense": 3,
+      "magicAttack": 1,
+      "magicDefense": 3,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "slam", "learnAtLevel": 1 },
+      { "abilityId": "ice-shard", "learnAtLevel": 3 },
+      { "abilityId": "power-strike", "learnAtLevel": 7 },
+      { "abilityId": "shield-wall", "learnAtLevel": 11 },
+      { "abilityId": "blizzard", "learnAtLevel": 15 },
+      { "abilityId": "boulder-crush", "learnAtLevel": 20 }
+    ],
+    "captureBaseDifficulty": 0.62,
+    "spriteKey": "iceboxer",
+    "evolutionChain": null,
+    "breedingGroup": "elemental",
+    "breedingTraits": ["waterproof", "tough", "thick-skin"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "plantosaur",
+    "name": "Mega Plant Roar",
+    "description": "A towering plant dinosaur with a long neck and a thunderous roar. Vines and leaves grow from its bark-like skin, and its stomp shakes the earth.",
+    "element": "earth",
+    "rarity": "rare",
+    "baseStats": {
+      "maxHp": 160,
+      "currentHp": 160,
+      "maxMp": 40,
+      "currentMp": 40,
+      "attack": 24,
+      "defense": 24,
+      "magicAttack": 20,
+      "magicDefense": 20,
+      "speed": 12,
+      "luck": 12
+    },
+    "statGrowth": {
+      "hp": 12,
+      "mp": 4,
+      "attack": 3,
+      "defense": 3,
+      "magicAttack": 2,
+      "magicDefense": 2,
+      "speed": 1
+    },
+    "abilities": [
+      { "abilityId": "bite", "learnAtLevel": 1 },
+      { "abilityId": "vine-whip", "learnAtLevel": 3 },
+      { "abilityId": "rock-throw", "learnAtLevel": 7 },
+      { "abilityId": "earthquake", "learnAtLevel": 12 },
+      { "abilityId": "boulder-crush", "learnAtLevel": 18 }
+    ],
+    "captureBaseDifficulty": 0.60,
+    "spriteKey": "plantosaur",
+    "evolutionChain": null,
+    "breedingGroup": "dragon",
+    "breedingTraits": ["tough", "thick-skin", "fierce"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "miniflame",
+    "name": "Mini X-Fire",
+    "description": "A tiny but fierce fire creature with a curled tail of pure flame. What it lacks in size it makes up for in explosive magical power.",
+    "element": "fire",
+    "rarity": "common",
+    "baseStats": {
+      "maxHp": 72,
+      "currentHp": 72,
+      "maxMp": 32,
+      "currentMp": 32,
+      "attack": 12,
+      "defense": 10,
+      "magicAttack": 20,
+      "magicDefense": 15,
+      "speed": 18,
+      "luck": 16
+    },
+    "statGrowth": {
+      "hp": 5,
+      "mp": 4,
+      "attack": 1,
+      "defense": 1,
+      "magicAttack": 3,
+      "magicDefense": 2,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "ember", "learnAtLevel": 2 },
+      { "abilityId": "fireball", "learnAtLevel": 6 },
+      { "abilityId": "inferno", "learnAtLevel": 14 }
+    ],
+    "captureBaseDifficulty": 0.24,
+    "spriteKey": "miniflame",
+    "evolutionChain": null,
+    "breedingGroup": "elemental",
+    "breedingTraits": ["fireproof", "nimble"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "tidalfang",
+    "name": "Water Fierce Tiger",
+    "description": "A fierce blue water tiger with massive claws and razor teeth. It commands ocean currents and lunges at foes with terrifying speed.",
+    "element": "water",
+    "rarity": "uncommon",
+    "baseStats": {
+      "maxHp": 110,
+      "currentHp": 110,
+      "maxMp": 32,
+      "currentMp": 32,
+      "attack": 22,
+      "defense": 16,
+      "magicAttack": 18,
+      "magicDefense": 15,
+      "speed": 20,
+      "luck": 14
+    },
+    "statGrowth": {
+      "hp": 8,
+      "mp": 3,
+      "attack": 3,
+      "defense": 2,
+      "magicAttack": 2,
+      "magicDefense": 2,
+      "speed": 3
+    },
+    "abilities": [
+      { "abilityId": "bite", "learnAtLevel": 1 },
+      { "abilityId": "water-splash", "learnAtLevel": 3 },
+      { "abilityId": "ice-shard", "learnAtLevel": 7 },
+      { "abilityId": "quick-step", "learnAtLevel": 11 },
+      { "abilityId": "tidal-wave", "learnAtLevel": 16 }
+    ],
+    "captureBaseDifficulty": 0.44,
+    "spriteKey": "tidalfang",
+    "evolutionChain": null,
+    "breedingGroup": "beast",
+    "breedingTraits": ["waterproof", "fierce", "nimble"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "leafblower",
+    "name": "Windy Leaf Blower",
+    "description": "A jolly wind creature that blows streams of leaves from its mouth. Its round body bounces as it waddles, and its leaf-shaped ears flutter in the breeze.",
+    "element": "wind",
+    "rarity": "common",
+    "baseStats": {
+      "maxHp": 86,
+      "currentHp": 86,
+      "maxMp": 28,
+      "currentMp": 28,
+      "attack": 13,
+      "defense": 14,
+      "magicAttack": 16,
+      "magicDefense": 15,
+      "speed": 16,
+      "luck": 15
+    },
+    "statGrowth": {
+      "hp": 7,
+      "mp": 3,
+      "attack": 1,
+      "defense": 2,
+      "magicAttack": 2,
+      "magicDefense": 2,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "tackle", "learnAtLevel": 1 },
+      { "abilityId": "gust", "learnAtLevel": 3 },
+      { "abilityId": "vine-whip", "learnAtLevel": 7 },
+      { "abilityId": "wind-blade", "learnAtLevel": 12 },
+      { "abilityId": "tornado", "learnAtLevel": 17 }
+    ],
+    "captureBaseDifficulty": 0.26,
+    "spriteKey": "leafblower",
+    "evolutionChain": null,
+    "breedingGroup": "elemental",
+    "breedingTraits": ["nimble", "gentle"],
+    "obtainableVia": "wild"
+  },
+  {
+    "speciesId": "aquafang",
+    "name": "X Water Tiger",
+    "description": "A menacing water predator with razor fangs and a long sweeping tail. It lurks in deep waters, its multiple limbs making it a fearsome swimmer.",
+    "element": "water",
+    "rarity": "uncommon",
+    "baseStats": {
+      "maxHp": 118,
+      "currentHp": 118,
+      "maxMp": 30,
+      "currentMp": 30,
+      "attack": 24,
+      "defense": 18,
+      "magicAttack": 16,
+      "magicDefense": 16,
+      "speed": 18,
+      "luck": 13
+    },
+    "statGrowth": {
+      "hp": 9,
+      "mp": 3,
+      "attack": 3,
+      "defense": 2,
+      "magicAttack": 2,
+      "magicDefense": 2,
+      "speed": 2
+    },
+    "abilities": [
+      { "abilityId": "bite", "learnAtLevel": 1 },
+      { "abilityId": "water-splash", "learnAtLevel": 2 },
+      { "abilityId": "poison-sting", "learnAtLevel": 6 },
+      { "abilityId": "ice-shard", "learnAtLevel": 10 },
+      { "abilityId": "tidal-wave", "learnAtLevel": 15 }
+    ],
+    "captureBaseDifficulty": 0.46,
+    "spriteKey": "aquafang",
+    "evolutionChain": null,
+    "breedingGroup": "aquatic",
+    "breedingTraits": ["waterproof", "fierce"],
+    "obtainableVia": "wild"
   }
 ]

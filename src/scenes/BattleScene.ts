@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS, DEPTH, TEXT_STYLES } from '../config'
-import { getMonsterFrame, getMonsterIconKey } from '../config/spriteMapping'
+import { getMonsterFrame, getMonsterIconKey, getMonsterBattleKey } from '../config/spriteMapping'
 import type { Battle, BattleCombatant, BattleAction, MonsterElement, ItemDrop, MonsterInstance, BossDefinition } from '../models/types'
 import { initAudioSystem, playMusic, crossfadeMusic, playSfx, stopMusic, MUSIC_KEYS, SFX_KEYS } from '../systems/AudioSystem'
 import { checkAndShowTutorial, isTutorialComplete } from '../systems/TutorialSystem'
@@ -194,15 +194,33 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private createVillageBackground(bg: Phaser.GameObjects.Graphics): void {
-    // Bright sunny sky gradient
+    // Use image background if available
+    if (this.textures.exists('battle-bg-village')) {
+      const bgImage = this.add.image(0, 0, 'battle-bg-village')
+      bgImage.setOrigin(0, 0)
+      bgImage.setDisplaySize(GAME_WIDTH, GAME_HEIGHT)
+      bgImage.setDepth(DEPTH.GROUND - 1)
+
+      // Semi-transparent battle platforms over the image
+      bg.fillStyle(0xa1887f, 0.4)
+      bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.40, 380, 70)
+      bg.fillStyle(0x8d6e63, 0.3)
+      bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.38, 350, 55)
+
+      bg.fillStyle(0xa1887f, 0.4)
+      bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.54, 420, 70)
+      bg.fillStyle(0x8d6e63, 0.3)
+      bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.52, 380, 55)
+      return
+    }
+
+    // Fallback: procedural village background
     bg.fillGradientStyle(0x87ceeb, 0x87ceeb, 0xadd8e6, 0xadd8e6)
     bg.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT * 0.6)
 
-    // Warm green grass
     bg.fillStyle(0x7cb342, 1)
     bg.fillRect(0, GAME_HEIGHT * 0.6, GAME_WIDTH, GAME_HEIGHT * 0.4)
 
-    // Add some grass variation
     bg.fillStyle(0x689f38, 0.5)
     for (let i = 0; i < 20; i++) {
       const x = (i * 73) % GAME_WIDTH
@@ -210,29 +228,45 @@ export class BattleScene extends Phaser.Scene {
       bg.fillCircle(x, y, 15 + (i % 10))
     }
 
-    // Battle platform for enemies (cobblestone look)
     bg.fillStyle(0xa1887f, 0.8)
-    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.48, 380, 70)
+    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.40, 380, 70)
     bg.fillStyle(0x8d6e63, 0.6)
-    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.46, 350, 55)
+    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.38, 350, 55)
 
-    // Battle platform for player
     bg.fillStyle(0xa1887f, 0.8)
-    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.68, 420, 70)
+    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.54, 420, 70)
     bg.fillStyle(0x8d6e63, 0.6)
-    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.66, 380, 55)
+    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.52, 380, 55)
   }
 
   private createForestBackground(bg: Phaser.GameObjects.Graphics): void {
-    // Darker, mystical sky with green tint
+    // Use image background if available
+    if (this.textures.exists('battle-bg-forest')) {
+      const bgImage = this.add.image(0, 0, 'battle-bg-forest')
+      bgImage.setOrigin(0, 0)
+      bgImage.setDisplaySize(GAME_WIDTH, GAME_HEIGHT)
+      bgImage.setDepth(DEPTH.GROUND - 1)
+
+      // Semi-transparent battle platforms over the image
+      bg.fillStyle(0x5d4e37, 0.5)
+      bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.40, 380, 70)
+      bg.fillStyle(0x4a6741, 0.3)
+      bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.38, 340, 50)
+
+      bg.fillStyle(0x5d4e37, 0.5)
+      bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.54, 420, 70)
+      bg.fillStyle(0x4a6741, 0.3)
+      bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.52, 370, 50)
+      return
+    }
+
+    // Fallback: procedural forest background
     bg.fillGradientStyle(0x4a6741, 0x5d8a54, 0x2d5a27, 0x1a3d12)
     bg.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT * 0.6)
 
-    // Dark forest floor
     bg.fillStyle(0x2d4a27, 1)
     bg.fillRect(0, GAME_HEIGHT * 0.6, GAME_WIDTH, GAME_HEIGHT * 0.4)
 
-    // Add moss and undergrowth patches
     bg.fillStyle(0x3d6b37, 0.7)
     for (let i = 0; i < 25; i++) {
       const x = (i * 61) % GAME_WIDTH
@@ -240,31 +274,47 @@ export class BattleScene extends Phaser.Scene {
       bg.fillCircle(x, y, 20 + (i % 15))
     }
 
-    // Draw background trees (silhouettes)
     bg.fillStyle(0x1a3d12, 0.8)
     for (let i = 0; i < 8; i++) {
       const x = i * 180 + 50
       const treeHeight = 150 + (i % 3) * 40
-      // Tree trunk
       bg.fillRect(x - 8, GAME_HEIGHT * 0.6 - treeHeight + 80, 16, treeHeight - 80)
-      // Tree canopy (triangle)
       bg.fillTriangle(x, GAME_HEIGHT * 0.6 - treeHeight, x - 50, GAME_HEIGHT * 0.6 - 50, x + 50, GAME_HEIGHT * 0.6 - 50)
     }
 
-    // Battle platform for enemies (mossy stone)
     bg.fillStyle(0x5d4e37, 0.9)
-    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.48, 380, 70)
+    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.40, 380, 70)
     bg.fillStyle(0x4a6741, 0.5)
-    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.46, 340, 50)
+    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.38, 340, 50)
 
-    // Battle platform for player
     bg.fillStyle(0x5d4e37, 0.9)
-    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.68, 420, 70)
+    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.54, 420, 70)
     bg.fillStyle(0x4a6741, 0.5)
-    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.66, 370, 50)
+    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.52, 370, 50)
   }
 
   private createCaveBackground(bg: Phaser.GameObjects.Graphics): void {
+    // Use image background if available
+    if (this.textures.exists('battle-bg-cave')) {
+      const bgImage = this.add.image(0, 0, 'battle-bg-cave')
+      bgImage.setOrigin(0, 0)
+      bgImage.setDisplaySize(GAME_WIDTH, GAME_HEIGHT)
+      bgImage.setDepth(DEPTH.GROUND - 1)
+
+      // Semi-transparent battle platforms over the image
+      bg.fillStyle(0x5d5d7e, 0.5)
+      bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.40, 380, 70)
+      bg.fillStyle(0x00bcd4, 0.2)
+      bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.38, 320, 45)
+
+      bg.fillStyle(0x5d5d7e, 0.5)
+      bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.54, 420, 70)
+      bg.fillStyle(0x7c4dff, 0.2)
+      bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.52, 360, 45)
+      return
+    }
+
+    // Fallback: procedural cave background
     // Dark cave ceiling
     bg.fillGradientStyle(0x1a1a2e, 0x1a1a2e, 0x2d2d44, 0x2d2d44)
     bg.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT * 0.5)
@@ -510,49 +560,69 @@ export class BattleScene extends Phaser.Scene {
 
     // Battle platform for enemies (rotting log/mud mound)
     bg.fillStyle(0x4a3a2a, 0.95)
-    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.48, 380, 70)
+    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.40, 380, 70)
     bg.fillStyle(0x3d4d3d, 0.5)
-    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.46, 320, 45)
+    bg.fillEllipse(GAME_WIDTH * 0.25, GAME_HEIGHT * 0.38, 320, 45)
 
     // Battle platform for player
     bg.fillStyle(0x4a3a2a, 0.95)
-    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.68, 420, 70)
+    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.54, 420, 70)
     bg.fillStyle(0x2f4f2f, 0.4)
-    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.66, 360, 45)
+    bg.fillEllipse(GAME_WIDTH * 0.72, GAME_HEIGHT * 0.52, 360, 45)
   }
 
   private createCombatantSprites(): void {
     const hasCharacters32 = this.textures.exists('characters-32')
 
-    // Determine enemy scale based on boss battle
-    const enemyScale = this.isBossBattle ? 6 : 4  // Boss is 6x, regular is 4x
-    const playerScale = 2.5  // Player party at 2.5x
+    // Scale depends on whether the monster has a high-res battle sprite
+    // Hand-drawn monsters with 128x128 battle sprites get larger display
+    // Old 32x32-only sprites use original smaller scale to avoid pixelation
+    const smallEnemyScale = this.isBossBattle ? 6 : 4   // For 32x32 icons
+    const largeEnemyScale = this.isBossBattle ? 12 : 8  // For 128x128 battle sprites
+    const smallPlayerScale = 2.5  // For 32x32 icons/characters
+    const largePlayerScale = 5    // For 128x128 battle sprites
 
     // Enemy sprites (left side) - centered for boss battles
     this.enemySprites = this.battle.enemySquad.map((enemy, index) => {
       // Position boss in center, regular enemies spread out
       const x = this.isBossBattle
         ? GAME_WIDTH * 0.22
-        : GAME_WIDTH * 0.15 + index * 140
-      const y = this.isBossBattle ? GAME_HEIGHT * 0.35 : GAME_HEIGHT * 0.38
+        : GAME_WIDTH * 0.15 + index * 260
+      const y = this.isBossBattle ? GAME_HEIGHT * 0.28 : GAME_HEIGHT * 0.30
 
       let sprite: BattleSprite
 
+      // Track the final scale for the entry animation
+      let finalScale = smallEnemyScale
+
       if (enemy.speciesId) {
-        // Try to use 32x32 monster icon
-        const iconKey = getMonsterIconKey(enemy.speciesId)
-        if (this.textures.exists(iconKey)) {
-          const creatureSprite = this.add.sprite(x, y, iconKey)
-          creatureSprite.setScale(enemyScale)
+        // Try 128x128 battle sprite first for maximum detail
+        const battleKey = getMonsterBattleKey(enemy.speciesId)
+        if (battleKey && this.textures.exists(battleKey)) {
+          const creatureSprite = this.add.sprite(x, y, battleKey)
+          // 128x128 at largeScale/4 gives same display size as 32x32 at largeScale
+          finalScale = largeEnemyScale * 0.25
+          creatureSprite.setScale(finalScale)
           creatureSprite.setDepth(DEPTH.PLAYER)
           sprite = creatureSprite
         } else {
-          // Fallback to legacy 16x16 creatures-sheet
-          const frameIndex = getMonsterFrame(enemy.speciesId)
-          const creatureSprite = this.add.sprite(x, y, 'creatures-sheet', frameIndex)
-          creatureSprite.setScale(enemyScale * 1.5) // 16x16 needs more scaling
-          creatureSprite.setDepth(DEPTH.PLAYER)
-          sprite = creatureSprite
+          // Fall back to 32x32 monster icon at smaller scale
+          const iconKey = getMonsterIconKey(enemy.speciesId)
+          if (this.textures.exists(iconKey)) {
+            const creatureSprite = this.add.sprite(x, y, iconKey)
+            finalScale = smallEnemyScale
+            creatureSprite.setScale(finalScale)
+            creatureSprite.setDepth(DEPTH.PLAYER)
+            sprite = creatureSprite
+          } else {
+            // Fallback to legacy 16x16 creatures-sheet
+            const frameIndex = getMonsterFrame(enemy.speciesId)
+            const creatureSprite = this.add.sprite(x, y, 'creatures-sheet', frameIndex)
+            finalScale = smallEnemyScale * 1.5 // 16x16 needs more scaling
+            creatureSprite.setScale(finalScale)
+            creatureSprite.setDepth(DEPTH.PLAYER)
+            sprite = creatureSprite
+          }
         }
       } else {
         // Fallback to colored rectangle
@@ -564,27 +634,14 @@ export class BattleScene extends Phaser.Scene {
         sprite = rectSprite
       }
 
-      // Name label above - adjust for boss size
-      const labelY = this.isBossBattle ? y - 110 : y - 70
-      const fontSize = this.isBossBattle ? '16px' : '14px'
-      const label = this.add.text(x, labelY, enemy.name, {
-        ...TEXT_STYLES.SMALL,
-        fontSize,
-        color: '#ffffff',
-        stroke: '#000000',
-        strokeThickness: 3,
-      })
-      label.setOrigin(0.5)
-      label.setDepth(DEPTH.PLAYER + 1)
-
       // Entry animation - boss has more dramatic entrance
       sprite.setAlpha(0)
-      sprite.setScale(this.isBossBattle ? 1 : 0.5)
+      sprite.setScale(this.isBossBattle ? finalScale * 0.2 : finalScale * 0.5)
       this.tweens.add({
         targets: sprite,
         alpha: 1,
-        scaleX: enemyScale,
-        scaleY: enemyScale,
+        scaleX: finalScale,
+        scaleY: finalScale,
         duration: this.isBossBattle ? 600 : 400,
         delay: index * 150,
         ease: this.isBossBattle ? 'Bounce.easeOut' : 'Back.easeOut',
@@ -604,36 +661,46 @@ export class BattleScene extends Phaser.Scene {
       let sprite: BattleSprite
 
       if (player.isMonster && player.speciesId) {
-        // Try to use 32x32 monster icon for squad monsters
-        const iconKey = getMonsterIconKey(player.speciesId)
-        if (this.textures.exists(iconKey)) {
-          const creatureSprite = this.add.sprite(x, y, iconKey)
-          creatureSprite.setScale(playerScale)
+        // Try 128x128 battle sprite first for squad monsters
+        const battleKey = getMonsterBattleKey(player.speciesId)
+        if (battleKey && this.textures.exists(battleKey)) {
+          const creatureSprite = this.add.sprite(x, y, battleKey)
+          creatureSprite.setScale(largePlayerScale * 0.25)
           creatureSprite.setDepth(DEPTH.PLAYER)
           creatureSprite.setFlipX(true) // Face the enemies
           sprite = creatureSprite
         } else {
-          // Fallback to legacy 16x16 creatures-sheet
-          const frameIndex = getMonsterFrame(player.speciesId)
-          const creatureSprite = this.add.sprite(x, y, 'creatures-sheet', frameIndex)
-          creatureSprite.setScale(playerScale * 1.5)
-          creatureSprite.setDepth(DEPTH.PLAYER)
-          creatureSprite.setFlipX(true)
-          sprite = creatureSprite
+          // Fall back to 32x32 monster icon at smaller scale
+          const iconKey = getMonsterIconKey(player.speciesId)
+          if (this.textures.exists(iconKey)) {
+            const creatureSprite = this.add.sprite(x, y, iconKey)
+            creatureSprite.setScale(smallPlayerScale)
+            creatureSprite.setDepth(DEPTH.PLAYER)
+            creatureSprite.setFlipX(true) // Face the enemies
+            sprite = creatureSprite
+          } else {
+            // Fallback to legacy 16x16 creatures-sheet
+            const frameIndex = getMonsterFrame(player.speciesId)
+            const creatureSprite = this.add.sprite(x, y, 'creatures-sheet', frameIndex)
+            creatureSprite.setScale(smallPlayerScale * 1.5)
+            creatureSprite.setDepth(DEPTH.PLAYER)
+            creatureSprite.setFlipX(true)
+            sprite = creatureSprite
+          }
         }
       } else if (!player.isMonster && hasCharacters32) {
         // Use 32x32 character sprite for player hero
         // Row 2 (index 2) is a suitable hero character, idle down frame is col 1
         const heroFrame = 2 * 12 + 1 // Row 2, column 1
         const heroSprite = this.add.sprite(x, y, 'characters-32', heroFrame)
-        heroSprite.setScale(playerScale)
+        heroSprite.setScale(smallPlayerScale)
         heroSprite.setDepth(DEPTH.PLAYER)
         heroSprite.setFlipX(true)
         sprite = heroSprite
       } else if (!player.isMonster) {
         // Fallback to legacy 16x16 character
         const heroSprite = this.add.sprite(x, y, 'characters-sheet', 0)
-        heroSprite.setScale(playerScale * 1.5)
+        heroSprite.setScale(smallPlayerScale * 1.5)
         heroSprite.setDepth(DEPTH.PLAYER)
         heroSprite.setFlipX(true)
         sprite = heroSprite
@@ -663,8 +730,8 @@ export class BattleScene extends Phaser.Scene {
   private calculateSquadPositions(squadCount: number): Array<{ x: number; y: number }> {
     // Layout configuration - positioned lower on screen
     const centerX = 950  // Center point for the squad area (right side)
-    const topRowY = GAME_HEIGHT * 0.54  // Top row Y position
-    const bottomRowY = GAME_HEIGHT * 0.78  // Bottom row Y position
+    const topRowY = GAME_HEIGHT * 0.42  // Top row Y position (higher to avoid label overlap)
+    const bottomRowY = GAME_HEIGHT * 0.70  // Bottom row Y position
     const spacing = 180  // Horizontal spacing between characters
 
     // Determine row sizes based on squad count
