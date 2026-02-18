@@ -52,6 +52,21 @@ export const MONSTER_ICON_NUMBERS: Readonly<Record<string, number>> = {
   thornwarden: 26,  // Forest miniboss - thorny guardian
   elderwood: 27,    // Forest boss - tree creature
   crystallix: 28,   // Cave boss - crystal creature
+
+  // Hand-drawn originals (by the kids!)
+  fireimp: 51,          // Fire imp creature
+  aquawing: 52,         // Flying water tiger
+  madcheeks: 53,        // Chubby angry cheeks creature
+  chimeradrake: 54,     // Dragon with horns and tusks
+  emberwing: 55,        // Fire creature with wing-like appendages
+  blazecheetah: 56,     // Fire cheetah standing and roaring
+  frostfist: 57,        // Ice creature with extended arms
+  iceboxer: 58,         // Chunky ice golem boxer
+  plantosaur: 59,       // Mega plant dinosaur
+  miniflame: 60,        // Small fire creature
+  tidalfang: 61,        // Fierce water tiger
+  leafblower: 62,       // Wind creature blowing leaves
+  aquafang: 63,         // Water tiger with fangs
 }
 
 // Legacy: Monster species ID to creature sheet frame index (16x16)
@@ -172,6 +187,19 @@ export const ELEMENT_COLORS: Readonly<Record<string, number>> = {
   neutral: 0x9e9e9e,
 }
 
+// Monster icon numbers that have 128x128 battle sprites available
+// Add icon numbers here as new high-res sprites are created
+export const BATTLE_SPRITE_ICONS: ReadonlySet<number> = new Set([
+  1,   // flamepup
+  4,   // bubblefin
+  8,   // pebblit
+  11,  // mossbun
+  19,  // shadowpup
+  26,  // thornwarden (boss)
+  27,  // elderwood (boss)
+  51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,  // hand-drawn originals
+])
+
 /**
  * Get the 32x32 monster icon key for a species
  * Returns the texture key like 'monster-icon-1'
@@ -179,6 +207,17 @@ export const ELEMENT_COLORS: Readonly<Record<string, number>> = {
 export function getMonsterIconKey(speciesId: string): string {
   const iconNumber = MONSTER_ICON_NUMBERS[speciesId] ?? 1
   return `monster-icon-${iconNumber}`
+}
+
+/**
+ * Get the 128x128 battle sprite key for a species, if available
+ * Returns the texture key like 'monster-battle-51' or null if no battle sprite exists
+ */
+export function getMonsterBattleKey(speciesId: string): string | null {
+  const iconNumber = MONSTER_ICON_NUMBERS[speciesId]
+  if (iconNumber === undefined) return null
+  if (!BATTLE_SPRITE_ICONS.has(iconNumber)) return null
+  return `monster-battle-${iconNumber}`
 }
 
 /**

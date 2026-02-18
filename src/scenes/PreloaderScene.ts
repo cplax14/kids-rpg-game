@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS, TEXT_STYLES } from '../config'
+import { BATTLE_SPRITE_ICONS } from '../config/spriteMapping'
 
 export class PreloaderScene extends Phaser.Scene {
   constructor() {
@@ -92,9 +93,19 @@ export class PreloaderScene extends Phaser.Scene {
     })
 
     // Load monster portrait icons (32x32, transparent)
-    for (let i = 1; i <= 50; i++) {
+    for (let i = 1; i <= 63; i++) {
       this.load.image(`monster-icon-${i}`, `assets/sprites/monsters/Icon${i}.png`)
     }
+
+    // Load high-res battle sprites (128x128) for monsters with upgraded art
+    for (const iconNum of BATTLE_SPRITE_ICONS) {
+      this.load.image(`monster-battle-${iconNum}`, `assets/sprites/monsters/battle/Battle${iconNum}.png`)
+    }
+
+    // Load battle background images
+    this.load.image('battle-bg-forest', 'assets/sprites/backgrounds/battle-bg-forest.png')
+    this.load.image('battle-bg-village', 'assets/sprites/backgrounds/battle-bg-village.png')
+    this.load.image('battle-bg-cave', 'assets/sprites/backgrounds/battle-bg-cave.png')
 
     // Load Mixel 32x32 tilesets as spritesheets for decoration sprites
     this.load.spritesheet('tileset-ground', 'assets/tilesets/mixel-32x32/Topdown RPG 32x32 - Ground Tileset.png', {

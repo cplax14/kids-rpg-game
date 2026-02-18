@@ -350,8 +350,8 @@ export class BattleHUD {
   private calculateSquadPositions(squadCount: number): Array<{ x: number; y: number }> {
     // Match the layout from BattleScene
     const centerX = 950
-    const topRowY = GAME_HEIGHT * 0.54 + 55  // Below top row sprites
-    const bottomRowY = GAME_HEIGHT * 0.78 + 55  // Below bottom row sprites
+    const topRowY = GAME_HEIGHT * 0.42 + 85  // Below top row sprites (extra room for large battle sprites)
+    const bottomRowY = GAME_HEIGHT * 0.70 + 85  // Below bottom row sprites
     const spacing = 180
 
     let topRowCount: number
@@ -422,11 +422,11 @@ export class BattleHUD {
     const positions: Array<{ x: number; y: number }> = []
 
     for (let i = 0; i < enemyCount; i++) {
-      const spriteX = isBossBattle ? GAME_WIDTH * 0.22 : GAME_WIDTH * 0.15 + i * 140
-      const spriteY = isBossBattle ? GAME_HEIGHT * 0.35 : GAME_HEIGHT * 0.38
+      const spriteX = isBossBattle ? GAME_WIDTH * 0.22 : GAME_WIDTH * 0.15 + i * 260
+      const spriteY = isBossBattle ? GAME_HEIGHT * 0.28 : GAME_HEIGHT * 0.30
       positions.push({
         x: spriteX,
-        y: spriteY + 70, // Position labels below sprites
+        y: spriteY + 140, // Position labels below larger sprites
       })
     }
 
@@ -739,8 +739,8 @@ export class BattleHUD {
   }
 
   private createMessageBox(): Phaser.GameObjects.Container {
-    // Position in upper right area (raised to avoid overlapping turn indicator)
-    const container = this.scene.add.container(GAME_WIDTH - 620, 180)
+    // Position just below the Battle Spirit container in upper right
+    const container = this.scene.add.container(GAME_WIDTH - 620, 90)
     container.setDepth(DEPTH.UI + 10)
 
     const bg = this.scene.add.graphics()
@@ -1045,7 +1045,7 @@ export class BattleHUD {
    * Shows at top-left of the screen.
    */
   private createBattleSpiritIndicator(): Phaser.GameObjects.Container {
-    const container = this.scene.add.container(20, 20)
+    const container = this.scene.add.container(GAME_WIDTH - 220, 20)
     container.setDepth(DEPTH.UI)
 
     // Background panel
@@ -1157,7 +1157,7 @@ export class BattleHUD {
    */
   showSpiritIncrease(level: number): void {
     const bonusPercent = level * 8
-    const text = this.scene.add.text(120, 70, `+${bonusPercent}% Power!`, {
+    const text = this.scene.add.text(GAME_WIDTH - 120, 70, `+${bonusPercent}% Power!`, {
       fontFamily: 'Arial Black, Arial, sans-serif',
       fontSize: '16px',
       color: '#ffd700',

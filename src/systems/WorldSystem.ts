@@ -55,6 +55,13 @@ export interface EncounterOptions {
   readonly isFirstBattle?: boolean
 }
 
+// Hand-drawn monster species (by the kids!) - guaranteed in first battle
+const HAND_DRAWN_SPECIES: ReadonlyArray<string> = [
+  'fireimp', 'aquawing', 'madcheeks', 'chimeradrake', 'emberwing',
+  'blazecheetah', 'frostfist', 'iceboxer', 'plantosaur', 'miniflame',
+  'tidalfang', 'leafblower', 'aquafang',
+]
+
 export function generateAreaEncounter(
   areaId: string,
   options?: EncounterOptions,
@@ -75,14 +82,23 @@ export function generateAreaEncounter(
     return null
   }
 
+  // First battle: guarantee a hand-drawn monster
+  // Otherwise filter to all wild encounters as normal
+  const encounterPool = options?.isFirstBattle
+    ? wildEncounters.filter((e) => HAND_DRAWN_SPECIES.includes(e.speciesId))
+    : wildEncounters
+
+  // Fall back to full pool if no hand-drawn monsters in this area
+  const finalPool = encounterPool.length > 0 ? encounterPool : wildEncounters
+
   // First battle always has exactly 1 enemy for a gentler introduction
   // Normal battles have 30% chance of 2 enemies
   const enemyCount = options?.isFirstBattle ? 1 : Math.random() < 0.3 ? 2 : 1
   const enemies: BattleCombatant[] = []
   const speciesIds: string[] = []
 
-  const items = wildEncounters.map((e) => e)
-  const weights = wildEncounters.map((e) => e.weight)
+  const items = finalPool.map((e) => e)
+  const weights = finalPool.map((e) => e.weight)
 
   for (let i = 0; i < enemyCount; i++) {
     const picked = weightedRandom(items, weights) as AreaEncounterEntry
