@@ -688,10 +688,15 @@ export class BattleScene extends Phaser.Scene {
             sprite = creatureSprite
           }
         }
+      } else if (!player.isMonster && this.textures.exists('hero-battle')) {
+        // Use 128x128 hero battle sprite
+        const heroSprite = this.add.sprite(x, y, 'hero-battle')
+        heroSprite.setScale(smallPlayerScale * 0.6)
+        heroSprite.setDepth(DEPTH.PLAYER)
+        sprite = heroSprite
       } else if (!player.isMonster && hasCharacters32) {
-        // Use 32x32 character sprite for player hero
-        // Row 2 (index 2) is a suitable hero character, idle down frame is col 1
-        const heroFrame = 2 * 12 + 1 // Row 2, column 1
+        // Fallback to 32x32 character sprite
+        const heroFrame = 2 * 12 + 1
         const heroSprite = this.add.sprite(x, y, 'characters-32', heroFrame)
         heroSprite.setScale(smallPlayerScale)
         heroSprite.setDepth(DEPTH.PLAYER)
@@ -730,8 +735,8 @@ export class BattleScene extends Phaser.Scene {
   private calculateSquadPositions(squadCount: number): Array<{ x: number; y: number }> {
     // Layout configuration - positioned lower on screen
     const centerX = 950  // Center point for the squad area (right side)
-    const topRowY = GAME_HEIGHT * 0.42  // Top row Y position (higher to avoid label overlap)
-    const bottomRowY = GAME_HEIGHT * 0.70  // Bottom row Y position
+    const topRowY = GAME_HEIGHT * 0.35  // Top row Y position (higher to avoid label overlap)
+    const bottomRowY = GAME_HEIGHT * 0.75  // Bottom row Y position (lower for tall battle sprites)
     const spacing = 180  // Horizontal spacing between characters
 
     // Determine row sizes based on squad count

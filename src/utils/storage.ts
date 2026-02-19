@@ -33,8 +33,8 @@ export function removeFromStorage(key: string): void {
   localStorage.removeItem(getKey(key))
 }
 
-export function hasSaveData(slot: number): boolean {
-  const key = generateSaveId(slot)
+export function hasSaveData(slot: number, userId?: string): boolean {
+  const key = generateSaveId(slot, userId)
   return localStorage.getItem(getKey(key)) !== null
 }
 

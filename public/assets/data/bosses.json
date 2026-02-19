@@ -56,6 +56,36 @@
     }
   },
   {
+    "bossId": "dragonrockking",
+    "speciesId": "dragonrockking",
+    "name": "Dragon Rock King",
+    "title": "Sovereign of Stone",
+    "level": 10,
+    "areaId": "crystal-caves",
+    "position": { "x": 320, "y": 320 },
+    "introDialog": [
+      "The ground trembles as stones begin to shift and rise...",
+      "A massive dragon-like creature emerges from the rock!",
+      "DRAGON ROCK KING: You dare trespass in my domain?",
+      "DRAGON ROCK KING: These caves belong to the earth!",
+      "DRAGON ROCK KING: Prove your worth or be buried!"
+    ],
+    "defeatDialog": [
+      "DRAGON ROCK KING: Such strength... You have earned my respect.",
+      "DRAGON ROCK KING: But Crystallix lies deeper within these caves.",
+      "DRAGON ROCK KING: Its power far surpasses my own. Beware...",
+      "The Dragon Rock King retreats into the stone walls..."
+    ],
+    "rewards": {
+      "experience": 600,
+      "gold": 450,
+      "guaranteedItems": [
+        { "itemId": "potion-large", "quantity": 2 },
+        { "itemId": "super-capsule", "quantity": 1 }
+      ]
+    }
+  },
+  {
     "bossId": "crystallix",
     "speciesId": "crystallix",
     "name": "Crystallix",

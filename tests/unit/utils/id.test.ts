@@ -28,9 +28,18 @@ describe('generateMonsterId', () => {
 })
 
 describe('generateSaveId', () => {
-  it('generates slot-specific ID', () => {
+  it('generates slot-specific ID for guest mode', () => {
     expect(generateSaveId(0)).toBe('save-slot-0')
     expect(generateSaveId(1)).toBe('save-slot-1')
     expect(generateSaveId(2)).toBe('save-slot-2')
+  })
+
+  it('generates user-scoped ID when userId provided', () => {
+    expect(generateSaveId(0, 'user-abc')).toBe('save-slot-user-abc-0')
+    expect(generateSaveId(1, 'user-abc')).toBe('save-slot-user-abc-1')
+  })
+
+  it('different users get different keys for same slot', () => {
+    expect(generateSaveId(0, 'user-a')).not.toBe(generateSaveId(0, 'user-b'))
   })
 })

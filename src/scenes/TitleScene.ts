@@ -22,7 +22,7 @@ import {
   getUserDisplayName,
   onAuthStateChange,
 } from '../systems/AuthSystem'
-import { hasLocalSavesToMigrate } from '../systems/CloudSaveSystem'
+import { hasLocalSavesToMigrate, syncAllSlots } from '../systems/CloudSaveSystem'
 
 export class TitleScene extends Phaser.Scene {
   private saveLoadPanel: SaveLoadPanel | null = null
@@ -62,7 +62,14 @@ export class TitleScene extends Phaser.Scene {
     if (CLOUD_SAVE_ENABLED) {
       this.authUnsubscribe = onAuthStateChange(() => {
         this.updateAuthArea()
-        this.checkMigration()
+        // Sync cloud saves to user-scoped local storage, then refresh menu
+        if (isAuthenticated()) {
+          syncAllSlots().then(() => {
+            this.rebuildMainMenu()
+          })
+        } else {
+          this.rebuildMainMenu()
+        }
       })
     }
   }
@@ -206,7 +213,8 @@ export class TitleScene extends Phaser.Scene {
       this.startNewGame()
     })
 
-    const hasSave = hasSaveData(0) || hasSaveData(1) || hasSaveData(2)
+    const userId = getUser()?.id
+    const hasSave = hasSaveData(0, userId) || hasSaveData(1, userId) || hasSaveData(2, userId)
     const continueButton = this.createButton(centerX, startY + 70, 'Continue', () => {
       if (hasSave) {
         playSfx(SFX_KEYS.MENU_SELECT)
@@ -226,6 +234,14 @@ export class TitleScene extends Phaser.Scene {
       playSfx(SFX_KEYS.MENU_SELECT)
       this.showSettingsPanel()
     })
+  }
+
+  private rebuildMainMenu(): void {
+    if (this.mainMenuContainer) {
+      this.mainMenuContainer.destroy()
+      this.mainMenuContainer = null
+    }
+    this.createMainMenu()
   }
 
   private createButton(
@@ -433,10 +449,10 @@ export class TitleScene extends Phaser.Scene {
 
   private checkMigration(): void {
     if (isAuthenticated() && hasLocalSavesToMigrate()) {
-      // Count local saves
+      const userId = getUser()?.id
       let localSaveCount = 0
       for (let i = 0; i < 3; i++) {
-        if (hasSaveData(i)) {
+        if (hasSaveData(i, userId)) {
           localSaveCount++
         }
       }

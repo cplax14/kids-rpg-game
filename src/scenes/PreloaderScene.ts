@@ -296,6 +296,9 @@ export class PreloaderScene extends Phaser.Scene {
       this.load.image(`monster-battle-${iconNum}`, `assets/sprites/monsters/battle/Battle${iconNum}.png`)
     }
 
+    // Load hero battle sprite (128x128)
+    this.load.image('hero-battle', 'assets/sprites/hero/hero-battle.png')
+
     // Load battle background images
     this.load.image('battle-bg-forest', 'assets/sprites/backgrounds/battle-bg-forest.png')
     this.load.image('battle-bg-village', 'assets/sprites/backgrounds/battle-bg-village.png')

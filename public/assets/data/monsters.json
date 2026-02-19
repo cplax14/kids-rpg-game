@@ -1626,6 +1626,62 @@
     "obtainableVia": "both"
   },
   {
+    "speciesId": "dragonrockking",
+    "name": "Dragon Rock King",
+    "description": "A fearsome dragon-like creature whose body is forged from volcanic stone. Its crystalline horns channel earth energy into devastating attacks.",
+    "element": "earth",
+    "rarity": "rare",
+    "baseStats": {
+      "maxHp": 250,
+      "currentHp": 250,
+      "maxMp": 45,
+      "currentMp": 45,
+      "attack": 26,
+      "defense": 28,
+      "magicAttack": 22,
+      "magicDefense": 24,
+      "speed": 12,
+      "luck": 10
+    },
+    "statGrowth": {
+      "hp": 15,
+      "mp": 4,
+      "attack": 3,
+      "defense": 4,
+      "magicAttack": 3,
+      "magicDefense": 3,
+      "speed": 1
+    },
+    "abilities": [
+      {
+        "abilityId": "rock-throw",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "boulder-crush",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "shield-wall",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "slam",
+        "learnAtLevel": 1
+      }
+    ],
+    "captureBaseDifficulty": 1,
+    "spriteKey": "dragonrockking",
+    "evolutionChain": null,
+    "breedingGroup": "dragon",
+    "breedingTraits": [
+      "fierce",
+      "tough",
+      "thick-skin"
+    ],
+    "obtainableVia": "both"
+  },
+  {
     "speciesId": "magmaslime",
     "name": "Magmaslime",
     "description": "A gelatinous creature of molten rock. Its body bubbles and glows with intense heat, yet it wobbles adorably when it moves.",
