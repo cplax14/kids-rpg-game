@@ -350,8 +350,8 @@ export class BattleHUD {
   private calculateSquadPositions(squadCount: number): Array<{ x: number; y: number }> {
     // Match the layout from BattleScene
     const centerX = 950
-    const topRowY = GAME_HEIGHT * 0.42 + 85  // Below top row sprites (extra room for large battle sprites)
-    const bottomRowY = GAME_HEIGHT * 0.70 + 85  // Below bottom row sprites
+    const topRowY = GAME_HEIGHT * 0.35 + 85  // Below top row sprites (matches BattleScene topRowY)
+    const bottomRowY = GAME_HEIGHT * 0.75 + 85  // Below bottom row sprites (matches BattleScene bottomRowY)
     const spacing = 180
 
     let topRowCount: number

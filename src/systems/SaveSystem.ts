@@ -5,11 +5,17 @@ import { generateSaveId } from '../utils/id'
 import { getGameState, type GameState } from './GameStateManager'
 import { loadSettings } from './SettingsManager'
 import { createInitialAchievementStats } from './AchievementSystem'
+import { getUser } from './AuthSystem'
 import { logger } from '../utils/logger'
 import { SAVE_SLOTS, CLOUD_SAVE_ENABLED } from '../config'
 
 const SAVE_VERSION = '1.0.0'
 const EXPORT_MAGIC = 'MQRPG_SAVE'
+
+function currentSaveKey(slot: number): string {
+  const user = getUser()
+  return generateSaveId(slot, user?.id)
+}
 
 export interface SaveSlotInfo {
   readonly exists: boolean
@@ -51,7 +57,7 @@ export function loadSaveGame(slot: number): SaveGame | null {
   }
 
   try {
-    const key = generateSaveId(slot)
+    const key = currentSaveKey(slot)
     const saveData = loadFromStorage<SaveGame>(key)
 
     if (!saveData) {
@@ -78,7 +84,7 @@ export function saveGame(slot: number, saveGame: SaveGame): boolean {
   }
 
   try {
-    const key = generateSaveId(slot)
+    const key = currentSaveKey(slot)
     const result = saveToStorage(key, saveGame)
 
     if (result) {
@@ -99,7 +105,7 @@ export function deleteSave(slot: number): void {
   }
 
   try {
-    const key = generateSaveId(slot)
+    const key = currentSaveKey(slot)
     removeFromStorage(key)
     logger.info('SaveSystem: Save deleted', { slot })
   } catch (error) {
@@ -113,7 +119,7 @@ export function getSaveSlotInfo(slot: number): SaveSlotInfo {
   }
 
   try {
-    const key = generateSaveId(slot)
+    const key = currentSaveKey(slot)
     const saveData = loadFromStorage<SaveGame>(key)
 
     if (!saveData) {

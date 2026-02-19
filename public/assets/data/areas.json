@@ -204,6 +204,7 @@
         "message": [
           "Crystal Caves",
           "The crystals here are said to hold ancient power.",
+          "The Dragon Rock King guards the upper caverns...",
           "Deep within lurks the mighty Crystallix..."
         ]
       },
@@ -227,7 +228,7 @@
         "targetAreaId": "sunlit-village"
       }
     ],
-    "bossIds": ["crystallix"],
+    "bossIds": ["dragonrockking", "crystallix"],
     "ambientColor": 4473924
   },
   {

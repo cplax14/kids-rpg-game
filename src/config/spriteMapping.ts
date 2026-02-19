@@ -52,6 +52,7 @@ export const MONSTER_ICON_NUMBERS: Readonly<Record<string, number>> = {
   thornwarden: 26,  // Forest miniboss - thorny guardian
   elderwood: 27,    // Forest boss - tree creature
   crystallix: 28,   // Cave boss - crystal creature
+  dragonrockking: 29, // Cave miniboss - dragon rock creature
 
   // Hand-drawn originals (by the kids!)
   fireimp: 51,          // Fire imp creature
@@ -194,9 +195,12 @@ export const BATTLE_SPRITE_ICONS: ReadonlySet<number> = new Set([
   4,   // bubblefin
   8,   // pebblit
   11,  // mossbun
+  12,  // ironshell
   19,  // shadowpup
   26,  // thornwarden (boss)
   27,  // elderwood (boss)
+  28,  // crystallix (boss)
+  29,  // dragonrockking (boss)
   51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,  // hand-drawn originals
 ])
 

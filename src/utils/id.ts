@@ -8,6 +8,9 @@ export function generateMonsterId(): string {
   return `mon-${generateId()}`
 }
 
-export function generateSaveId(slot: number): string {
+export function generateSaveId(slot: number, userId?: string): string {
+  if (userId) {
+    return `save-slot-${userId}-${slot}`
+  }
   return `save-slot-${slot}`
 }
