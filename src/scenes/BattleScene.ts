@@ -1636,7 +1636,7 @@ export class BattleScene extends Phaser.Scene {
     const normalRewards = calculateBattleRewards(this.battle)
 
     const rewards = bossRewards
-      ? { experience: bossRewards.experience, gold: bossRewards.gold }
+      ? { experience: bossRewards.experience, gold: bossRewards.gold, stardust: bossRewards.stardust ?? 0 }
       : normalRewards
 
     // Generate loot (for non-boss battles)
@@ -1726,7 +1726,7 @@ export class BattleScene extends Phaser.Scene {
     if (!this.bossData) return
 
     const bossRewards = this.bossData.rewards
-    const rewards = { experience: bossRewards.experience, gold: bossRewards.gold }
+    const rewards = { experience: bossRewards.experience, gold: bossRewards.gold, stardust: bossRewards.stardust ?? 0 }
     const loot = bossRewards.guaranteedItems
 
     // Show defeat dialog via dialog scene
@@ -1750,14 +1750,15 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private showVictoryMessage(
-    rewards: { experience: number; gold: number },
+    rewards: { experience: number; gold: number; stardust: number },
     loot: ReadonlyArray<ItemDrop>,
     lootMsg: string,
   ): void {
     const isBoss = this.isBossBattle && this.bossData
+    const stardustMsg = rewards.stardust > 0 ? ` +${rewards.stardust} stardust` : ''
     const victoryMsg = isBoss
-      ? `${this.bossData!.name} defeated! Gained ${rewards.experience} XP and ${rewards.gold} gold!${lootMsg}`
-      : `Victory! Gained ${rewards.experience} XP and ${rewards.gold} gold!${lootMsg}`
+      ? `${this.bossData!.name} defeated! Gained ${rewards.experience} XP, ${rewards.gold} gold${stardustMsg}!${lootMsg}`
+      : `Victory! Gained ${rewards.experience} XP, ${rewards.gold} gold${stardustMsg}!${lootMsg}`
 
     this.hud.showMessage(victoryMsg).then(() => {
       this.time.delayedCall(1000, () => {
@@ -1783,6 +1784,7 @@ export class BattleScene extends Phaser.Scene {
               bossRewards: {
                 experience: bossInfo.rewards.experience,
                 gold: bossInfo.rewards.gold,
+                stardust: bossInfo.rewards.stardust ?? 0,
                 items: bossInfo.rewards.guaranteedItems,
                 unlocksArea: bossInfo.rewards.unlocksArea,
               },

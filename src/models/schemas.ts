@@ -93,13 +93,7 @@ export const LearnableAbilitySchema = z.object({
 
 // ── Monsters ──
 
-export const EvolutionStageSchema = z.object({
-  evolvesTo: z.string().min(1),
-  levelRequired: z.number().int().min(1),
-  itemRequired: z.string().nullable(),
-})
-
-export const ObtainableViaSchema = z.enum(['wild', 'breeding', 'both'])
+export const ObtainableViaSchema = z.enum(['wild', 'evolution', 'both', 'quest'])
 
 export const MonsterSpeciesSchema = z.object({
   speciesId: z.string().min(1),
@@ -112,16 +106,14 @@ export const MonsterSpeciesSchema = z.object({
   abilities: z.array(LearnableAbilitySchema),
   captureBaseDifficulty: z.number().min(0).max(1),
   spriteKey: z.string().min(1),
-  evolutionChain: EvolutionStageSchema.nullable(),
-  breedingGroup: z.string().min(1),
-  breedingTraits: z.array(z.string()),
-  obtainableVia: ObtainableViaSchema.default('both'),
+  evolutionChainId: z.string().nullable(),
+  obtainableVia: ObtainableViaSchema.default('wild'),
 })
 
 // ── Items ──
 
 export const ItemEffectSchema = z.object({
-  type: z.enum(['heal_hp', 'heal_mp', 'cure_status', 'buff', 'capture_boost', 'breeding_boost']),
+  type: z.enum(['heal_hp', 'heal_mp', 'cure_status', 'buff', 'capture_boost', 'evolution_boost']),
   magnitude: z.number().min(0),
   targetType: z.enum(['self', 'single_ally', 'single_monster']),
 })
@@ -130,7 +122,7 @@ export const ItemSchema = z.object({
   itemId: z.string().min(1),
   name: z.string().min(1),
   description: z.string(),
-  category: z.enum(['consumable', 'capture_device', 'key_item', 'breeding_item', 'material']),
+  category: z.enum(['consumable', 'capture_device', 'key_item', 'evolution_item', 'material']),
   iconKey: z.string().min(1),
   stackable: z.boolean(),
   maxStack: z.number().int().min(1),
@@ -183,7 +175,7 @@ export const NpcDefinitionSchema = z.object({
   spriteKey: z.string().min(1),
   position: PositionSchema,
   dialogTreeId: z.string().min(1),
-  type: z.enum(['quest', 'shop', 'info', 'breeder', 'healer']),
+  type: z.enum(['quest', 'shop', 'info', 'evolution_sage', 'healer']),
 })
 
 export const AreaConnectionSchema = z.object({
@@ -284,6 +276,7 @@ export const TransitionZoneSchema = z.object({
 export const BossRewardsSchema = z.object({
   experience: z.number().int().min(0),
   gold: z.number().int().min(0),
+  stardust: z.number().int().min(0).optional().default(0),
   guaranteedItems: z.array(ItemDropSchema),
   unlocksArea: z.string().optional(),
 })
@@ -340,19 +333,21 @@ export const TraitDefinitionSchema = z.object({
   rarity: TraitRaritySchema,
 })
 
-// ── Breeding Recipes ──
+// ── Evolution Chains ──
 
-export const BreedingOffspringOptionSchema = z.object({
+export const EvolutionStageDefinitionSchema = z.object({
   speciesId: z.string().min(1),
-  probability: z.number().min(0).max(1),
-  bonusTraits: z.array(z.string()),
+  order: z.number().int().min(1),
+  evolvesTo: z.string().nullable(),
+  evolvesFrom: z.string().nullable(),
+  requiredLevel: z.number().int().min(1),
+  stardustCost: z.number().int().min(0),
 })
 
-export const BreedingRecipeSchema = z.object({
-  recipeId: z.string().min(1),
-  parents: z.tuple([z.string().min(1), z.string().min(1)]),
-  offspring: z.array(BreedingOffspringOptionSchema),
-  requiredCompatibility: z.number().min(0).max(1),
+export const EvolutionChainSchema = z.object({
+  chainId: z.string().min(1),
+  name: z.string().min(1),
+  stages: z.array(EvolutionStageDefinitionSchema),
 })
 
 // ── Save Game ──
@@ -468,7 +463,7 @@ export const AchievementStatsSchema = z.object({
   bossesDefeated: z.number().int().min(0),
   areasVisited: z.number().int().min(0),
   speciesDiscovered: z.number().int().min(0),
-  monstersBreed: z.number().int().min(0),
+  monstersEvolved: z.number().int().min(0),
   highestPlayerLevel: z.number().int().min(1),
 })
 
@@ -496,6 +491,7 @@ export const SaveGameSchema = z.object({
     position: PositionSchema,
     currentAreaId: z.string().min(1),
     gold: z.number().int().min(0),
+    stardust: z.number().int().min(0).optional().default(0),
   }),
   inventory: z.object({
     items: z.array(z.object({
@@ -535,7 +531,7 @@ export const SaveGameSchema = z.object({
     bossesDefeated: 0,
     areasVisited: 0,
     speciesDiscovered: 0,
-    monstersBreed: 0,
+    monstersEvolved: 0,
     highestPlayerLevel: 1,
   }),
   completedGuidanceMilestones: z.array(z.string()).optional().default([]),

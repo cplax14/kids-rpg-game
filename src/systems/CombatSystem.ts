@@ -35,6 +35,7 @@ import {
   BATTLE_SPIRIT_MAX,
   BATTLE_SPIRIT_DAMAGE_BONUS,
   BATTLE_SPIRIT_ACCURACY_BONUS,
+  STARDUST_PER_BATTLE,
 } from '../models/constants'
 import { generateId } from '../utils/id'
 
@@ -920,6 +921,7 @@ export function calculateBattleRewards(battle: Battle): BattleRewards {
   return {
     experience: totalXp,
     gold: totalGold,
+    stardust: STARDUST_PER_BATTLE + randomInt(0, 2),
     items: [],
     capturedMonster: null,
   }

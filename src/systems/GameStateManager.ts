@@ -60,7 +60,7 @@ export function createInitialGameState(playerName: string): GameState {
       bossesDefeated: 0,
       areasVisited: 0,
       speciesDiscovered: 0,
-      monstersBreed: 0,
+      monstersEvolved: 0,
       highestPlayerLevel: 1,
     },
     completedGuidanceMilestones: [],

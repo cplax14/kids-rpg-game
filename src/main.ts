@@ -11,7 +11,7 @@ import { BattleScene } from './scenes/BattleScene'
 import { MenuScene } from './scenes/MenuScene'
 import { DialogScene } from './scenes/DialogScene'
 import { ShopScene } from './scenes/ShopScene'
-import { BreedingScene } from './scenes/BreedingScene'
+import { EvolutionScene } from './scenes/EvolutionScene'
 import { DefeatRecoveryScene } from './scenes/DefeatRecoveryScene'
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -35,7 +35,7 @@ const config: Phaser.Types.Core.GameConfig = {
       height: 360,
     },
   },
-  scene: [BootScene, PreloaderScene, TitleScene, WorldScene, BattleScene, MenuScene, DialogScene, ShopScene, BreedingScene, DefeatRecoveryScene],
+  scene: [BootScene, PreloaderScene, TitleScene, WorldScene, BattleScene, MenuScene, DialogScene, ShopScene, EvolutionScene, DefeatRecoveryScene],
 }
 
 const game = new Phaser.Game(config)

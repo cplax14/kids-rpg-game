@@ -20,6 +20,7 @@
     "rewards": {
       "experience": 250,
       "gold": 200,
+      "stardust": 15,
       "guaranteedItems": [
         { "itemId": "potion-medium", "quantity": 2 }
       ]
@@ -48,6 +49,7 @@
     "rewards": {
       "experience": 500,
       "gold": 400,
+      "stardust": 30,
       "guaranteedItems": [
         { "itemId": "potion-large", "quantity": 2 },
         { "itemId": "super-capsule", "quantity": 1 }
@@ -79,6 +81,7 @@
     "rewards": {
       "experience": 600,
       "gold": 450,
+      "stardust": 40,
       "guaranteedItems": [
         { "itemId": "potion-large", "quantity": 2 },
         { "itemId": "super-capsule", "quantity": 1 }
@@ -110,6 +113,7 @@
     "rewards": {
       "experience": 1000,
       "gold": 800,
+      "stardust": 60,
       "guaranteedItems": [
         { "itemId": "potion-large", "quantity": 3 },
         { "itemId": "ultra-capsule", "quantity": 2 },
@@ -143,6 +147,7 @@
     "rewards": {
       "experience": 1800,
       "gold": 1200,
+      "stardust": 90,
       "guaranteedItems": [
         { "itemId": "potion-large", "quantity": 4 },
         { "itemId": "ultra-capsule", "quantity": 2 },
@@ -176,6 +181,7 @@
     "rewards": {
       "experience": 2800,
       "gold": 1800,
+      "stardust": 120,
       "guaranteedItems": [
         { "itemId": "potion-large", "quantity": 5 },
         { "itemId": "ultra-capsule", "quantity": 3 },
@@ -213,6 +219,7 @@
     "rewards": {
       "experience": 5000,
       "gold": 3000,
+      "stardust": 200,
       "guaranteedItems": [
         { "itemId": "potion-large", "quantity": 5 },
         { "itemId": "ultra-capsule", "quantity": 5 },

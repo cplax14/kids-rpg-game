@@ -68,6 +68,7 @@ export const MONSTER_ICON_NUMBERS: Readonly<Record<string, number>> = {
   tidalfang: 61,        // Fierce water tiger
   leafblower: 62,       // Wind creature blowing leaves
   aquafang: 63,         // Water tiger with fangs
+  toughchunkice: 64,    // Tough chunky ice creature (Ice stage 1)
 }
 
 // Legacy: Monster species ID to creature sheet frame index (16x16)
@@ -120,7 +121,7 @@ export const MONSTER_SPRITE_FRAMES: Readonly<Record<string, number>> = {
 export const NPC_SPRITE_FRAMES: Readonly<Record<string, number>> = {
   shopkeeper: 0,
   healer: 12, // Row 1
-  breeder: 24, // Row 2
+  evolution_sage: 24, // Row 2
   quest: 36, // Row 3
   guide: 48, // Row 4
   guard: 60, // Row 5
@@ -133,7 +134,7 @@ export const NPC_SPRITE_FRAMES: Readonly<Record<string, number>> = {
 export const NPC_SPRITE_FRAMES_32: Readonly<Record<string, number>> = {
   shopkeeper: 14 * 12 + 1,   // Row 14: tan merchant = 169
   healer: 8 * 12 + 1,        // Row 8: white robed = 97
-  breeder: 16 * 12 + 1,      // Row 16: orange clothed = 193
+  evolution_sage: 16 * 12 + 1, // Row 16: orange clothed = 193
   quest: 4 * 12 + 1,         // Row 4: red mage = 49
   guide: 10 * 12 + 1,        // Row 10: brown clothed = 121
   guard: 6 * 12 + 1,         // Row 6: gray armored = 73
@@ -194,14 +195,19 @@ export const BATTLE_SPRITE_ICONS: ReadonlySet<number> = new Set([
   1,   // flamepup
   4,   // bubblefin
   8,   // pebblit
+  9,   // thornback
+  10,  // crystalgolem
   11,  // mossbun
   12,  // ironshell
+  13,  // breezling
+  14,  // stormowl
   19,  // shadowpup
   26,  // thornwarden (boss)
   27,  // elderwood (boss)
   28,  // crystallix (boss)
   29,  // dragonrockking (boss)
   51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,  // hand-drawn originals
+  64,  // toughchunkice (hand-drawn)
 ])
 
 /**

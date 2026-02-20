@@ -35,6 +35,7 @@ import { createCombatantFromPlayer, createCombatantFromEnemy } from '../systems/
 import {
   addExperienceWithInfo,
   updatePlayerGold,
+  updatePlayerStardust,
   getPlayerAbilitiesAtLevel,
   type StatChange,
   type PlayerLevelUpResult,
@@ -66,10 +67,10 @@ import { addItem, loadItemData, getItemQuantity } from '../systems/InventorySyst
 import { loadEquipmentData } from '../systems/EquipmentSystem'
 import { loadDialogData } from '../systems/DialogSystem'
 import { loadTraitData } from '../systems/TraitSystem'
-import { loadBreedingRecipes } from '../systems/BreedingSystem'
+import { loadEvolutionChains } from '../systems/EvolutionSystem'
 import { NPC } from '../entities/NPC'
 import { Interactable } from '../entities/Interactable'
-import type { TraitDefinition, BreedingRecipe } from '../models/types'
+import type { TraitDefinition, EvolutionChain } from '../models/types'
 import {
   loadAreaData,
   loadBossData,
@@ -131,12 +132,13 @@ interface WorldSceneData {
   readonly areaId?: string
   readonly spawnPosition?: { x: number; y: number }
   readonly battleResult?: 'victory' | 'defeat' | 'fled'
-  readonly rewards?: { experience: number; gold: number }
+  readonly rewards?: { experience: number; gold: number; stardust: number }
   readonly loot?: ReadonlyArray<ItemDrop>
   readonly bossDefeated?: string
   readonly bossRewards?: {
     experience: number
     gold: number
+    stardust: number
     items: ReadonlyArray<ItemDrop>
     unlocksArea?: string
   }
@@ -687,7 +689,7 @@ export class WorldScene extends Phaser.Scene {
           const isNpcArea = (x >= 12 && x <= 14 && y >= 12 && y <= 14) || // Shopkeeper
                            (x >= 14 && x <= 16 && y >= 10 && y <= 12) || // Guide
                            (x >= 16 && x <= 18 && y >= 12 && y <= 14) || // Healer
-                           (x >= 18 && x <= 20 && y >= 12 && y <= 14)    // Breeder
+                           (x >= 18 && x <= 20 && y >= 12 && y <= 14)    // Evolution Sage
           if (isNpcArea) continue
 
           const r = random(x, y)
@@ -1739,15 +1741,17 @@ export class WorldScene extends Phaser.Scene {
     rewards: {
       experience: number
       gold: number
+      stardust: number
       items: ReadonlyArray<ItemDrop>
       unlocksArea?: string
     },
   ): void {
     const state = getGameState(this)
 
-    // Apply XP and gold
+    // Apply XP, gold, and stardust
     const playerXpResult = addExperienceWithInfo(state.player, rewards.experience)
-    const updatedPlayer = updatePlayerGold(playerXpResult.player, rewards.gold)
+    let updatedPlayer = updatePlayerGold(playerXpResult.player, rewards.gold)
+    updatedPlayer = updatePlayerStardust(updatedPlayer, rewards.stardust)
     let newState = updatePlayer(state, updatedPlayer)
 
     // Add items
@@ -1766,7 +1770,7 @@ export class WorldScene extends Phaser.Scene {
     const text = this.add.text(
       GAME_WIDTH / 2,
       GAME_HEIGHT - 60,
-      `Boss defeated! +${rewards.experience} XP  +${rewards.gold} Gold`,
+      `Boss defeated! +${rewards.experience} XP  +${rewards.gold} Gold  +${rewards.stardust} Stardust`,
       {
         ...TEXT_STYLES.BODY,
         fontSize: '18px',
@@ -1861,10 +1865,8 @@ export class WorldScene extends Phaser.Scene {
     const traitsData = this.cache.json.get('traits-data') as TraitDefinition[] | undefined
     if (traitsData) loadTraitData(traitsData)
 
-    const breedingRecipesData = this.cache.json.get('breeding-recipes-data') as
-      | BreedingRecipe[]
-      | undefined
-    if (breedingRecipesData) loadBreedingRecipes(breedingRecipesData)
+    const evolutionChainsData = this.cache.json.get('evolution-chains-data') as EvolutionChain[] | undefined
+    if (evolutionChainsData) loadEvolutionChains(evolutionChainsData)
 
     // Load area and boss data
     const areasData = this.cache.json.get('areas-data') as GameAreaDefinition[] | undefined
@@ -2224,11 +2226,12 @@ export class WorldScene extends Phaser.Scene {
       .filter((a): a is Ability => a !== undefined)
   }
 
-  private applyBattleRewards(rewards: { experience: number; gold: number }): void {
+  private applyBattleRewards(rewards: { experience: number; gold: number; stardust: number }): void {
     // Update game state with rewards
     let state = getGameState(this)
     const playerXpResult = addExperienceWithInfo(state.player, rewards.experience)
-    const updatedPlayer = updatePlayerGold(playerXpResult.player, rewards.gold)
+    let updatedPlayer = updatePlayerGold(playerXpResult.player, rewards.gold)
+    updatedPlayer = updatePlayerStardust(updatedPlayer, rewards.stardust)
     state = updatePlayer(state, updatedPlayer)
 
     // Track monster level-ups (separate from player)
@@ -2288,10 +2291,11 @@ export class WorldScene extends Phaser.Scene {
     setGameState(this, state)
 
     // Show reward notification
+    const stardustMsg = rewards.stardust > 0 ? `  +${rewards.stardust} Stardust` : ''
     const text = this.add.text(
       GAME_WIDTH / 2,
       GAME_HEIGHT - 40,
-      `+${rewards.experience} XP  +${rewards.gold} Gold`,
+      `+${rewards.experience} XP  +${rewards.gold} Gold${stardustMsg}`,
       {
         ...TEXT_STYLES.BODY,
         fontSize: '16px',
@@ -2441,17 +2445,17 @@ export class WorldScene extends Phaser.Scene {
       type: 'info',
     })
 
-    // Monster Breeder - far right
-    const breeder = new NPC(this, 21 * TILE_SIZE, 14 * TILE_SIZE, {
-      npcId: 'breeder',
-      name: 'Monster Breeder',
-      spriteKey: 'npc-breeder',
+    // Evolution Sage - far right
+    const evolutionSage = new NPC(this, 21 * TILE_SIZE, 14 * TILE_SIZE, {
+      npcId: 'evolution-sage',
+      name: 'Evolution Sage',
+      spriteKey: 'npc-evolution_sage',
       position: { x: 21 * TILE_SIZE, y: 14 * TILE_SIZE },
-      dialogTreeId: 'breeder-greeting',
-      type: 'breeder',
+      dialogTreeId: 'evolution-sage-greeting',
+      type: 'evolution_sage',
     })
 
-    this.npcs = [shopkeeper, healer, guide, breeder]
+    this.npcs = [shopkeeper, healer, guide, evolutionSage]
 
     // Set up overlap detection with player
     for (const npc of this.npcs) {

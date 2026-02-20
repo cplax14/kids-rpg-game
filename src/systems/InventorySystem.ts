@@ -128,7 +128,7 @@ export function sortInventory(inventory: Inventory): Inventory {
       consumable: 0,
       capture_device: 1,
       material: 2,
-      breeding_item: 3,
+      evolution_item: 3,
       key_item: 4,
     }
     const catA = categoryOrder[a.item.category] ?? 99

@@ -8,7 +8,7 @@ const NPC_COLORS: Readonly<Record<NpcType, number>> = {
   shop: 0xffd54f,
   healer: 0xef5350,
   info: 0x66bb6a,
-  breeder: 0x7e57c2,
+  evolution_sage: 0x7e57c2,
   quest: 0x42a5f5,
 }
 
@@ -19,7 +19,7 @@ const NPC_FRAMES_32: Readonly<Record<NpcType, number>> = {
   shop: 14 * 12 + 1,     // Row 14 (tan merchant) = 169
   healer: 8 * 12 + 1,    // Row 8 (white robed) = 97
   info: 10 * 12 + 1,     // Row 10 (brown clothed guide) = 121
-  breeder: 16 * 12 + 1,  // Row 16 (orange clothed) = 193
+  evolution_sage: 16 * 12 + 1,  // Row 16 (orange clothed) = 193
   quest: 4 * 12 + 1,     // Row 4 (red mage) = 49
 }
 
@@ -28,7 +28,7 @@ const NPC_FRAMES_16: Readonly<Record<NpcType, number>> = {
   shop: 13,
   healer: 25,
   info: 37,
-  breeder: 49,
+  evolution_sage: 49,
   quest: 61,
 }
 
@@ -37,7 +37,7 @@ const NPC_ANIM_KEYS: Readonly<Record<NpcType, string>> = {
   shop: 'shopkeeper',
   healer: 'healer',
   info: 'village-guide',
-  breeder: 'breeder',
+  evolution_sage: 'evolution_sage',
   quest: 'village-guide', // Use guide animations for quest NPCs
 }
 

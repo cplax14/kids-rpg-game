@@ -1,7 +1,7 @@
 import type {
   BattleRewards,
   MonsterInstance,
-  BreedingResult,
+  EvolutionResult,
   PlayerCharacter,
   GameSettings,
   CaptureAttempt,
@@ -80,9 +80,10 @@ export const GAME_EVENTS = {
   BOUNTY_BOARD_REFRESHED: 'bounty:board_refreshed',
   BOUNTY_STREAK_UPDATED: 'bounty:streak_updated',
 
-  // Breeding
-  BREEDING_STARTED: 'breeding:started',
-  BREEDING_COMPLETE: 'breeding:complete',
+  // Evolution
+  EVOLUTION_STARTED: 'evolution:started',
+  EVOLUTION_COMPLETE: 'evolution:complete',
+  STARDUST_CHANGED: 'stardust:changed',
 
   // World
   AREA_TRANSITION: 'world:area_transition',
@@ -136,7 +137,8 @@ export interface GameEventPayloads {
   [GAME_EVENTS.ITEM_ADDED]: { itemId: string; quantity: number }
   [GAME_EVENTS.ITEM_USED]: { itemId: string }
   [GAME_EVENTS.GOLD_CHANGED]: { amount: number; newTotal: number }
-  [GAME_EVENTS.BREEDING_COMPLETE]: { result: BreedingResult }
+  [GAME_EVENTS.EVOLUTION_COMPLETE]: { result: EvolutionResult }
+  [GAME_EVENTS.STARDUST_CHANGED]: { amount: number; newTotal: number }
   [GAME_EVENTS.AREA_TRANSITION]: { fromAreaId: string; toAreaId: string }
   [GAME_EVENTS.NOTIFICATION]: { message: string; type: 'info' | 'success' | 'warning' }
   [GAME_EVENTS.MUSIC_PLAY]: { key: string }

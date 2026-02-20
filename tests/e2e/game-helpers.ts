@@ -69,15 +69,16 @@ export async function getSquadMonsters(page: Page): Promise<unknown[]> {
 }
 
 /**
- * Get breeding system state
+ * Get evolution system state (squad monsters + stardust)
  */
-export async function getBreedingState(page: Page): Promise<unknown> {
+export async function getEvolutionState(page: Page): Promise<unknown> {
   return await page.evaluate(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const gameState = (window as any).__GAME_STATE__
     return {
       squad: gameState?.squad || [],
       storage: gameState?.monsterStorage || [],
+      stardust: gameState?.player?.stardust ?? 0,
     }
   })
 }

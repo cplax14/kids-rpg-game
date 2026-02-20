@@ -150,10 +150,51 @@ export function getAllSaveSlotInfo(): ReadonlyArray<SaveSlotInfo> {
   return slots
 }
 
+function migrateInventory(inventory: SaveGame['inventory']): SaveGame['inventory'] {
+  const migratedItems = inventory.items.map((slot) => {
+    const item = slot.item
+    // Migrate breeding-charm → stardust-charm
+    if (item.itemId === 'breeding-charm') {
+      return {
+        ...slot,
+        item: {
+          ...item,
+          itemId: 'stardust-charm',
+          name: 'Stardust Charm',
+          description: 'A glowing charm that reduces the stardust cost of evolution by 20%.',
+          category: 'evolution_item' as const,
+          iconKey: 'icon-stardust-charm',
+          useEffect: item.useEffect
+            ? { ...item.useEffect, type: 'evolution_boost' as const }
+            : item.useEffect,
+        },
+      }
+    }
+    // Migrate category/effect type for other former breeding items
+    if ((item.category as string) === 'breeding_item') {
+      return {
+        ...slot,
+        item: {
+          ...item,
+          category: 'evolution_item' as const,
+          useEffect: item.useEffect && (item.useEffect.type as string) === 'breeding_boost'
+            ? { ...item.useEffect, type: 'evolution_boost' as const }
+            : item.useEffect,
+        },
+      }
+    }
+    return slot
+  })
+  return { ...inventory, items: migratedItems }
+}
+
 export function gameStateFromSave(save: SaveGame): GameState {
   return {
-    player: save.player,
-    inventory: save.inventory,
+    player: {
+      ...save.player,
+      stardust: save.player.stardust ?? 0,
+    },
+    inventory: migrateInventory(save.inventory),
     squad: [...save.squad],
     monsterStorage: [...save.monsterStorage],
     discoveredSpecies: [...save.discoveredSpecies],

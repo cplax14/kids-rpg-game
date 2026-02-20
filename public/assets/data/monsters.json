@@ -46,17 +46,8 @@
     ],
     "captureBaseDifficulty": 0.25,
     "spriteKey": "flamepup",
-    "evolutionChain": {
-      "evolvesTo": "blazefox",
-      "levelRequired": 16,
-      "itemRequired": null
-    },
-    "breedingGroup": "beast",
-    "breedingTraits": [
-      "fireproof",
-      "fierce"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "wild",
+    "evolutionChainId": "fire-beast-line"
   },
   {
     "speciesId": "blazefox",
@@ -105,13 +96,8 @@
     ],
     "captureBaseDifficulty": 0.45,
     "spriteKey": "blazefox",
-    "evolutionChain": null,
-    "breedingGroup": "beast",
-    "breedingTraits": [
-      "nimble",
-      "fireproof"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "fire-beast-line"
   },
   {
     "speciesId": "volcanix",
@@ -164,13 +150,8 @@
     ],
     "captureBaseDifficulty": 0.65,
     "spriteKey": "volcanix",
-    "evolutionChain": null,
-    "breedingGroup": "dragon",
-    "breedingTraits": [
-      "fireproof",
-      "tough"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "fire-beast-line"
   },
   {
     "speciesId": "bubblefin",
@@ -219,17 +200,8 @@
     ],
     "captureBaseDifficulty": 0.22,
     "spriteKey": "bubblefin",
-    "evolutionChain": {
-      "evolvesTo": "tidecrab",
-      "levelRequired": 16,
-      "itemRequired": null
-    },
-    "breedingGroup": "aquatic",
-    "breedingTraits": [
-      "waterproof",
-      "gentle"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "wild",
+    "evolutionChainId": "water-beast-line"
   },
   {
     "speciesId": "tidecrab",
@@ -278,13 +250,8 @@
     ],
     "captureBaseDifficulty": 0.42,
     "spriteKey": "tidecrab",
-    "evolutionChain": null,
-    "breedingGroup": "aquatic",
-    "breedingTraits": [
-      "thick-skin",
-      "waterproof"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "water-beast-line"
   },
   {
     "speciesId": "serpentide",
@@ -337,13 +304,8 @@
     ],
     "captureBaseDifficulty": 0.68,
     "spriteKey": "serpentide",
-    "evolutionChain": null,
-    "breedingGroup": "dragon",
-    "breedingTraits": [
-      "waterproof",
-      "keen-eye"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "water-beast-line"
   },
   {
     "speciesId": "pebblit",
@@ -392,17 +354,8 @@
     ],
     "captureBaseDifficulty": 0.2,
     "spriteKey": "pebblit",
-    "evolutionChain": {
-      "evolvesTo": "ironshell",
-      "levelRequired": 18,
-      "itemRequired": null
-    },
-    "breedingGroup": "elemental",
-    "breedingTraits": [
-      "thick-skin",
-      "tough"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "wild",
+    "evolutionChainId": "earth-stone-line"
   },
   {
     "speciesId": "thornback",
@@ -451,13 +404,8 @@
     ],
     "captureBaseDifficulty": 0.44,
     "spriteKey": "thornback",
-    "evolutionChain": null,
-    "breedingGroup": "beast",
-    "breedingTraits": [
-      "fierce",
-      "thick-skin"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "earth-stone-line"
   },
   {
     "speciesId": "crystalgolem",
@@ -510,13 +458,8 @@
     ],
     "captureBaseDifficulty": 0.7,
     "spriteKey": "crystalgolem",
-    "evolutionChain": null,
-    "breedingGroup": "elemental",
-    "breedingTraits": [
-      "tough",
-      "thick-skin"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "earth-stone-line"
   },
   {
     "speciesId": "breezling",
@@ -565,17 +508,8 @@
     ],
     "captureBaseDifficulty": 0.28,
     "spriteKey": "breezling",
-    "evolutionChain": {
-      "evolvesTo": "stormowl",
-      "levelRequired": 16,
-      "itemRequired": null
-    },
-    "breedingGroup": "avian",
-    "breedingTraits": [
-      "nimble",
-      "quick-learner"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "wild",
+    "evolutionChainId": "wind-sky-line"
   },
   {
     "speciesId": "stormowl",
@@ -624,13 +558,8 @@
     ],
     "captureBaseDifficulty": 0.48,
     "spriteKey": "stormowl",
-    "evolutionChain": null,
-    "breedingGroup": "avian",
-    "breedingTraits": [
-      "keen-eye",
-      "nimble"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "wind-sky-line"
   },
   {
     "speciesId": "tempestdrake",
@@ -683,13 +612,8 @@
     ],
     "captureBaseDifficulty": 0.66,
     "spriteKey": "tempestdrake",
-    "evolutionChain": null,
-    "breedingGroup": "dragon",
-    "breedingTraits": [
-      "nimble",
-      "fierce"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "wind-sky-line"
   },
   {
     "speciesId": "glowmoth",
@@ -738,17 +662,8 @@
     ],
     "captureBaseDifficulty": 0.24,
     "spriteKey": "glowmoth",
-    "evolutionChain": {
-      "evolvesTo": "sunstag",
-      "levelRequired": 20,
-      "itemRequired": null
-    },
-    "breedingGroup": "avian",
-    "breedingTraits": [
-      "gentle",
-      "lucky"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "wild",
+    "evolutionChainId": "light-radiance-line"
   },
   {
     "speciesId": "sunstag",
@@ -797,13 +712,8 @@
     ],
     "captureBaseDifficulty": 0.5,
     "spriteKey": "sunstag",
-    "evolutionChain": null,
-    "breedingGroup": "beast",
-    "breedingTraits": [
-      "gentle",
-      "keen-eye"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "light-radiance-line"
   },
   {
     "speciesId": "shadowpup",
@@ -852,17 +762,8 @@
     ],
     "captureBaseDifficulty": 0.26,
     "spriteKey": "shadowpup",
-    "evolutionChain": {
-      "evolvesTo": "nightstalker",
-      "levelRequired": 18,
-      "itemRequired": null
-    },
-    "breedingGroup": "beast",
-    "breedingTraits": [
-      "fierce",
-      "nimble"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "wild",
+    "evolutionChainId": "dark-shadow-line"
   },
   {
     "speciesId": "nightstalker",
@@ -911,13 +812,8 @@
     ],
     "captureBaseDifficulty": 0.46,
     "spriteKey": "nightstalker",
-    "evolutionChain": null,
-    "breedingGroup": "beast",
-    "breedingTraits": [
-      "nimble",
-      "keen-eye"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "dark-shadow-line"
   },
   {
     "speciesId": "mossbun",
@@ -966,13 +862,8 @@
     ],
     "captureBaseDifficulty": 0.2,
     "spriteKey": "mossbun",
-    "evolutionChain": null,
-    "breedingGroup": "beast",
-    "breedingTraits": [
-      "gentle",
-      "lucky"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "wild",
+    "evolutionChainId": "mossbun-standalone"
   },
   {
     "speciesId": "ironshell",
@@ -1021,13 +912,8 @@
     ],
     "captureBaseDifficulty": 0.4,
     "spriteKey": "ironshell",
-    "evolutionChain": null,
-    "breedingGroup": "elemental",
-    "breedingTraits": [
-      "tough",
-      "thick-skin"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "neutral-armor-line"
   },
   {
     "speciesId": "emberbun",
@@ -1076,14 +962,8 @@
     ],
     "captureBaseDifficulty": 0,
     "spriteKey": "emberbun",
-    "evolutionChain": null,
-    "breedingGroup": "beast",
-    "breedingTraits": [
-      "fireproof",
-      "gentle",
-      "lucky"
-    ],
-    "obtainableVia": "breeding"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "fire-elemental-line"
   },
   {
     "speciesId": "steampup",
@@ -1136,14 +1016,8 @@
     ],
     "captureBaseDifficulty": 0,
     "spriteKey": "steampup",
-    "evolutionChain": null,
-    "breedingGroup": "beast",
-    "breedingTraits": [
-      "fireproof",
-      "waterproof",
-      "nimble"
-    ],
-    "obtainableVia": "breeding"
+    "obtainableVia": "wild",
+    "evolutionChainId": "steampup-standalone"
   },
   {
     "speciesId": "magmawyrm",
@@ -1200,15 +1074,8 @@
     ],
     "captureBaseDifficulty": 0,
     "spriteKey": "magmawyrm",
-    "evolutionChain": null,
-    "breedingGroup": "dragon",
-    "breedingTraits": [
-      "fireproof",
-      "waterproof",
-      "tough",
-      "fierce"
-    ],
-    "obtainableVia": "breeding"
+    "obtainableVia": "wild",
+    "evolutionChainId": null
   },
   {
     "speciesId": "prismbug",
@@ -1261,14 +1128,8 @@
     ],
     "captureBaseDifficulty": 0,
     "spriteKey": "prismbug",
-    "evolutionChain": null,
-    "breedingGroup": "avian",
-    "breedingTraits": [
-      "nimble",
-      "lucky",
-      "gentle"
-    ],
-    "obtainableVia": "breeding"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "light-radiance-line"
   },
   {
     "speciesId": "magnetite",
@@ -1321,14 +1182,8 @@
     ],
     "captureBaseDifficulty": 0,
     "spriteKey": "magnetite",
-    "evolutionChain": null,
-    "breedingGroup": "elemental",
-    "breedingTraits": [
-      "thick-skin",
-      "tough",
-      "iron-will"
-    ],
-    "obtainableVia": "breeding"
+    "obtainableVia": "wild",
+    "evolutionChainId": "magnetite-standalone"
   },
   {
     "speciesId": "duskfox",
@@ -1381,14 +1236,8 @@
     ],
     "captureBaseDifficulty": 0,
     "spriteKey": "duskfox",
-    "evolutionChain": null,
-    "breedingGroup": "beast",
-    "breedingTraits": [
-      "nimble",
-      "fierce",
-      "fireproof"
-    ],
-    "obtainableVia": "breeding"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "dark-shadow-line"
   },
   {
     "speciesId": "coralshell",
@@ -1441,14 +1290,8 @@
     ],
     "captureBaseDifficulty": 0,
     "spriteKey": "coralshell",
-    "evolutionChain": null,
-    "breedingGroup": "aquatic",
-    "breedingTraits": [
-      "thick-skin",
-      "waterproof",
-      "tough"
-    ],
-    "obtainableVia": "breeding"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "water-reef-line"
   },
   {
     "speciesId": "thornwarden",
@@ -1497,13 +1340,8 @@
     ],
     "captureBaseDifficulty": 1,
     "spriteKey": "thornwarden",
-    "evolutionChain": null,
-    "breedingGroup": "elemental",
-    "breedingTraits": [
-      "fierce",
-      "thick-skin"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "wild",
+    "evolutionChainId": null
   },
   {
     "speciesId": "elderwood",
@@ -1556,14 +1394,8 @@
     ],
     "captureBaseDifficulty": 1,
     "spriteKey": "elderwood",
-    "evolutionChain": null,
-    "breedingGroup": "elemental",
-    "breedingTraits": [
-      "tough",
-      "thick-skin",
-      "iron-will"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "wild",
+    "evolutionChainId": null
   },
   {
     "speciesId": "crystallix",
@@ -1616,14 +1448,8 @@
     ],
     "captureBaseDifficulty": 1,
     "spriteKey": "crystallix",
-    "evolutionChain": null,
-    "breedingGroup": "elemental",
-    "breedingTraits": [
-      "tough",
-      "thick-skin",
-      "iron-will"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "wild",
+    "evolutionChainId": null
   },
   {
     "speciesId": "dragonrockking",
@@ -1672,14 +1498,8 @@
     ],
     "captureBaseDifficulty": 1,
     "spriteKey": "dragonrockking",
-    "evolutionChain": null,
-    "breedingGroup": "dragon",
-    "breedingTraits": [
-      "fierce",
-      "tough",
-      "thick-skin"
-    ],
-    "obtainableVia": "both"
+    "obtainableVia": "wild",
+    "evolutionChainId": null
   },
   {
     "speciesId": "magmaslime",
@@ -1709,18 +1529,31 @@
       "speed": 1
     },
     "abilities": [
-      { "abilityId": "tackle", "learnAtLevel": 1 },
-      { "abilityId": "ember", "learnAtLevel": 3 },
-      { "abilityId": "fireball", "learnAtLevel": 8 },
-      { "abilityId": "shield-wall", "learnAtLevel": 12 },
-      { "abilityId": "inferno", "learnAtLevel": 18 }
+      {
+        "abilityId": "tackle",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "ember",
+        "learnAtLevel": 3
+      },
+      {
+        "abilityId": "fireball",
+        "learnAtLevel": 8
+      },
+      {
+        "abilityId": "shield-wall",
+        "learnAtLevel": 12
+      },
+      {
+        "abilityId": "inferno",
+        "learnAtLevel": 18
+      }
     ],
     "captureBaseDifficulty": 0.35,
     "spriteKey": "magmaslime",
-    "evolutionChain": null,
-    "breedingGroup": "elemental",
-    "breedingTraits": ["fireproof", "tough"],
-    "obtainableVia": "wild"
+    "obtainableVia": "wild",
+    "evolutionChainId": "fire-elemental-line"
   },
   {
     "speciesId": "cinderbird",
@@ -1750,18 +1583,31 @@
       "speed": 3
     },
     "abilities": [
-      { "abilityId": "scratch", "learnAtLevel": 1 },
-      { "abilityId": "ember", "learnAtLevel": 2 },
-      { "abilityId": "quick-step", "learnAtLevel": 6 },
-      { "abilityId": "fireball", "learnAtLevel": 10 },
-      { "abilityId": "flame-burst", "learnAtLevel": 16 }
+      {
+        "abilityId": "scratch",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "ember",
+        "learnAtLevel": 2
+      },
+      {
+        "abilityId": "quick-step",
+        "learnAtLevel": 6
+      },
+      {
+        "abilityId": "fireball",
+        "learnAtLevel": 10
+      },
+      {
+        "abilityId": "flame-burst",
+        "learnAtLevel": 16
+      }
     ],
     "captureBaseDifficulty": 0.48,
     "spriteKey": "cinderbird",
-    "evolutionChain": null,
-    "breedingGroup": "avian",
-    "breedingTraits": ["nimble", "fireproof"],
-    "obtainableVia": "wild"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "fire-sprite-line"
   },
   {
     "speciesId": "obsidiangolem",
@@ -1791,18 +1637,31 @@
       "speed": 1
     },
     "abilities": [
-      { "abilityId": "slam", "learnAtLevel": 1 },
-      { "abilityId": "rock-throw", "learnAtLevel": 3 },
-      { "abilityId": "shield-wall", "learnAtLevel": 6 },
-      { "abilityId": "fireball", "learnAtLevel": 10 },
-      { "abilityId": "earthquake", "learnAtLevel": 16 }
+      {
+        "abilityId": "slam",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "rock-throw",
+        "learnAtLevel": 3
+      },
+      {
+        "abilityId": "shield-wall",
+        "learnAtLevel": 6
+      },
+      {
+        "abilityId": "fireball",
+        "learnAtLevel": 10
+      },
+      {
+        "abilityId": "earthquake",
+        "learnAtLevel": 16
+      }
     ],
     "captureBaseDifficulty": 0.62,
     "spriteKey": "obsidiangolem",
-    "evolutionChain": null,
-    "breedingGroup": "elemental",
-    "breedingTraits": ["tough", "thick-skin", "fireproof"],
-    "obtainableVia": "wild"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "fire-elemental-line"
   },
   {
     "speciesId": "glowjelly",
@@ -1832,18 +1691,31 @@
       "speed": 2
     },
     "abilities": [
-      { "abilityId": "tackle", "learnAtLevel": 1 },
-      { "abilityId": "water-splash", "learnAtLevel": 3 },
-      { "abilityId": "heal", "learnAtLevel": 6 },
-      { "abilityId": "light-beam", "learnAtLevel": 10 },
-      { "abilityId": "group-heal", "learnAtLevel": 16 }
+      {
+        "abilityId": "tackle",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "water-splash",
+        "learnAtLevel": 3
+      },
+      {
+        "abilityId": "heal",
+        "learnAtLevel": 6
+      },
+      {
+        "abilityId": "light-beam",
+        "learnAtLevel": 10
+      },
+      {
+        "abilityId": "group-heal",
+        "learnAtLevel": 16
+      }
     ],
     "captureBaseDifficulty": 0.32,
     "spriteKey": "glowjelly",
-    "evolutionChain": null,
-    "breedingGroup": "aquatic",
-    "breedingTraits": ["gentle", "waterproof"],
-    "obtainableVia": "wild"
+    "obtainableVia": "wild",
+    "evolutionChainId": "water-reef-line"
   },
   {
     "speciesId": "shellwhisper",
@@ -1873,18 +1745,31 @@
       "speed": 1
     },
     "abilities": [
-      { "abilityId": "tackle", "learnAtLevel": 1 },
-      { "abilityId": "water-splash", "learnAtLevel": 2 },
-      { "abilityId": "shield-wall", "learnAtLevel": 5 },
-      { "abilityId": "defense-boost", "learnAtLevel": 9 },
-      { "abilityId": "tidal-wave", "learnAtLevel": 15 }
+      {
+        "abilityId": "tackle",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "water-splash",
+        "learnAtLevel": 2
+      },
+      {
+        "abilityId": "shield-wall",
+        "learnAtLevel": 5
+      },
+      {
+        "abilityId": "defense-boost",
+        "learnAtLevel": 9
+      },
+      {
+        "abilityId": "tidal-wave",
+        "learnAtLevel": 15
+      }
     ],
     "captureBaseDifficulty": 0.45,
     "spriteKey": "shellwhisper",
-    "evolutionChain": null,
-    "breedingGroup": "aquatic",
-    "breedingTraits": ["thick-skin", "waterproof"],
-    "obtainableVia": "wild"
+    "obtainableVia": "wild",
+    "evolutionChainId": "water-wing-line"
   },
   {
     "speciesId": "coraldragon",
@@ -1914,18 +1799,31 @@
       "speed": 2
     },
     "abilities": [
-      { "abilityId": "bite", "learnAtLevel": 1 },
-      { "abilityId": "water-splash", "learnAtLevel": 3 },
-      { "abilityId": "ice-shard", "learnAtLevel": 7 },
-      { "abilityId": "tidal-wave", "learnAtLevel": 12 },
-      { "abilityId": "blizzard", "learnAtLevel": 18 }
+      {
+        "abilityId": "bite",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "water-splash",
+        "learnAtLevel": 3
+      },
+      {
+        "abilityId": "ice-shard",
+        "learnAtLevel": 7
+      },
+      {
+        "abilityId": "tidal-wave",
+        "learnAtLevel": 12
+      },
+      {
+        "abilityId": "blizzard",
+        "learnAtLevel": 18
+      }
     ],
     "captureBaseDifficulty": 0.58,
     "spriteKey": "coraldragon",
-    "evolutionChain": null,
-    "breedingGroup": "dragon",
-    "breedingTraits": ["waterproof", "fierce"],
-    "obtainableVia": "wild"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "water-reef-line"
   },
   {
     "speciesId": "bogwitch",
@@ -1955,18 +1853,31 @@
       "speed": 2
     },
     "abilities": [
-      { "abilityId": "scratch", "learnAtLevel": 1 },
-      { "abilityId": "shadow-strike", "learnAtLevel": 3 },
-      { "abilityId": "poison-sting", "learnAtLevel": 7 },
-      { "abilityId": "dark-pulse", "learnAtLevel": 12 },
-      { "abilityId": "lullaby", "learnAtLevel": 17 }
+      {
+        "abilityId": "scratch",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "shadow-strike",
+        "learnAtLevel": 3
+      },
+      {
+        "abilityId": "poison-sting",
+        "learnAtLevel": 7
+      },
+      {
+        "abilityId": "dark-pulse",
+        "learnAtLevel": 12
+      },
+      {
+        "abilityId": "lullaby",
+        "learnAtLevel": 17
+      }
     ],
     "captureBaseDifficulty": 0.38,
     "spriteKey": "bogwitch",
-    "evolutionChain": null,
-    "breedingGroup": "elemental",
-    "breedingTraits": ["keen-eye", "nimble"],
-    "obtainableVia": "wild"
+    "obtainableVia": "wild",
+    "evolutionChainId": "dark-swamp-line"
   },
   {
     "speciesId": "gloomtoad",
@@ -1996,18 +1907,31 @@
       "speed": 1
     },
     "abilities": [
-      { "abilityId": "tackle", "learnAtLevel": 1 },
-      { "abilityId": "bite", "learnAtLevel": 3 },
-      { "abilityId": "poison-sting", "learnAtLevel": 6 },
-      { "abilityId": "shadow-strike", "learnAtLevel": 10 },
-      { "abilityId": "slam", "learnAtLevel": 15 }
+      {
+        "abilityId": "tackle",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "bite",
+        "learnAtLevel": 3
+      },
+      {
+        "abilityId": "poison-sting",
+        "learnAtLevel": 6
+      },
+      {
+        "abilityId": "shadow-strike",
+        "learnAtLevel": 10
+      },
+      {
+        "abilityId": "slam",
+        "learnAtLevel": 15
+      }
     ],
     "captureBaseDifficulty": 0.34,
     "spriteKey": "gloomtoad",
-    "evolutionChain": null,
-    "breedingGroup": "beast",
-    "breedingTraits": ["thick-skin", "tough"],
-    "obtainableVia": "wild"
+    "obtainableVia": "wild",
+    "evolutionChainId": "gloomtoad-standalone"
   },
   {
     "speciesId": "mistweaver",
@@ -2037,18 +1961,31 @@
       "speed": 2
     },
     "abilities": [
-      { "abilityId": "tackle", "learnAtLevel": 1 },
-      { "abilityId": "shadow-strike", "learnAtLevel": 2 },
-      { "abilityId": "slow-fog", "learnAtLevel": 6 },
-      { "abilityId": "lullaby", "learnAtLevel": 10 },
-      { "abilityId": "dark-pulse", "learnAtLevel": 15 }
+      {
+        "abilityId": "tackle",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "shadow-strike",
+        "learnAtLevel": 2
+      },
+      {
+        "abilityId": "slow-fog",
+        "learnAtLevel": 6
+      },
+      {
+        "abilityId": "lullaby",
+        "learnAtLevel": 10
+      },
+      {
+        "abilityId": "dark-pulse",
+        "learnAtLevel": 15
+      }
     ],
     "captureBaseDifficulty": 0.48,
     "spriteKey": "mistweaver",
-    "evolutionChain": null,
-    "breedingGroup": "dragon",
-    "breedingTraits": ["nimble", "keen-eye"],
-    "obtainableVia": "wild"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "dark-swamp-line"
   },
   {
     "speciesId": "dreadwyrm",
@@ -2078,18 +2015,31 @@
       "speed": 2
     },
     "abilities": [
-      { "abilityId": "bite", "learnAtLevel": 1 },
-      { "abilityId": "shadow-strike", "learnAtLevel": 3 },
-      { "abilityId": "war-cry", "learnAtLevel": 7 },
-      { "abilityId": "dark-pulse", "learnAtLevel": 12 },
-      { "abilityId": "power-strike", "learnAtLevel": 18 }
+      {
+        "abilityId": "bite",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "shadow-strike",
+        "learnAtLevel": 3
+      },
+      {
+        "abilityId": "war-cry",
+        "learnAtLevel": 7
+      },
+      {
+        "abilityId": "dark-pulse",
+        "learnAtLevel": 12
+      },
+      {
+        "abilityId": "power-strike",
+        "learnAtLevel": 18
+      }
     ],
-    "captureBaseDifficulty": 0.60,
+    "captureBaseDifficulty": 0.6,
     "spriteKey": "dreadwyrm",
-    "evolutionChain": null,
-    "breedingGroup": "dragon",
-    "breedingTraits": ["fierce", "tough"],
-    "obtainableVia": "wild"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "dark-swamp-line"
   },
   {
     "speciesId": "emberlord",
@@ -2119,18 +2069,31 @@
       "speed": 2
     },
     "abilities": [
-      { "abilityId": "inferno", "learnAtLevel": 1 },
-      { "abilityId": "flame-burst", "learnAtLevel": 1 },
-      { "abilityId": "war-cry", "learnAtLevel": 1 },
-      { "abilityId": "fireball", "learnAtLevel": 1 },
-      { "abilityId": "earthquake", "learnAtLevel": 1 }
+      {
+        "abilityId": "inferno",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "flame-burst",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "war-cry",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "fireball",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "earthquake",
+        "learnAtLevel": 1
+      }
     ],
     "captureBaseDifficulty": 1,
     "spriteKey": "emberlord",
-    "evolutionChain": null,
-    "breedingGroup": "elemental",
-    "breedingTraits": ["fireproof", "fierce", "tough"],
-    "obtainableVia": "both"
+    "obtainableVia": "wild",
+    "evolutionChainId": null
   },
   {
     "speciesId": "pearlqueen",
@@ -2160,18 +2123,31 @@
       "speed": 1
     },
     "abilities": [
-      { "abilityId": "tidal-wave", "learnAtLevel": 1 },
-      { "abilityId": "blizzard", "learnAtLevel": 1 },
-      { "abilityId": "group-heal", "learnAtLevel": 1 },
-      { "abilityId": "shield-wall", "learnAtLevel": 1 },
-      { "abilityId": "ice-shard", "learnAtLevel": 1 }
+      {
+        "abilityId": "tidal-wave",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "blizzard",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "group-heal",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "shield-wall",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "ice-shard",
+        "learnAtLevel": 1
+      }
     ],
     "captureBaseDifficulty": 1,
     "spriteKey": "pearlqueen",
-    "evolutionChain": null,
-    "breedingGroup": "aquatic",
-    "breedingTraits": ["waterproof", "gentle", "keen-eye"],
-    "obtainableVia": "both"
+    "obtainableVia": "wild",
+    "evolutionChainId": null
   },
   {
     "speciesId": "umbralsovereign",
@@ -2201,18 +2177,31 @@
       "speed": 2
     },
     "abilities": [
-      { "abilityId": "dark-pulse", "learnAtLevel": 1 },
-      { "abilityId": "shadow-strike", "learnAtLevel": 1 },
-      { "abilityId": "regen", "learnAtLevel": 1 },
-      { "abilityId": "war-cry", "learnAtLevel": 1 },
-      { "abilityId": "power-strike", "learnAtLevel": 1 }
+      {
+        "abilityId": "dark-pulse",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "shadow-strike",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "regen",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "war-cry",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "power-strike",
+        "learnAtLevel": 1
+      }
     ],
     "captureBaseDifficulty": 1,
     "spriteKey": "umbralsovereign",
-    "evolutionChain": null,
-    "breedingGroup": "dragon",
-    "breedingTraits": ["fierce", "tough", "iron-will"],
-    "obtainableVia": "both"
+    "obtainableVia": "wild",
+    "evolutionChainId": null
   },
   {
     "speciesId": "fireimp",
@@ -2242,18 +2231,31 @@
       "speed": 3
     },
     "abilities": [
-      { "abilityId": "scratch", "learnAtLevel": 1 },
-      { "abilityId": "ember", "learnAtLevel": 3 },
-      { "abilityId": "quick-step", "learnAtLevel": 7 },
-      { "abilityId": "fireball", "learnAtLevel": 12 },
-      { "abilityId": "flame-burst", "learnAtLevel": 18 }
+      {
+        "abilityId": "scratch",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "ember",
+        "learnAtLevel": 3
+      },
+      {
+        "abilityId": "quick-step",
+        "learnAtLevel": 7
+      },
+      {
+        "abilityId": "fireball",
+        "learnAtLevel": 12
+      },
+      {
+        "abilityId": "flame-burst",
+        "learnAtLevel": 18
+      }
     ],
     "captureBaseDifficulty": 0.28,
     "spriteKey": "fireimp",
-    "evolutionChain": null,
-    "breedingGroup": "elemental",
-    "breedingTraits": ["fireproof", "nimble"],
-    "obtainableVia": "wild"
+    "obtainableVia": "wild",
+    "evolutionChainId": "fire-sprite-line"
   },
   {
     "speciesId": "aquawing",
@@ -2283,18 +2285,31 @@
       "speed": 3
     },
     "abilities": [
-      { "abilityId": "bite", "learnAtLevel": 1 },
-      { "abilityId": "water-splash", "learnAtLevel": 3 },
-      { "abilityId": "gust", "learnAtLevel": 6 },
-      { "abilityId": "ice-shard", "learnAtLevel": 10 },
-      { "abilityId": "tidal-wave", "learnAtLevel": 16 }
+      {
+        "abilityId": "bite",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "water-splash",
+        "learnAtLevel": 3
+      },
+      {
+        "abilityId": "gust",
+        "learnAtLevel": 6
+      },
+      {
+        "abilityId": "ice-shard",
+        "learnAtLevel": 10
+      },
+      {
+        "abilityId": "tidal-wave",
+        "learnAtLevel": 16
+      }
     ],
     "captureBaseDifficulty": 0.58,
     "spriteKey": "aquawing",
-    "evolutionChain": null,
-    "breedingGroup": "beast",
-    "breedingTraits": ["waterproof", "fierce", "nimble"],
-    "obtainableVia": "wild"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "water-wing-line"
   },
   {
     "speciesId": "madcheeks",
@@ -2324,18 +2339,31 @@
       "speed": 1
     },
     "abilities": [
-      { "abilityId": "tackle", "learnAtLevel": 1 },
-      { "abilityId": "slam", "learnAtLevel": 4 },
-      { "abilityId": "war-cry", "learnAtLevel": 8 },
-      { "abilityId": "defense-boost", "learnAtLevel": 12 },
-      { "abilityId": "power-strike", "learnAtLevel": 17 }
+      {
+        "abilityId": "tackle",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "slam",
+        "learnAtLevel": 4
+      },
+      {
+        "abilityId": "war-cry",
+        "learnAtLevel": 8
+      },
+      {
+        "abilityId": "defense-boost",
+        "learnAtLevel": 12
+      },
+      {
+        "abilityId": "power-strike",
+        "learnAtLevel": 17
+      }
     ],
     "captureBaseDifficulty": 0.22,
     "spriteKey": "madcheeks",
-    "evolutionChain": null,
-    "breedingGroup": "beast",
-    "breedingTraits": ["tough", "thick-skin"],
-    "obtainableVia": "wild"
+    "obtainableVia": "wild",
+    "evolutionChainId": "neutral-armor-line"
   },
   {
     "speciesId": "chimeradrake",
@@ -2365,19 +2393,35 @@
       "speed": 2
     },
     "abilities": [
-      { "abilityId": "bite", "learnAtLevel": 1 },
-      { "abilityId": "ember", "learnAtLevel": 3 },
-      { "abilityId": "fireball", "learnAtLevel": 7 },
-      { "abilityId": "war-cry", "learnAtLevel": 12 },
-      { "abilityId": "inferno", "learnAtLevel": 16 },
-      { "abilityId": "flame-burst", "learnAtLevel": 20 }
+      {
+        "abilityId": "bite",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "ember",
+        "learnAtLevel": 3
+      },
+      {
+        "abilityId": "fireball",
+        "learnAtLevel": 7
+      },
+      {
+        "abilityId": "war-cry",
+        "learnAtLevel": 12
+      },
+      {
+        "abilityId": "inferno",
+        "learnAtLevel": 16
+      },
+      {
+        "abilityId": "flame-burst",
+        "learnAtLevel": 20
+      }
     ],
     "captureBaseDifficulty": 0.65,
     "spriteKey": "chimeradrake",
-    "evolutionChain": null,
-    "breedingGroup": "dragon",
-    "breedingTraits": ["fireproof", "fierce", "tough"],
-    "obtainableVia": "wild"
+    "obtainableVia": "wild",
+    "evolutionChainId": "dragon-hand-drawn"
   },
   {
     "speciesId": "emberwing",
@@ -2407,18 +2451,31 @@
       "speed": 2
     },
     "abilities": [
-      { "abilityId": "tackle", "learnAtLevel": 1 },
-      { "abilityId": "ember", "learnAtLevel": 3 },
-      { "abilityId": "fireball", "learnAtLevel": 8 },
-      { "abilityId": "quick-step", "learnAtLevel": 12 },
-      { "abilityId": "flame-burst", "learnAtLevel": 17 }
+      {
+        "abilityId": "tackle",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "ember",
+        "learnAtLevel": 3
+      },
+      {
+        "abilityId": "fireball",
+        "learnAtLevel": 8
+      },
+      {
+        "abilityId": "quick-step",
+        "learnAtLevel": 12
+      },
+      {
+        "abilityId": "flame-burst",
+        "learnAtLevel": 17
+      }
     ],
     "captureBaseDifficulty": 0.42,
     "spriteKey": "emberwing",
-    "evolutionChain": null,
-    "breedingGroup": "beast",
-    "breedingTraits": ["fireproof", "fierce"],
-    "obtainableVia": "wild"
+    "obtainableVia": "wild",
+    "evolutionChainId": "fire-hand-drawn"
   },
   {
     "speciesId": "blazecheetah",
@@ -2448,18 +2505,31 @@
       "speed": 4
     },
     "abilities": [
-      { "abilityId": "scratch", "learnAtLevel": 1 },
-      { "abilityId": "ember", "learnAtLevel": 2 },
-      { "abilityId": "quick-step", "learnAtLevel": 6 },
-      { "abilityId": "fireball", "learnAtLevel": 10 },
-      { "abilityId": "flame-burst", "learnAtLevel": 16 }
+      {
+        "abilityId": "scratch",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "ember",
+        "learnAtLevel": 2
+      },
+      {
+        "abilityId": "quick-step",
+        "learnAtLevel": 6
+      },
+      {
+        "abilityId": "fireball",
+        "learnAtLevel": 10
+      },
+      {
+        "abilityId": "flame-burst",
+        "learnAtLevel": 16
+      }
     ],
     "captureBaseDifficulty": 0.44,
     "spriteKey": "blazecheetah",
-    "evolutionChain": null,
-    "breedingGroup": "beast",
-    "breedingTraits": ["nimble", "fireproof", "fierce"],
-    "obtainableVia": "wild"
+    "obtainableVia": "wild",
+    "evolutionChainId": "fire-hand-drawn"
   },
   {
     "speciesId": "frostfist",
@@ -2489,18 +2559,31 @@
       "speed": 1
     },
     "abilities": [
-      { "abilityId": "tackle", "learnAtLevel": 1 },
-      { "abilityId": "ice-shard", "learnAtLevel": 3 },
-      { "abilityId": "power-strike", "learnAtLevel": 7 },
-      { "abilityId": "shield-wall", "learnAtLevel": 11 },
-      { "abilityId": "blizzard", "learnAtLevel": 16 }
+      {
+        "abilityId": "tackle",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "ice-shard",
+        "learnAtLevel": 3
+      },
+      {
+        "abilityId": "power-strike",
+        "learnAtLevel": 7
+      },
+      {
+        "abilityId": "shield-wall",
+        "learnAtLevel": 11
+      },
+      {
+        "abilityId": "blizzard",
+        "learnAtLevel": 16
+      }
     ],
     "captureBaseDifficulty": 0.46,
     "spriteKey": "frostfist",
-    "evolutionChain": null,
-    "breedingGroup": "elemental",
-    "breedingTraits": ["waterproof", "tough"],
-    "obtainableVia": "wild"
+    "obtainableVia": "wild",
+    "evolutionChainId": "ice-hand-drawn"
   },
   {
     "speciesId": "iceboxer",
@@ -2530,19 +2613,35 @@
       "speed": 1
     },
     "abilities": [
-      { "abilityId": "slam", "learnAtLevel": 1 },
-      { "abilityId": "ice-shard", "learnAtLevel": 3 },
-      { "abilityId": "power-strike", "learnAtLevel": 7 },
-      { "abilityId": "shield-wall", "learnAtLevel": 11 },
-      { "abilityId": "blizzard", "learnAtLevel": 15 },
-      { "abilityId": "boulder-crush", "learnAtLevel": 20 }
+      {
+        "abilityId": "slam",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "ice-shard",
+        "learnAtLevel": 3
+      },
+      {
+        "abilityId": "power-strike",
+        "learnAtLevel": 7
+      },
+      {
+        "abilityId": "shield-wall",
+        "learnAtLevel": 11
+      },
+      {
+        "abilityId": "blizzard",
+        "learnAtLevel": 15
+      },
+      {
+        "abilityId": "boulder-crush",
+        "learnAtLevel": 20
+      }
     ],
     "captureBaseDifficulty": 0.62,
     "spriteKey": "iceboxer",
-    "evolutionChain": null,
-    "breedingGroup": "elemental",
-    "breedingTraits": ["waterproof", "tough", "thick-skin"],
-    "obtainableVia": "wild"
+    "obtainableVia": "wild",
+    "evolutionChainId": "ice-hand-drawn"
   },
   {
     "speciesId": "plantosaur",
@@ -2572,18 +2671,31 @@
       "speed": 1
     },
     "abilities": [
-      { "abilityId": "bite", "learnAtLevel": 1 },
-      { "abilityId": "vine-whip", "learnAtLevel": 3 },
-      { "abilityId": "rock-throw", "learnAtLevel": 7 },
-      { "abilityId": "earthquake", "learnAtLevel": 12 },
-      { "abilityId": "boulder-crush", "learnAtLevel": 18 }
+      {
+        "abilityId": "bite",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "vine-whip",
+        "learnAtLevel": 3
+      },
+      {
+        "abilityId": "rock-throw",
+        "learnAtLevel": 7
+      },
+      {
+        "abilityId": "earthquake",
+        "learnAtLevel": 12
+      },
+      {
+        "abilityId": "boulder-crush",
+        "learnAtLevel": 18
+      }
     ],
-    "captureBaseDifficulty": 0.60,
+    "captureBaseDifficulty": 0.6,
     "spriteKey": "plantosaur",
-    "evolutionChain": null,
-    "breedingGroup": "dragon",
-    "breedingTraits": ["tough", "thick-skin", "fierce"],
-    "obtainableVia": "wild"
+    "obtainableVia": "wild",
+    "evolutionChainId": "plant-hand-drawn"
   },
   {
     "speciesId": "miniflame",
@@ -2613,17 +2725,27 @@
       "speed": 2
     },
     "abilities": [
-      { "abilityId": "tackle", "learnAtLevel": 1 },
-      { "abilityId": "ember", "learnAtLevel": 2 },
-      { "abilityId": "fireball", "learnAtLevel": 6 },
-      { "abilityId": "inferno", "learnAtLevel": 14 }
+      {
+        "abilityId": "tackle",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "ember",
+        "learnAtLevel": 2
+      },
+      {
+        "abilityId": "fireball",
+        "learnAtLevel": 6
+      },
+      {
+        "abilityId": "inferno",
+        "learnAtLevel": 14
+      }
     ],
     "captureBaseDifficulty": 0.24,
     "spriteKey": "miniflame",
-    "evolutionChain": null,
-    "breedingGroup": "elemental",
-    "breedingTraits": ["fireproof", "nimble"],
-    "obtainableVia": "wild"
+    "obtainableVia": "wild",
+    "evolutionChainId": "fire-hand-drawn"
   },
   {
     "speciesId": "tidalfang",
@@ -2653,18 +2775,31 @@
       "speed": 3
     },
     "abilities": [
-      { "abilityId": "bite", "learnAtLevel": 1 },
-      { "abilityId": "water-splash", "learnAtLevel": 3 },
-      { "abilityId": "ice-shard", "learnAtLevel": 7 },
-      { "abilityId": "quick-step", "learnAtLevel": 11 },
-      { "abilityId": "tidal-wave", "learnAtLevel": 16 }
+      {
+        "abilityId": "bite",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "water-splash",
+        "learnAtLevel": 3
+      },
+      {
+        "abilityId": "ice-shard",
+        "learnAtLevel": 7
+      },
+      {
+        "abilityId": "quick-step",
+        "learnAtLevel": 11
+      },
+      {
+        "abilityId": "tidal-wave",
+        "learnAtLevel": 16
+      }
     ],
     "captureBaseDifficulty": 0.44,
     "spriteKey": "tidalfang",
-    "evolutionChain": null,
-    "breedingGroup": "beast",
-    "breedingTraits": ["waterproof", "fierce", "nimble"],
-    "obtainableVia": "wild"
+    "obtainableVia": "wild",
+    "evolutionChainId": "water-hand-drawn"
   },
   {
     "speciesId": "leafblower",
@@ -2694,18 +2829,31 @@
       "speed": 2
     },
     "abilities": [
-      { "abilityId": "tackle", "learnAtLevel": 1 },
-      { "abilityId": "gust", "learnAtLevel": 3 },
-      { "abilityId": "vine-whip", "learnAtLevel": 7 },
-      { "abilityId": "wind-blade", "learnAtLevel": 12 },
-      { "abilityId": "tornado", "learnAtLevel": 17 }
+      {
+        "abilityId": "tackle",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "gust",
+        "learnAtLevel": 3
+      },
+      {
+        "abilityId": "vine-whip",
+        "learnAtLevel": 7
+      },
+      {
+        "abilityId": "wind-blade",
+        "learnAtLevel": 12
+      },
+      {
+        "abilityId": "tornado",
+        "learnAtLevel": 17
+      }
     ],
     "captureBaseDifficulty": 0.26,
     "spriteKey": "leafblower",
-    "evolutionChain": null,
-    "breedingGroup": "elemental",
-    "breedingTraits": ["nimble", "gentle"],
-    "obtainableVia": "wild"
+    "obtainableVia": "wild",
+    "evolutionChainId": "plant-hand-drawn"
   },
   {
     "speciesId": "aquafang",
@@ -2735,17 +2883,84 @@
       "speed": 2
     },
     "abilities": [
-      { "abilityId": "bite", "learnAtLevel": 1 },
-      { "abilityId": "water-splash", "learnAtLevel": 2 },
-      { "abilityId": "poison-sting", "learnAtLevel": 6 },
-      { "abilityId": "ice-shard", "learnAtLevel": 10 },
-      { "abilityId": "tidal-wave", "learnAtLevel": 15 }
+      {
+        "abilityId": "bite",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "water-splash",
+        "learnAtLevel": 2
+      },
+      {
+        "abilityId": "poison-sting",
+        "learnAtLevel": 6
+      },
+      {
+        "abilityId": "ice-shard",
+        "learnAtLevel": 10
+      },
+      {
+        "abilityId": "tidal-wave",
+        "learnAtLevel": 15
+      }
     ],
     "captureBaseDifficulty": 0.46,
     "spriteKey": "aquafang",
-    "evolutionChain": null,
-    "breedingGroup": "aquatic",
-    "breedingTraits": ["waterproof", "fierce"],
-    "obtainableVia": "wild"
+    "obtainableVia": "wild",
+    "evolutionChainId": "water-hand-drawn"
+  },
+  {
+    "speciesId": "toughchunkice",
+    "name": "Tough Chunk Ice",
+    "description": "A hulking ice creature with crystalline horns and fists of solid frost. Despite its intimidating bulk, it starts as a young brawler eager to prove itself.",
+    "element": "water",
+    "rarity": "common",
+    "baseStats": {
+      "maxHp": 85,
+      "currentHp": 85,
+      "maxMp": 25,
+      "currentMp": 25,
+      "attack": 16,
+      "defense": 18,
+      "magicAttack": 12,
+      "magicDefense": 14,
+      "speed": 10,
+      "luck": 10
+    },
+    "statGrowth": {
+      "hp": 8,
+      "mp": 2,
+      "attack": 2,
+      "defense": 3,
+      "magicAttack": 1,
+      "magicDefense": 2,
+      "speed": 1
+    },
+    "abilities": [
+      {
+        "abilityId": "tackle",
+        "learnAtLevel": 1
+      },
+      {
+        "abilityId": "ice-shard",
+        "learnAtLevel": 3
+      },
+      {
+        "abilityId": "water-splash",
+        "learnAtLevel": 5
+      },
+      {
+        "abilityId": "frost-bite",
+        "learnAtLevel": 9
+      },
+      {
+        "abilityId": "ice-wall",
+        "learnAtLevel": 13
+      }
+    ],
+    "captureBaseDifficulty": 0.3,
+    "spriteKey": "toughchunkice",
+    "obtainableVia": "wild",
+    "evolutionChainId": "ice-hand-drawn"
   }
 ]

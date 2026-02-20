@@ -83,6 +83,7 @@ describe('SaveSystem', () => {
       position: { x: 100, y: 100 },
       currentAreaId: 'sunlit-village',
       gold: 250,
+      stardust: 0,
     },
     inventory: {
       items: [],
@@ -107,7 +108,7 @@ describe('SaveSystem', () => {
       bossesDefeated: 0,
       areasVisited: 0,
       speciesDiscovered: 0,
-      monstersBreed: 0,
+      monstersEvolved: 0,
       highestPlayerLevel: 1,
     },
     completedGuidanceMilestones: [],

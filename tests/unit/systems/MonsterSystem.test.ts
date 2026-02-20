@@ -17,9 +17,7 @@ import {
   setMonsterInSquad,
   increaseBondLevel,
   getAllAvailableAbilities,
-  checkEvolution,
-  evolveMonster,
-  checkAndEvolve,
+  transformMonster,
 } from '../../../src/systems/MonsterSystem'
 import type { MonsterSpecies, Ability, CharacterStats } from '../../../src/models/types'
 
@@ -84,10 +82,8 @@ const mockSpecies: MonsterSpecies = {
   ],
   captureBaseDifficulty: 0.5,
   spriteKey: 'test-mon-sprite',
-  evolutionChain: null,
-  breedingGroup: 'beast',
-  breedingTraits: ['fire-affinity'],
-  obtainableVia: 'both',
+  evolutionChainId: null,
+  obtainableVia: 'wild',
 }
 
 // Mock species with evolution chain
@@ -123,14 +119,8 @@ const mockEvolvableSpecies: MonsterSpecies = {
   ],
   captureBaseDifficulty: 0.3,
   spriteKey: 'evolvable-mon-sprite',
-  evolutionChain: {
-    evolvesTo: 'evolved-mon',
-    levelRequired: 10,
-    itemRequired: null,
-  },
-  breedingGroup: 'beast',
-  breedingTraits: [],
-  obtainableVia: 'both',
+  evolutionChainId: 'test-chain',
+  obtainableVia: 'wild',
 }
 
 // Mock evolved form
@@ -167,36 +157,12 @@ const mockEvolvedSpecies: MonsterSpecies = {
   ],
   captureBaseDifficulty: 0.6,
   spriteKey: 'evolved-mon-sprite',
-  evolutionChain: null,
-  breedingGroup: 'beast',
-  breedingTraits: [],
-  obtainableVia: 'both',
-}
-
-// Mock species with item-required evolution
-const mockItemEvolutionSpecies: MonsterSpecies = {
-  speciesId: 'item-evolve-mon',
-  name: 'Item Evolve Monster',
-  description: 'Needs an item to evolve',
-  element: 'water',
-  rarity: 'common',
-  baseStats: mockEvolvableSpecies.baseStats,
-  statGrowth: mockEvolvableSpecies.statGrowth,
-  abilities: mockEvolvableSpecies.abilities,
-  captureBaseDifficulty: 0.3,
-  spriteKey: 'item-evolve-sprite',
-  evolutionChain: {
-    evolvesTo: 'evolved-mon',
-    levelRequired: 10,
-    itemRequired: 'evolution-stone',
-  },
-  breedingGroup: 'beast',
-  breedingTraits: [],
-  obtainableVia: 'both',
+  evolutionChainId: 'test-chain',
+  obtainableVia: 'evolution',
 }
 
 beforeEach(() => {
-  loadSpeciesData([mockSpecies, mockEvolvableSpecies, mockEvolvedSpecies, mockItemEvolutionSpecies])
+  loadSpeciesData([mockSpecies, mockEvolvableSpecies, mockEvolvedSpecies])
   loadAbilityData([mockAbility, mockAbility2])
 })
 
@@ -213,7 +179,7 @@ describe('species registry', () => {
 
   it('returns all loaded species', () => {
     const all = getAllSpecies()
-    expect(all).toHaveLength(4) // test-mon, evolvable-mon, evolved-mon, item-evolve-mon
+    expect(all).toHaveLength(3) // test-mon, evolvable-mon, evolved-mon
     expect(all.some((s) => s.speciesId === 'test-mon')).toBe(true)
   })
 })
@@ -335,13 +301,13 @@ describe('createMonsterInstance', () => {
     expect(instance!.nickname).toBe('Sparky')
   })
 
-  it('accepts optional inherited traits', () => {
+  it('accepts optional evolution fields', () => {
     const instance = createMonsterInstance('test-mon', 1, {
-      inheritedTraits: ['fire-boost'],
-      parentSpeciesIds: ['parent-a', 'parent-b'],
+      evolutionStage: 2,
+      previousForms: ['pre-form'],
     })
-    expect(instance!.inheritedTraits).toEqual(['fire-boost'])
-    expect(instance!.parentSpeciesIds).toEqual(['parent-a', 'parent-b'])
+    expect(instance!.evolutionStage).toBe(2)
+    expect(instance!.previousForms).toEqual(['pre-form'])
   })
 
   it('generates unique instance IDs', () => {
@@ -541,179 +507,64 @@ describe('getAllAvailableAbilities', () => {
     expect(abilities.some((a) => a.abilityId === 'test-heal')).toBe(true)
   })
 
-  it('includes legacy abilities in addition to learned abilities', () => {
+  it('returns only learned abilities (no legacy system)', () => {
     const instance = createMonsterInstance('test-mon', 1)!
+    const abilities = getAllAvailableAbilities(instance)
 
-    // Manually add a legacy ability
-    const monsterWithLegacy = {
-      ...instance,
-      legacyAbilities: ['test-heal'], // Normally learned at level 5
-    }
+    expect(abilities.length).toBe(1)
+    expect(abilities[0].abilityId).toBe('test-attack')
+  })
 
-    const abilities = getAllAvailableAbilities(monsterWithLegacy)
+  it('returns all learned abilities for higher level monster', () => {
+    const instance = createMonsterInstance('test-mon', 5)!
+    const abilities = getAllAvailableAbilities(instance)
 
-    // Should have test-attack (learned at level 1) + test-heal (legacy)
     expect(abilities.length).toBe(2)
     expect(abilities.some((a) => a.abilityId === 'test-attack')).toBe(true)
     expect(abilities.some((a) => a.abilityId === 'test-heal')).toBe(true)
   })
-
-  it('does not duplicate abilities already in learned abilities', () => {
-    const instance = createMonsterInstance('test-mon', 5)!
-
-    // Add legacy ability that's already learned
-    const monsterWithDuplicateLegacy = {
-      ...instance,
-      legacyAbilities: ['test-attack'], // Already learned at level 1
-    }
-
-    const abilities = getAllAvailableAbilities(monsterWithDuplicateLegacy)
-
-    // Should still only have 2 abilities (no duplicates)
-    expect(abilities.length).toBe(2)
-    const attackAbilities = abilities.filter((a) => a.abilityId === 'test-attack')
-    expect(attackAbilities.length).toBe(1)
-  })
-
-  it('handles monster with empty legacy abilities', () => {
-    const instance = createMonsterInstance('test-mon', 1)!
-    const monsterWithEmptyLegacy = {
-      ...instance,
-      legacyAbilities: [],
-    }
-
-    const abilities = getAllAvailableAbilities(monsterWithEmptyLegacy)
-    expect(abilities.length).toBe(1)
-    expect(abilities[0].abilityId).toBe('test-attack')
-  })
-
-  it('handles undefined legacy abilities gracefully', () => {
-    const instance = createMonsterInstance('test-mon', 1)!
-    const abilities = getAllAvailableAbilities(instance)
-
-    // Default legacyAbilities is empty array, should work fine
-    expect(abilities.length).toBe(1)
-  })
-
-  it('skips invalid legacy ability IDs', () => {
-    const instance = createMonsterInstance('test-mon', 1)!
-    const monsterWithInvalidLegacy = {
-      ...instance,
-      legacyAbilities: ['nonexistent-ability'],
-    }
-
-    const abilities = getAllAvailableAbilities(monsterWithInvalidLegacy)
-
-    // Should only have the learned ability, invalid legacy skipped
-    expect(abilities.length).toBe(1)
-    expect(abilities[0].abilityId).toBe('test-attack')
-  })
 })
 
-describe('checkEvolution', () => {
-  it('returns canEvolve: false for species without evolution chain', () => {
-    const instance = createMonsterInstance('test-mon', 15)!
-    const result = checkEvolution(instance)
-
-    expect(result.canEvolve).toBe(false)
-    expect(result.evolvesToSpeciesId).toBe(null)
-  })
-
-  it('returns canEvolve: false when level is too low', () => {
-    const instance = createMonsterInstance('evolvable-mon', 5)!
-    const result = checkEvolution(instance)
-
-    expect(result.canEvolve).toBe(false)
-    expect(result.evolvesToSpeciesId).toBe('evolved-mon')
-  })
-
-  it('returns canEvolve: true when level requirement is met', () => {
+describe('transformMonster', () => {
+  it('transforms monster to new species', () => {
     const instance = createMonsterInstance('evolvable-mon', 10)!
-    const result = checkEvolution(instance)
+    const result = transformMonster(instance, 'evolved-mon', 1)
 
-    expect(result.canEvolve).toBe(true)
-    expect(result.evolvesToSpeciesId).toBe('evolved-mon')
-    expect(result.requiresItem).toBe(false)
-  })
-
-  it('returns canEvolve: false when item is required', () => {
-    const instance = createMonsterInstance('item-evolve-mon', 15)!
-    const result = checkEvolution(instance)
-
-    expect(result.canEvolve).toBe(false)
-    expect(result.evolvesToSpeciesId).toBe('evolved-mon')
-    expect(result.requiresItem).toBe(true)
-    expect(result.requiredItemId).toBe('evolution-stone')
-  })
-})
-
-describe('evolveMonster', () => {
-  it('evolves monster to new species', () => {
-    const instance = createMonsterInstance('evolvable-mon', 10)!
-    const result = evolveMonster(instance)
-
-    expect(result.evolved).toBe(true)
     expect(result.originalSpeciesId).toBe('evolvable-mon')
     expect(result.newSpeciesId).toBe('evolved-mon')
     expect(result.monster.speciesId).toBe('evolved-mon')
   })
 
-  it('preserves level after evolution', () => {
+  it('preserves level after transformation', () => {
     const instance = createMonsterInstance('evolvable-mon', 12)!
-    const result = evolveMonster(instance)
+    const result = transformMonster(instance, 'evolved-mon', 1)
 
     expect(result.monster.level).toBe(12)
   })
 
-  it('preserves experience after evolution', () => {
+  it('preserves experience after transformation', () => {
     const instance = {
       ...createMonsterInstance('evolvable-mon', 10)!,
       experience: 500,
     }
-    const result = evolveMonster(instance)
+    const result = transformMonster(instance, 'evolved-mon', 1)
 
     expect(result.monster.experience).toBe(500)
   })
 
-  it('preserves bond level after evolution', () => {
+  it('preserves bond level after transformation', () => {
     const instance = {
       ...createMonsterInstance('evolvable-mon', 10)!,
-      bondLevel: 75,
+      bond: 75,
     }
-    const result = evolveMonster(instance)
+    const result = transformMonster(instance, 'evolved-mon', 1)
 
-    expect(result.monster.bondLevel).toBe(75)
-  })
-
-  it('preserves inherited traits after evolution', () => {
-    const instance = {
-      ...createMonsterInstance('evolvable-mon', 10)!,
-      inheritedTraits: ['fireproof', 'fierce'],
-    }
-    const result = evolveMonster(instance)
-
-    expect(result.monster.inheritedTraits).toEqual(['fireproof', 'fierce'])
-  })
-
-  it('preserves generation and breeding data after evolution', () => {
-    const instance = {
-      ...createMonsterInstance('evolvable-mon', 10)!,
-      generation: 2,
-      inheritedStatBonus: { attack: 5 },
-      legacyAbilities: ['test-heal'],
-      isPerfect: true,
-    }
-    const result = evolveMonster(instance)
-
-    expect(result.monster.generation).toBe(2)
-    expect(result.monster.inheritedStatBonus).toEqual({ attack: 5 })
-    expect(result.monster.legacyAbilities).toEqual(['test-heal'])
-    expect(result.monster.isPerfect).toBe(true)
+    expect(result.monster.bond).toBe(75)
   })
 
   it('recalculates stats using new species growth', () => {
     const instance = createMonsterInstance('evolvable-mon', 10)!
-    const result = evolveMonster(instance)
+    const result = transformMonster(instance, 'evolved-mon', 1)
 
     // Evolved species has higher base stats, so evolved monster should have higher stats
     expect(result.monster.stats.maxHp).toBeGreaterThan(instance.stats.maxHp)
@@ -722,61 +573,40 @@ describe('evolveMonster', () => {
 
   it('learns new abilities from evolved species', () => {
     const instance = createMonsterInstance('evolvable-mon', 10)!
-    const result = evolveMonster(instance)
+    const result = transformMonster(instance, 'evolved-mon', 1)
 
     // Evolved species has test-heal at level 5, so level 10 should have both abilities
     expect(result.monster.learnedAbilities.length).toBe(2)
   })
 
-  it('returns evolved: false if cannot evolve', () => {
-    const instance = createMonsterInstance('evolvable-mon', 5)!
-    const result = evolveMonster(instance)
-
-    expect(result.evolved).toBe(false)
-    expect(result.monster).toBe(instance) // Same reference
-  })
-
-  it('preserves nickname after evolution', () => {
+  it('preserves nickname after transformation', () => {
     const instance = {
       ...createMonsterInstance('evolvable-mon', 10)!,
       nickname: 'Sparky',
     }
-    const result = evolveMonster(instance)
+    const result = transformMonster(instance, 'evolved-mon', 1)
 
     expect(result.monster.nickname).toBe('Sparky')
   })
-})
 
-describe('checkAndEvolve', () => {
-  it('evolves when eligible', () => {
+  it('updates evolution stage', () => {
     const instance = createMonsterInstance('evolvable-mon', 10)!
-    const result = checkAndEvolve(instance)
+    const result = transformMonster(instance, 'evolved-mon', 2)
 
-    expect(result.evolved).toBe(true)
-    expect(result.monster.speciesId).toBe('evolved-mon')
+    expect(result.monster.evolutionStage).toBe(2)
   })
 
-  it('does not evolve when level too low', () => {
-    const instance = createMonsterInstance('evolvable-mon', 5)!
-    const result = checkAndEvolve(instance)
+  it('adds previous form to previousForms', () => {
+    const instance = createMonsterInstance('evolvable-mon', 10)!
+    const result = transformMonster(instance, 'evolved-mon', 1)
 
-    expect(result.evolved).toBe(false)
-    expect(result.monster.speciesId).toBe('evolvable-mon')
+    expect(result.monster.previousForms).toContain('evolvable-mon')
   })
 
-  it('does not evolve species without evolution chain', () => {
-    const instance = createMonsterInstance('test-mon', 25)!
-    const result = checkAndEvolve(instance)
+  it('preserves instanceId after transformation', () => {
+    const instance = createMonsterInstance('evolvable-mon', 10)!
+    const result = transformMonster(instance, 'evolved-mon', 1)
 
-    expect(result.evolved).toBe(false)
-    expect(result.monster.speciesId).toBe('test-mon')
-  })
-
-  it('does not auto-evolve when item is required', () => {
-    const instance = createMonsterInstance('item-evolve-mon', 15)!
-    const result = checkAndEvolve(instance)
-
-    expect(result.evolved).toBe(false)
-    expect(result.monster.speciesId).toBe('item-evolve-mon')
+    expect(result.monster.instanceId).toBe(instance.instanceId)
   })
 })

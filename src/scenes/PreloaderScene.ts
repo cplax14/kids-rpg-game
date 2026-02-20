@@ -259,7 +259,7 @@ export class PreloaderScene extends Phaser.Scene {
     this.load.json('equipment-data', 'assets/data/equipment.json')
     this.load.json('dialogs-data', 'assets/data/dialogs.json')
     this.load.json('traits-data', 'assets/data/traits.json')
-    this.load.json('breeding-recipes-data', 'assets/data/breeding-recipes.json')
+    this.load.json('evolution-chains-data', 'assets/data/evolution-chains.json')
     this.load.json('areas-data', 'assets/data/areas.json')
     this.load.json('bosses-data', 'assets/data/bosses.json')
 
@@ -287,7 +287,7 @@ export class PreloaderScene extends Phaser.Scene {
     })
 
     // Load monster portrait icons (32x32, transparent)
-    for (let i = 1; i <= 63; i++) {
+    for (let i = 1; i <= 64; i++) {
       this.load.image(`monster-icon-${i}`, `assets/sprites/monsters/Icon${i}.png`)
     }
 
@@ -511,7 +511,7 @@ export class PreloaderScene extends Phaser.Scene {
       'village-guide': 10,    // Brown clothed
       'shopkeeper': 14,       // Tan/merchant
       'healer': 8,            // White robed
-      'breeder': 16,          // Orange clothed
+      'evolution_sage': 16,   // Orange clothed (evolution sage)
       'guard': 6,             // Gray armored knight
       'skeleton': 0,          // White skeleton (enemy)
     }

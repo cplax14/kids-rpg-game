@@ -97,6 +97,7 @@ export interface PlayerCharacter {
   readonly position: Position
   readonly currentAreaId: string
   readonly gold: number
+  readonly stardust: number
 }
 
 // ── Abilities ──
@@ -168,13 +169,7 @@ export interface ActiveStatusEffect {
 
 // ── Monsters ──
 
-export interface EvolutionStage {
-  readonly evolvesTo: string
-  readonly levelRequired: number
-  readonly itemRequired: string | null
-}
-
-export type ObtainableVia = 'wild' | 'breeding' | 'both'
+export type ObtainableVia = 'wild' | 'evolution' | 'both' | 'quest'
 
 export interface MonsterSpecies {
   readonly speciesId: string
@@ -187,10 +182,8 @@ export interface MonsterSpecies {
   readonly abilities: ReadonlyArray<LearnableAbility>
   readonly captureBaseDifficulty: number
   readonly spriteKey: string
-  readonly evolutionChain: EvolutionStage | null
-  readonly breedingGroup: string
-  readonly breedingTraits: ReadonlyArray<string>
-  readonly obtainableVia: ObtainableVia // 'wild', 'breeding', or 'both'
+  readonly evolutionChainId: string | null
+  readonly obtainableVia: ObtainableVia
 }
 
 export interface MonsterInstance {
@@ -202,15 +195,12 @@ export interface MonsterInstance {
   readonly stats: CharacterStats
   readonly learnedAbilities: ReadonlyArray<Ability>
   readonly inheritedTraits: ReadonlyArray<string>
-  readonly parentSpeciesIds: ReadonlyArray<string>
   readonly isInSquad: boolean
   readonly capturedAt: string
   readonly bondLevel: number
-  // Breeding progression fields
-  readonly generation: number // 0 = wild-caught, 1+ = bred
-  readonly inheritedStatBonus: Partial<CharacterStats> // Bonus from parent stats
-  readonly legacyAbilities: ReadonlyArray<string> // Ability IDs inherited from parents
-  readonly isPerfect: boolean // Rare perfect offspring flag
+  // Evolution fields
+  readonly evolutionStage: number // Current stage in evolution chain (1-based)
+  readonly previousForms: ReadonlyArray<string> // Species IDs of prior forms
   // Monster Gear
   readonly equippedGear: MonsterGearSlots
 }
@@ -221,7 +211,7 @@ export type ItemCategory =
   | 'consumable'
   | 'capture_device'
   | 'key_item'
-  | 'breeding_item'
+  | 'evolution_item'
   | 'material'
 
 export type ItemEffectType =
@@ -230,7 +220,7 @@ export type ItemEffectType =
   | 'cure_status'
   | 'buff'
   | 'capture_boost'
-  | 'breeding_boost'
+  | 'evolution_boost'
 
 export interface ItemEffect {
   readonly type: ItemEffectType
@@ -307,6 +297,7 @@ export interface ItemDrop {
 export interface BattleRewards {
   readonly experience: number
   readonly gold: number
+  readonly stardust: number
   readonly items: ReadonlyArray<ItemDrop>
   readonly capturedMonster: MonsterInstance | null
 }
@@ -354,41 +345,29 @@ export interface TraitDefinition {
   readonly rarity: TraitRarity
 }
 
-// ── Breeding ──
+// ── Evolution ──
 
-export interface BreedingOffspringOption {
+export interface EvolutionStageDefinition {
   readonly speciesId: string
-  readonly probability: number
-  readonly bonusTraits: ReadonlyArray<string>
+  readonly order: number
+  readonly evolvesTo: string | null
+  readonly evolvesFrom: string | null
+  readonly requiredLevel: number
+  readonly stardustCost: number
 }
 
-export interface BreedingRecipe {
-  readonly recipeId: string
-  readonly parents: readonly [string, string]
-  readonly offspring: ReadonlyArray<BreedingOffspringOption>
-  readonly requiredCompatibility: number
+export interface EvolutionChain {
+  readonly chainId: string
+  readonly name: string
+  readonly stages: ReadonlyArray<EvolutionStageDefinition>
 }
 
-export interface BreedingOutcome {
-  readonly resultSpeciesId: string
-  readonly probability: number
-  readonly inheritableTraits: ReadonlyArray<string>
-  readonly bonusStats: Partial<StatGrowthRates> | null
-}
-
-export interface BreedingPair {
-  readonly parent1: MonsterInstance
-  readonly parent2: MonsterInstance
-  readonly compatibility: number
-  readonly possibleOffspring: ReadonlyArray<BreedingOutcome>
-}
-
-export interface BreedingResult {
-  readonly offspring: MonsterInstance
-  readonly inheritedTraitsFromParent1: ReadonlyArray<string>
-  readonly inheritedTraitsFromParent2: ReadonlyArray<string>
-  readonly mutationOccurred: boolean
-  readonly mutationTrait: string | null
+export interface EvolutionResult {
+  readonly previousSpeciesId: string
+  readonly newSpeciesId: string
+  readonly stardustSpent: number
+  readonly bonusTrait: string | null
+  readonly statBoost: Partial<CharacterStats> | null
 }
 
 // ── World ──
@@ -405,7 +384,7 @@ export interface EncounterTable {
   readonly encounterRate: number
 }
 
-export type NpcType = 'quest' | 'shop' | 'info' | 'breeder' | 'healer'
+export type NpcType = 'quest' | 'shop' | 'info' | 'evolution_sage' | 'healer'
 
 export interface NpcDefinition {
   readonly npcId: string
@@ -502,6 +481,7 @@ export interface TransitionZone {
 export interface BossRewards {
   readonly experience: number
   readonly gold: number
+  readonly stardust: number
   readonly guaranteedItems: ReadonlyArray<ItemDrop>
   readonly unlocksArea?: string
 }
@@ -553,7 +533,7 @@ export type TutorialTrigger =
   | 'first_capture'
   | 'first_menu'
   | 'first_shop'
-  | 'first_breeding'
+  | 'first_evolution'
   | 'first_area_transition'
   | 'first_save_reminder'
 
@@ -726,7 +706,7 @@ export interface AchievementStats {
   readonly bossesDefeated: number
   readonly areasVisited: number
   readonly speciesDiscovered: number
-  readonly monstersBreed: number
+  readonly monstersEvolved: number
   readonly highestPlayerLevel: number
 }
 
