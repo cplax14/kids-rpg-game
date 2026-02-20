@@ -387,16 +387,16 @@
     ]
   },
   {
-    "treeId": "breeder-greeting",
+    "treeId": "evolution-sage-greeting",
     "startNodeId": "greeting",
     "nodes": [
       {
         "nodeId": "greeting",
-        "speaker": "Monster Breeder",
-        "text": "Hello there! I'm the village's monster breeder. How can I help you today?",
+        "speaker": "Evolution Sage",
+        "text": "Welcome, young trainer! I study the ancient art of monster evolution. How can I help you today?",
         "choices": [
-          { "text": "Let's breed monsters!", "nextNodeId": null, "action": "open_breeding" },
-          { "text": "Tell me about breeding", "nextNodeId": "explain" },
+          { "text": "I want to evolve a monster!", "nextNodeId": null, "action": "open_evolution" },
+          { "text": "Tell me about evolution", "nextNodeId": "explain" },
           { "text": "Turn in Monster Friendship quest", "nextNodeId": "quest-friendship-complete", "action": "complete_quest", "actionData": "monster-friendship" },
           { "text": "Maybe later", "nextNodeId": "farewell" }
         ],
@@ -404,36 +404,36 @@
       },
       {
         "nodeId": "explain",
-        "speaker": "Monster Breeder",
-        "text": "When two monsters breed, their baby can inherit traits from both parents. Monsters in the same breeding group are more compatible. You can also use special items like Breeding Charms and Trait Crystals to improve your chances!",
+        "speaker": "Evolution Sage",
+        "text": "When a monster reaches a certain level and you have enough Stardust, it can evolve into a more powerful form! Evolution transforms your monster permanently, boosting its stats and sometimes granting bonus traits.",
         "choices": [
-          { "text": "What about mutations?", "nextNodeId": "mutations" },
-          { "text": "I want to try breeding!", "nextNodeId": null, "action": "open_breeding" },
+          { "text": "What is Stardust?", "nextNodeId": "stardust" },
+          { "text": "Let's evolve a monster!", "nextNodeId": null, "action": "open_evolution" },
           { "text": "Thanks for explaining!", "nextNodeId": "farewell" }
         ],
         "isEnd": false
       },
       {
-        "nodeId": "mutations",
-        "speaker": "Monster Breeder",
-        "text": "Sometimes, if you're lucky, a baby monster will develop a rare mutation! These special traits are very powerful. Using a Mutation Catalyst item can increase your chances of getting one.",
+        "nodeId": "stardust",
+        "speaker": "Evolution Sage",
+        "text": "Stardust is a rare, shimmering energy that monsters leave behind after battle. You'll earn a bit from every fight, and defeating bosses grants a large amount. Save it up to power your evolutions!",
         "choices": [
-          { "text": "Amazing! Let's breed!", "nextNodeId": null, "action": "open_breeding" },
+          { "text": "I'm ready to evolve!", "nextNodeId": null, "action": "open_evolution" },
           { "text": "Good to know!", "nextNodeId": "farewell" }
         ],
         "isEnd": false
       },
       {
         "nodeId": "farewell",
-        "speaker": "Monster Breeder",
-        "text": "Come back anytime you want to breed your monsters. Good luck on your adventure!",
+        "speaker": "Evolution Sage",
+        "text": "Come back anytime you want to evolve your monsters. May the Stardust guide your path!",
         "choices": [],
         "isEnd": true
       },
       {
         "nodeId": "quest-friendship-complete",
-        "speaker": "Monster Breeder",
-        "text": "I'm so glad you came to visit! Here's a breeding charm to help you on your journey. Come back when you're ready to breed monsters!",
+        "speaker": "Evolution Sage",
+        "text": "Wonderful! Your bond with your monsters grows stronger. Here, take this Stardust Charm to aid your next evolution!",
         "choices": [],
         "isEnd": true
       }

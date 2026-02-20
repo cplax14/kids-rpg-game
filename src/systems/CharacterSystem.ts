@@ -78,6 +78,7 @@ export function createNewPlayer(name: string): PlayerCharacter {
     position: { x: 0, y: 0 },
     currentAreaId: 'sunlit-village',
     gold: 100,
+    stardust: 0,
   }
 }
 
@@ -311,6 +312,15 @@ export function updatePlayerGold(player: PlayerCharacter, amount: number): Playe
   return {
     ...player,
     gold: newGold,
+  }
+}
+
+export function updatePlayerStardust(player: PlayerCharacter, amount: number): PlayerCharacter {
+  const newStardust = Math.max(0, player.stardust + amount)
+  EventBus.emit(GAME_EVENTS.STARDUST_CHANGED, { amount, newTotal: newStardust })
+  return {
+    ...player,
+    stardust: newStardust,
   }
 }
 

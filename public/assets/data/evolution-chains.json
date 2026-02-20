@@ -1,0 +1,512 @@
+[
+  {
+    "chainId": "fire-hand-drawn",
+    "name": "Fire Evolution Line",
+    "stages": [
+      {
+        "speciesId": "miniflame",
+        "order": 1,
+        "evolvesTo": "blazecheetah",
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      },
+      {
+        "speciesId": "blazecheetah",
+        "order": 2,
+        "evolvesTo": "emberwing",
+        "evolvesFrom": "miniflame",
+        "requiredLevel": 8,
+        "stardustCost": 100
+      },
+      {
+        "speciesId": "emberwing",
+        "order": 3,
+        "evolvesTo": null,
+        "evolvesFrom": "blazecheetah",
+        "requiredLevel": 14,
+        "stardustCost": 250
+      }
+    ]
+  },
+  {
+    "chainId": "ice-hand-drawn",
+    "name": "Ice Evolution Line",
+    "stages": [
+      {
+        "speciesId": "toughchunkice",
+        "order": 1,
+        "evolvesTo": "frostfist",
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      },
+      {
+        "speciesId": "frostfist",
+        "order": 2,
+        "evolvesTo": "iceboxer",
+        "evolvesFrom": "toughchunkice",
+        "requiredLevel": 8,
+        "stardustCost": 100
+      },
+      {
+        "speciesId": "iceboxer",
+        "order": 3,
+        "evolvesTo": null,
+        "evolvesFrom": "frostfist",
+        "requiredLevel": 14,
+        "stardustCost": 250
+      }
+    ]
+  },
+  {
+    "chainId": "plant-hand-drawn",
+    "name": "Plant Evolution Line",
+    "stages": [
+      {
+        "speciesId": "leafblower",
+        "order": 1,
+        "evolvesTo": "plantosaur",
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      },
+      {
+        "speciesId": "plantosaur",
+        "order": 2,
+        "evolvesTo": null,
+        "evolvesFrom": "leafblower",
+        "requiredLevel": 10,
+        "stardustCost": 125
+      }
+    ]
+  },
+  {
+    "chainId": "water-hand-drawn",
+    "name": "Water Evolution Line",
+    "stages": [
+      {
+        "speciesId": "aquafang",
+        "order": 1,
+        "evolvesTo": "tidalfang",
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      },
+      {
+        "speciesId": "tidalfang",
+        "order": 2,
+        "evolvesTo": null,
+        "evolvesFrom": "aquafang",
+        "requiredLevel": 10,
+        "stardustCost": 125
+      }
+    ]
+  },
+  {
+    "chainId": "dragon-hand-drawn",
+    "name": "Dragon Evolution Line",
+    "stages": [
+      {
+        "speciesId": "chimeradrake",
+        "order": 1,
+        "evolvesTo": null,
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      }
+    ]
+  },
+  {
+    "chainId": "fire-beast-line",
+    "name": "Fire Beast Line",
+    "stages": [
+      {
+        "speciesId": "flamepup",
+        "order": 1,
+        "evolvesTo": "blazefox",
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      },
+      {
+        "speciesId": "blazefox",
+        "order": 2,
+        "evolvesTo": "volcanix",
+        "evolvesFrom": "flamepup",
+        "requiredLevel": 8,
+        "stardustCost": 100
+      },
+      {
+        "speciesId": "volcanix",
+        "order": 3,
+        "evolvesTo": null,
+        "evolvesFrom": "blazefox",
+        "requiredLevel": 14,
+        "stardustCost": 250
+      }
+    ]
+  },
+  {
+    "chainId": "fire-elemental-line",
+    "name": "Fire Elemental Line",
+    "stages": [
+      {
+        "speciesId": "magmaslime",
+        "order": 1,
+        "evolvesTo": "emberbun",
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      },
+      {
+        "speciesId": "emberbun",
+        "order": 2,
+        "evolvesTo": "obsidiangolem",
+        "evolvesFrom": "magmaslime",
+        "requiredLevel": 8,
+        "stardustCost": 100
+      },
+      {
+        "speciesId": "obsidiangolem",
+        "order": 3,
+        "evolvesTo": null,
+        "evolvesFrom": "emberbun",
+        "requiredLevel": 14,
+        "stardustCost": 250
+      }
+    ]
+  },
+  {
+    "chainId": "fire-sprite-line",
+    "name": "Fire Sprite Line",
+    "stages": [
+      {
+        "speciesId": "fireimp",
+        "order": 1,
+        "evolvesTo": "cinderbird",
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      },
+      {
+        "speciesId": "cinderbird",
+        "order": 2,
+        "evolvesTo": null,
+        "evolvesFrom": "fireimp",
+        "requiredLevel": 10,
+        "stardustCost": 125
+      }
+    ]
+  },
+  {
+    "chainId": "water-beast-line",
+    "name": "Water Beast Line",
+    "stages": [
+      {
+        "speciesId": "bubblefin",
+        "order": 1,
+        "evolvesTo": "tidecrab",
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      },
+      {
+        "speciesId": "tidecrab",
+        "order": 2,
+        "evolvesTo": "serpentide",
+        "evolvesFrom": "bubblefin",
+        "requiredLevel": 8,
+        "stardustCost": 100
+      },
+      {
+        "speciesId": "serpentide",
+        "order": 3,
+        "evolvesTo": null,
+        "evolvesFrom": "tidecrab",
+        "requiredLevel": 14,
+        "stardustCost": 250
+      }
+    ]
+  },
+  {
+    "chainId": "water-reef-line",
+    "name": "Water Reef Line",
+    "stages": [
+      {
+        "speciesId": "glowjelly",
+        "order": 1,
+        "evolvesTo": "coralshell",
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      },
+      {
+        "speciesId": "coralshell",
+        "order": 2,
+        "evolvesTo": "coraldragon",
+        "evolvesFrom": "glowjelly",
+        "requiredLevel": 8,
+        "stardustCost": 100
+      },
+      {
+        "speciesId": "coraldragon",
+        "order": 3,
+        "evolvesTo": null,
+        "evolvesFrom": "coralshell",
+        "requiredLevel": 14,
+        "stardustCost": 250
+      }
+    ]
+  },
+  {
+    "chainId": "water-wing-line",
+    "name": "Water Wing Line",
+    "stages": [
+      {
+        "speciesId": "shellwhisper",
+        "order": 1,
+        "evolvesTo": "aquawing",
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      },
+      {
+        "speciesId": "aquawing",
+        "order": 2,
+        "evolvesTo": null,
+        "evolvesFrom": "shellwhisper",
+        "requiredLevel": 10,
+        "stardustCost": 150
+      }
+    ]
+  },
+  {
+    "chainId": "earth-stone-line",
+    "name": "Earth Stone Line",
+    "stages": [
+      {
+        "speciesId": "pebblit",
+        "order": 1,
+        "evolvesTo": "thornback",
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      },
+      {
+        "speciesId": "thornback",
+        "order": 2,
+        "evolvesTo": "crystalgolem",
+        "evolvesFrom": "pebblit",
+        "requiredLevel": 8,
+        "stardustCost": 100
+      },
+      {
+        "speciesId": "crystalgolem",
+        "order": 3,
+        "evolvesTo": null,
+        "evolvesFrom": "thornback",
+        "requiredLevel": 14,
+        "stardustCost": 250
+      }
+    ]
+  },
+  {
+    "chainId": "wind-sky-line",
+    "name": "Wind Sky Line",
+    "stages": [
+      {
+        "speciesId": "breezling",
+        "order": 1,
+        "evolvesTo": "stormowl",
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      },
+      {
+        "speciesId": "stormowl",
+        "order": 2,
+        "evolvesTo": "tempestdrake",
+        "evolvesFrom": "breezling",
+        "requiredLevel": 8,
+        "stardustCost": 100
+      },
+      {
+        "speciesId": "tempestdrake",
+        "order": 3,
+        "evolvesTo": null,
+        "evolvesFrom": "stormowl",
+        "requiredLevel": 14,
+        "stardustCost": 250
+      }
+    ]
+  },
+  {
+    "chainId": "light-radiance-line",
+    "name": "Light Radiance Line",
+    "stages": [
+      {
+        "speciesId": "glowmoth",
+        "order": 1,
+        "evolvesTo": "sunstag",
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      },
+      {
+        "speciesId": "sunstag",
+        "order": 2,
+        "evolvesTo": "prismbug",
+        "evolvesFrom": "glowmoth",
+        "requiredLevel": 8,
+        "stardustCost": 100
+      },
+      {
+        "speciesId": "prismbug",
+        "order": 3,
+        "evolvesTo": null,
+        "evolvesFrom": "sunstag",
+        "requiredLevel": 14,
+        "stardustCost": 250
+      }
+    ]
+  },
+  {
+    "chainId": "dark-shadow-line",
+    "name": "Dark Shadow Line",
+    "stages": [
+      {
+        "speciesId": "shadowpup",
+        "order": 1,
+        "evolvesTo": "nightstalker",
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      },
+      {
+        "speciesId": "nightstalker",
+        "order": 2,
+        "evolvesTo": "duskfox",
+        "evolvesFrom": "shadowpup",
+        "requiredLevel": 8,
+        "stardustCost": 100
+      },
+      {
+        "speciesId": "duskfox",
+        "order": 3,
+        "evolvesTo": null,
+        "evolvesFrom": "nightstalker",
+        "requiredLevel": 14,
+        "stardustCost": 250
+      }
+    ]
+  },
+  {
+    "chainId": "dark-swamp-line",
+    "name": "Dark Swamp Line",
+    "stages": [
+      {
+        "speciesId": "bogwitch",
+        "order": 1,
+        "evolvesTo": "mistweaver",
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      },
+      {
+        "speciesId": "mistweaver",
+        "order": 2,
+        "evolvesTo": "dreadwyrm",
+        "evolvesFrom": "bogwitch",
+        "requiredLevel": 8,
+        "stardustCost": 100
+      },
+      {
+        "speciesId": "dreadwyrm",
+        "order": 3,
+        "evolvesTo": null,
+        "evolvesFrom": "mistweaver",
+        "requiredLevel": 14,
+        "stardustCost": 250
+      }
+    ]
+  },
+  {
+    "chainId": "neutral-armor-line",
+    "name": "Neutral Armor Line",
+    "stages": [
+      {
+        "speciesId": "madcheeks",
+        "order": 1,
+        "evolvesTo": "ironshell",
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      },
+      {
+        "speciesId": "ironshell",
+        "order": 2,
+        "evolvesTo": null,
+        "evolvesFrom": "madcheeks",
+        "requiredLevel": 10,
+        "stardustCost": 125
+      }
+    ]
+  },
+  {
+    "chainId": "steampup-standalone",
+    "name": "Steam Hybrid Line",
+    "stages": [
+      {
+        "speciesId": "steampup",
+        "order": 1,
+        "evolvesTo": null,
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      }
+    ]
+  },
+  {
+    "chainId": "magnetite-standalone",
+    "name": "Magnetic Line",
+    "stages": [
+      {
+        "speciesId": "magnetite",
+        "order": 1,
+        "evolvesTo": null,
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      }
+    ]
+  },
+  {
+    "chainId": "gloomtoad-standalone",
+    "name": "Gloom Line",
+    "stages": [
+      {
+        "speciesId": "gloomtoad",
+        "order": 1,
+        "evolvesTo": null,
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      }
+    ]
+  },
+  {
+    "chainId": "mossbun-standalone",
+    "name": "Moss Line",
+    "stages": [
+      {
+        "speciesId": "mossbun",
+        "order": 1,
+        "evolvesTo": null,
+        "evolvesFrom": null,
+        "requiredLevel": 1,
+        "stardustCost": 0
+      }
+    ]
+  }
+]

@@ -280,8 +280,8 @@ export class BestiaryPanel {
     this.detailContainer.add(captureLabel)
 
     // Evolution info
-    if (species.evolutionChain) {
-      const evoText = this.scene.add.text(15, captureY + 22, `Evolves to: ${species.evolutionChain.evolvesTo} at Lv.${species.evolutionChain.levelRequired}`, {
+    if (species.evolutionChainId) {
+      const evoText = this.scene.add.text(15, captureY + 22, 'Part of an evolution chain', {
         ...TEXT_STYLES.SMALL,
         fontSize: '12px',
         color: '#42a5f5',

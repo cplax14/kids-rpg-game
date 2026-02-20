@@ -184,7 +184,7 @@ export class TitleScene extends Phaser.Scene {
     title.setOrigin(0.5)
 
     // Subtitle
-    const subtitle = this.add.text(centerX, 170, 'Capture  \u2022  Breed  \u2022  Battle', {
+    const subtitle = this.add.text(centerX, 170, 'Capture  \u2022  Evolve  \u2022  Battle', {
       ...TEXT_STYLES.BODY,
       fontSize: '22px',
       color: '#b0bec5',

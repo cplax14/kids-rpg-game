@@ -5,7 +5,8 @@
  */
 
 import * as MonsterSystem from './systems/MonsterSystem'
-import * as BreedingSystem from './systems/BreedingSystem'
+import * as EvolutionSystem from './systems/EvolutionSystem'
+import * as CharacterSystem from './systems/CharacterSystem'
 import * as WorldSystem from './systems/WorldSystem'
 import * as TraitSystem from './systems/TraitSystem'
 import * as CombatSystem from './systems/CombatSystem'
@@ -25,7 +26,8 @@ declare global {
   interface Window {
     __TEST_EXPORTS__?: {
       MonsterSystem: typeof MonsterSystem
-      BreedingSystem: typeof BreedingSystem
+      EvolutionSystem: typeof EvolutionSystem
+      CharacterSystem: typeof CharacterSystem
       WorldSystem: typeof WorldSystem
       TraitSystem: typeof TraitSystem
       CombatSystem: typeof CombatSystem
@@ -47,7 +49,8 @@ declare global {
 if (import.meta.env.DEV) {
   window.__TEST_EXPORTS__ = {
     MonsterSystem,
-    BreedingSystem,
+    EvolutionSystem,
+    CharacterSystem,
     WorldSystem,
     TraitSystem,
     CombatSystem,

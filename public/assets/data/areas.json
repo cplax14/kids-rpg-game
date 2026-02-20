@@ -16,7 +16,8 @@
       { "speciesId": "bubblefin", "weight": 4, "minLevel": 2, "maxLevel": 3 },
       { "speciesId": "madcheeks", "weight": 30, "minLevel": 1, "maxLevel": 3 },
       { "speciesId": "leafblower", "weight": 25, "minLevel": 1, "maxLevel": 3 },
-      { "speciesId": "miniflame", "weight": 20, "minLevel": 1, "maxLevel": 3 }
+      { "speciesId": "miniflame", "weight": 20, "minLevel": 1, "maxLevel": 3 },
+      { "speciesId": "magmaslime", "weight": 12, "minLevel": 2, "maxLevel": 3 }
     ],
     "transitions": [
       {
@@ -65,12 +66,12 @@
       { "speciesId": "breezling", "weight": 7, "minLevel": 3, "maxLevel": 5 },
       { "speciesId": "glowmoth", "weight": 6, "minLevel": 4, "maxLevel": 6 },
       { "speciesId": "shadowpup", "weight": 5, "minLevel": 5, "maxLevel": 7 },
-      { "speciesId": "thornback", "weight": 4, "minLevel": 5, "maxLevel": 7 },
       { "speciesId": "pebblit", "weight": 6, "minLevel": 3, "maxLevel": 5 },
       { "speciesId": "tidalfang", "weight": 25, "minLevel": 3, "maxLevel": 6 },
       { "speciesId": "fireimp", "weight": 25, "minLevel": 3, "maxLevel": 5 },
       { "speciesId": "plantosaur", "weight": 15, "minLevel": 5, "maxLevel": 8 },
-      { "speciesId": "blazecheetah", "weight": 20, "minLevel": 4, "maxLevel": 7 }
+      { "speciesId": "blazecheetah", "weight": 20, "minLevel": 4, "maxLevel": 7 },
+      { "speciesId": "glowmoth", "weight": 8, "minLevel": 5, "maxLevel": 7 }
     ],
     "transitions": [
       {
@@ -147,11 +148,12 @@
     "terrainType": "cave",
     "encounters": [
       { "speciesId": "pebblit", "weight": 6, "minLevel": 7, "maxLevel": 9 },
-      { "speciesId": "crystalgolem", "weight": 5, "minLevel": 8, "maxLevel": 10 },
-      { "speciesId": "ironshell", "weight": 7, "minLevel": 9, "maxLevel": 11 },
+      { "speciesId": "madcheeks", "weight": 5, "minLevel": 8, "maxLevel": 10 },
       { "speciesId": "magnetite", "weight": 4, "minLevel": 10, "maxLevel": 12 },
+      { "speciesId": "toughchunkice", "weight": 28, "minLevel": 7, "maxLevel": 9 },
       { "speciesId": "frostfist", "weight": 25, "minLevel": 7, "maxLevel": 10 },
-      { "speciesId": "iceboxer", "weight": 20, "minLevel": 9, "maxLevel": 12 }
+      { "speciesId": "iceboxer", "weight": 20, "minLevel": 9, "maxLevel": 12 },
+      { "speciesId": "steampup", "weight": 6, "minLevel": 9, "maxLevel": 11 }
     ],
     "transitions": [
       {
@@ -242,13 +244,12 @@
     "terrainType": "volcano",
     "encounters": [
       { "speciesId": "magmaslime", "weight": 8, "minLevel": 12, "maxLevel": 14 },
-      { "speciesId": "cinderbird", "weight": 6, "minLevel": 13, "maxLevel": 15 },
-      { "speciesId": "obsidiangolem", "weight": 5, "minLevel": 14, "maxLevel": 16 },
-      { "speciesId": "flamepup", "weight": 5, "minLevel": 12, "maxLevel": 14 },
-      { "speciesId": "blazefox", "weight": 4, "minLevel": 13, "maxLevel": 15 },
+      { "speciesId": "flamepup", "weight": 6, "minLevel": 12, "maxLevel": 14 },
+      { "speciesId": "fireimp", "weight": 5, "minLevel": 13, "maxLevel": 15 },
       { "speciesId": "chimeradrake", "weight": 20, "minLevel": 13, "maxLevel": 16 },
       { "speciesId": "emberwing", "weight": 25, "minLevel": 12, "maxLevel": 14 },
-      { "speciesId": "blazecheetah", "weight": 22, "minLevel": 12, "maxLevel": 15 }
+      { "speciesId": "blazecheetah", "weight": 22, "minLevel": 12, "maxLevel": 15 },
+      { "speciesId": "magmawyrm", "weight": 3, "minLevel": 14, "maxLevel": 16 }
     ],
     "transitions": [
       {
@@ -359,12 +360,11 @@
     "encounters": [
       { "speciesId": "glowjelly", "weight": 8, "minLevel": 15, "maxLevel": 17 },
       { "speciesId": "shellwhisper", "weight": 6, "minLevel": 16, "maxLevel": 18 },
-      { "speciesId": "coraldragon", "weight": 4, "minLevel": 17, "maxLevel": 19 },
       { "speciesId": "bubblefin", "weight": 5, "minLevel": 15, "maxLevel": 17 },
-      { "speciesId": "tidecrab", "weight": 4, "minLevel": 16, "maxLevel": 18 },
-      { "speciesId": "aquawing", "weight": 20, "minLevel": 15, "maxLevel": 19 },
+      { "speciesId": "glowjelly", "weight": 6, "minLevel": 16, "maxLevel": 18 },
       { "speciesId": "aquafang", "weight": 25, "minLevel": 15, "maxLevel": 18 },
-      { "speciesId": "iceboxer", "weight": 22, "minLevel": 16, "maxLevel": 19 }
+      { "speciesId": "iceboxer", "weight": 22, "minLevel": 16, "maxLevel": 19 },
+      { "speciesId": "shellwhisper", "weight": 12, "minLevel": 15, "maxLevel": 18 }
     ],
     "transitions": [
       {
@@ -489,13 +489,12 @@
     "encounters": [
       { "speciesId": "bogwitch", "weight": 8, "minLevel": 18, "maxLevel": 20 },
       { "speciesId": "gloomtoad", "weight": 7, "minLevel": 18, "maxLevel": 20 },
-      { "speciesId": "mistweaver", "weight": 5, "minLevel": 19, "maxLevel": 21 },
-      { "speciesId": "dreadwyrm", "weight": 4, "minLevel": 20, "maxLevel": 22 },
       { "speciesId": "shadowpup", "weight": 6, "minLevel": 18, "maxLevel": 20 },
-      { "speciesId": "nightstalker", "weight": 5, "minLevel": 19, "maxLevel": 21 },
+      { "speciesId": "bogwitch", "weight": 5, "minLevel": 19, "maxLevel": 21 },
       { "speciesId": "chimeradrake", "weight": 20, "minLevel": 19, "maxLevel": 22 },
-      { "speciesId": "aquawing", "weight": 22, "minLevel": 19, "maxLevel": 22 },
-      { "speciesId": "plantosaur", "weight": 18, "minLevel": 18, "maxLevel": 21 }
+      { "speciesId": "shellwhisper", "weight": 22, "minLevel": 19, "maxLevel": 22 },
+      { "speciesId": "plantosaur", "weight": 18, "minLevel": 18, "maxLevel": 21 },
+      { "speciesId": "gloomtoad", "weight": 8, "minLevel": 19, "maxLevel": 22 }
     ],
     "transitions": [
       {

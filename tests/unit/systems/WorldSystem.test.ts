@@ -77,9 +77,7 @@ const mockSpecies: MonsterSpecies = {
   abilities: [{ abilityId: 'tackle', learnAtLevel: 1 }],
   captureBaseDifficulty: 0.3,
   spriteKey: 'test-monster',
-  evolutionChain: null,
-  breedingGroup: 'beast',
-  breedingTraits: [],
+  evolutionChainId: null,
   obtainableVia: 'both',
 }
 
@@ -91,11 +89,11 @@ const mockBossSpecies: MonsterSpecies = {
   obtainableVia: 'both',
 }
 
-const mockBreedingOnlySpecies: MonsterSpecies = {
+const mockEvolutionOnlySpecies: MonsterSpecies = {
   ...mockSpecies,
-  speciesId: 'breeding-only-monster',
-  name: 'Breeding Only Monster',
-  obtainableVia: 'breeding',
+  speciesId: 'evolution-only-monster',
+  name: 'Evolution Only Monster',
+  obtainableVia: 'evolution',
 }
 
 const mockArea: GameAreaDefinition = {
@@ -135,22 +133,22 @@ const mockSafeArea: GameAreaDefinition = {
   bossIds: [],
 }
 
-const mockAreaWithBreedingOnly: GameAreaDefinition = {
+const mockAreaWithEvolutionOnly: GameAreaDefinition = {
   ...mockArea,
-  areaId: 'breeding-filter-area',
-  name: 'Breeding Filter Area',
+  areaId: 'evolution-filter-area',
+  name: 'Evolution Filter Area',
   encounters: [
     { speciesId: 'test-monster', weight: 50, minLevel: 3, maxLevel: 5 },
-    { speciesId: 'breeding-only-monster', weight: 50, minLevel: 3, maxLevel: 5 },
+    { speciesId: 'evolution-only-monster', weight: 50, minLevel: 3, maxLevel: 5 },
   ],
 }
 
-const mockAreaOnlyBreedingEncounters: GameAreaDefinition = {
+const mockAreaOnlyEvolutionEncounters: GameAreaDefinition = {
   ...mockArea,
-  areaId: 'only-breeding-area',
-  name: 'Only Breeding Area',
+  areaId: 'only-evolution-area',
+  name: 'Only Evolution Area',
   encounters: [
-    { speciesId: 'breeding-only-monster', weight: 100, minLevel: 3, maxLevel: 5 },
+    { speciesId: 'evolution-only-monster', weight: 100, minLevel: 3, maxLevel: 5 },
   ],
 }
 
@@ -217,9 +215,9 @@ const createMockGameState = (overrides: Partial<GameState> = {}): GameState => (
 
 describe('WorldSystem', () => {
   beforeEach(() => {
-    loadAreaData([mockArea, mockSafeArea, mockAreaWithBreedingOnly, mockAreaOnlyBreedingEncounters])
+    loadAreaData([mockArea, mockSafeArea, mockAreaWithEvolutionOnly, mockAreaOnlyEvolutionEncounters])
     loadBossData([mockBoss])
-    loadSpeciesData([mockSpecies, mockBossSpecies, mockBreedingOnlySpecies])
+    loadSpeciesData([mockSpecies, mockBossSpecies, mockEvolutionOnlySpecies])
     loadAbilityData([mockAbility])
   })
 
@@ -237,7 +235,7 @@ describe('WorldSystem', () => {
 
     it('should get all areas', () => {
       const areas = getAllAreas()
-      expect(areas.length).toBe(4) // test-area, safe-area, breeding-filter-area, only-breeding-area
+      expect(areas.length).toBe(4) // test-area, safe-area, evolution-filter-area, only-evolution-area
     })
   })
 
@@ -277,19 +275,19 @@ describe('WorldSystem', () => {
       expect(encounter).toBeNull()
     })
 
-    it('should filter out breeding-exclusive species from encounters', () => {
-      // Run many times to ensure we never get the breeding-only species
+    it('should filter out evolution-exclusive species from encounters', () => {
+      // Run many times to ensure we never get the evolution-only species
       for (let i = 0; i < 50; i++) {
-        const encounter = generateAreaEncounter('breeding-filter-area')
+        const encounter = generateAreaEncounter('evolution-filter-area')
         expect(encounter).not.toBeNull()
-        // Should only contain the wild species, not the breeding-only one
-        expect(encounter?.speciesIds).not.toContain('breeding-only-monster')
+        // Should only contain the wild species, not the evolution-only one
+        expect(encounter?.speciesIds).not.toContain('evolution-only-monster')
         expect(encounter?.speciesIds.every((id) => id === 'test-monster')).toBe(true)
       }
     })
 
-    it('should return null when area only has breeding-exclusive species', () => {
-      const encounter = generateAreaEncounter('only-breeding-area')
+    it('should return null when area only has evolution-exclusive species', () => {
+      const encounter = generateAreaEncounter('only-evolution-area')
       // No wild species available, should return null
       expect(encounter).toBeNull()
     })

@@ -453,9 +453,9 @@ export class DialogScene extends Phaser.Scene {
         this.closeDialog()
         this.scene.launch(SCENE_KEYS.SHOP, { shopId: 'village-shop', mode: data ?? 'buy' })
         return
-      case 'open_breeding':
+      case 'open_evolution':
         this.closeDialog()
-        this.scene.launch(SCENE_KEYS.BREEDING)
+        this.scene.launch(SCENE_KEYS.EVOLUTION)
         return
       case 'heal_party': {
         const state = getGameState(this)

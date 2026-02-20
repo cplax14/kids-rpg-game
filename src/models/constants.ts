@@ -124,12 +124,6 @@ export const CAPTURE_MAX_RATE = 0.95
 export const SLEEP_CAPTURE_BONUS = 1.5
 export const LOW_HP_CAPTURE_THRESHOLD = 0.25
 
-// ── Breeding Constants ──
-
-export const TRAIT_INHERITANCE_CHANCE = 0.5
-export const MUTATION_CHANCE = 0.05
-export const STAT_INHERITANCE_VARIANCE = 0.1
-
 // ── Bond Constants ──
 
 export const BOND_PER_BATTLE = 2
@@ -142,28 +136,21 @@ export const BOND_STAT_BONUS_MAX = 0.1
 
 export const XP_BENCH_PERCENTAGE = 0.1 // 10% XP to bench monsters
 
-// ── Breeding Progression Constants ──
+// ── Stardust & Evolution Constants ──
 
-export const INHERITED_STAT_PERCENTAGE = 0.2 // 20% of parents' trained stats
-export const LEGACY_ABILITY_CHANCE = 0.25 // 25% per parent ability
-export const PERFECT_BASE_CHANCE = 0.02 // 2% base chance for perfect offspring
-export const PERFECT_HARMONY_BONUS = 0.03 // +3% with harmony-bell
-export const PERFECT_BOND_BONUS = 0.02 // +2% if both parents have >80 bond
-export const PERFECT_STAT_MULTIPLIER = 1.15 // +15% to inherited stat bonuses
+export const STARDUST_PER_BATTLE = 3 // Base stardust per regular battle win
+export const STARDUST_PER_BOSS_MULTIPLIER = 5 // Boss stardust = boss level * multiplier
+export const STARDUST_STARTING = 0 // Player starts with 0
 
-// Generation trait slots: how many traits each generation can have
-export const GENERATION_TRAIT_SLOTS: Record<number, number> = {
-  0: 1, // Wild-caught
-  1: 2, // G1 bred
-  2: 3, // G2+ bred
-}
+export const EVOLUTION_TRAIT_CHANCE = 0.30 // 30% chance to gain a bonus trait on evolution
+export const EVOLUTION_STAT_BOOST_MIN = 0.05 // 5% stat boost minimum on evolution
+export const EVOLUTION_STAT_BOOST_MAX = 0.15 // 15% stat boost maximum on evolution
 
-// Generation stat ceiling multipliers
-export const GENERATION_STAT_CEILING: Record<number, number> = {
-  0: 1.0, // Wild: 100% max
-  1: 1.1, // G1: 110% max
-  2: 1.2, // G2+: 120% max
-}
+// Possible bonus traits gained on evolution
+export const EVOLUTION_BONUS_TRAITS: ReadonlyArray<string> = [
+  'swift', 'hardy', 'fierce', 'clever',
+  'resilient', 'lucky', 'tough', 'sharp',
+]
 
 // ── Battle Spirit Constants ──
 

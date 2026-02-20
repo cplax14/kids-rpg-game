@@ -92,15 +92,15 @@ const testMaterial: Item = {
   sellPrice: 100,
 }
 
-const testBreedingItem: Item = {
+const testEvolutionItem: Item = {
   itemId: 'test-seed',
   name: 'Growth Seed',
-  description: 'Boosts breeding',
-  category: 'breeding_item',
+  description: 'Boosts evolution',
+  category: 'evolution_item',
   iconKey: 'icon-seed',
   stackable: true,
   maxStack: 10,
-  useEffect: { type: 'breeding_boost', magnitude: 15, targetType: 'self' },
+  useEffect: { type: 'evolution_boost', magnitude: 15, targetType: 'self' },
   buyPrice: 300,
   sellPrice: 150,
 }
@@ -111,7 +111,7 @@ const allTestItems: ReadonlyArray<Item> = [
   testCaptureNet,
   testKeyItem,
   testMaterial,
-  testBreedingItem,
+  testEvolutionItem,
 ]
 
 function createEmptyInventory(maxSlots = 10): Inventory {
@@ -589,12 +589,12 @@ describe('InventorySystem', () => {
   // ── sortInventory ──
 
   describe('sortInventory', () => {
-    it('should sort items by category order: consumable, capture_device, material, breeding_item, key_item', () => {
+    it('should sort items by category order: consumable, capture_device, material, evolution_item, key_item', () => {
       const inventory = createInventoryWithItems([
         { item: testKeyItem, quantity: 1 },
         { item: testMaterial, quantity: 5 },
         { item: testCaptureNet, quantity: 3 },
-        { item: testBreedingItem, quantity: 2 },
+        { item: testEvolutionItem, quantity: 2 },
         { item: testPotion, quantity: 4 },
       ])
 
@@ -603,7 +603,7 @@ describe('InventorySystem', () => {
       expect(result.items[0].item.category).toBe('consumable')
       expect(result.items[1].item.category).toBe('capture_device')
       expect(result.items[2].item.category).toBe('material')
-      expect(result.items[3].item.category).toBe('breeding_item')
+      expect(result.items[3].item.category).toBe('evolution_item')
       expect(result.items[4].item.category).toBe('key_item')
     })
 
@@ -949,7 +949,7 @@ describe('InventorySystem', () => {
         { item: testCaptureNet, quantity: 1 },
         { item: testKeyItem, quantity: 1 },
         { item: testMaterial, quantity: 1 },
-        { item: testBreedingItem, quantity: 1 },
+        { item: testEvolutionItem, quantity: 1 },
       ])
 
       const consumables = getConsumableItems(inventory)

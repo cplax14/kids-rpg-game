@@ -17,6 +17,7 @@ export class PlayerHeader {
   private hpText!: Phaser.GameObjects.Text
   private mpText!: Phaser.GameObjects.Text
   private goldText!: Phaser.GameObjects.Text
+  private stardustText!: Phaser.GameObjects.Text
   private levelText!: Phaser.GameObjects.Text
 
   constructor(scene: Phaser.Scene, x: number, y: number, playTime: number = 0) {
@@ -187,6 +188,19 @@ export class PlayerHeader {
       color: '#ffd54f',
     })
     this.container.add(this.goldText)
+
+    // Stardust display with styled background
+    const stardustBg = this.scene.add.graphics()
+    stardustBg.fillStyle(COLORS.STARDUST, 0.15)
+    stardustBg.fillRoundedRect(590, 55, 120, 22, 6)
+    this.container.add(stardustBg)
+
+    this.stardustText = this.scene.add.text(600, 58, `Stardust: ${state.player.stardust}`, {
+      ...TEXT_STYLES.BODY,
+      fontSize: '14px',
+      color: '#ce93d8',
+    })
+    this.container.add(this.stardustText)
   }
 
   private drawXpBar(current: number, max: number, width: number, height: number, x: number, y: number): void {
@@ -248,6 +262,9 @@ export class PlayerHeader {
 
     // Update gold
     this.goldText.setText(`Gold: ${state.player.gold}`)
+
+    // Update stardust
+    this.stardustText.setText(`Stardust: ${state.player.stardust}`)
   }
 
   destroy(): void {

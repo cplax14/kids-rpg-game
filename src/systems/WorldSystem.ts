@@ -71,11 +71,11 @@ export function generateAreaEncounter(
     return null
   }
 
-  // Filter out breeding-exclusive species from encounter table
+  // Filter out evolution-exclusive species from encounter table
   const wildEncounters = area.encounters.filter((e) => {
     const species = getSpecies(e.speciesId)
-    // Include species that are wild or both - exclude breeding-only
-    return species && species.obtainableVia !== 'breeding'
+    // Include species that are wild or both - exclude evolution-only
+    return species && species.obtainableVia !== 'evolution'
   })
 
   if (wildEncounters.length === 0) {

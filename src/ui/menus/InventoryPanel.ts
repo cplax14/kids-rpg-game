@@ -18,7 +18,7 @@ const CATEGORY_COLORS: Record<ItemCategory, number> = {
   consumable: 0x66bb6a,
   capture_device: 0x42a5f5,
   material: 0x8d6e63,
-  breeding_item: 0x7e57c2,
+  evolution_item: 0x7e57c2,
   key_item: 0xffd54f,
 }
 
@@ -26,7 +26,7 @@ const CATEGORY_LABELS: Record<ItemCategory, string> = {
   consumable: 'Consumable',
   capture_device: 'Capture',
   material: 'Material',
-  breeding_item: 'Breeding',
+  evolution_item: 'Evolution',
   key_item: 'Key Item',
 }
 
@@ -515,7 +515,7 @@ export class InventoryPanel {
       consumable: 'Item',
       capture_device: 'Capture',
       material: 'Material',
-      breeding_item: 'Breed',
+      evolution_item: 'Evo',
       key_item: 'Key',
     }
     return shorts[category] ?? 'Item'

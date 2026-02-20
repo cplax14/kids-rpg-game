@@ -447,9 +447,7 @@ test.describe('First Battle Tutorial Experience', () => {
           abilities: [],
           captureBaseDifficulty: 0.5,
           spriteKey: 'test',
-          evolutionChain: null,
-          breedingGroup: 'beast',
-          breedingTraits: [],
+          evolutionChainId: null,
           obtainableVia: 'wild',
         },
       ])
@@ -894,9 +892,7 @@ test.describe('First Battle Flow Integration', () => {
           abilities: [],
           captureBaseDifficulty: 0.5,
           spriteKey: 'test',
-          evolutionChain: null,
-          breedingGroup: 'beast',
-          breedingTraits: [],
+          evolutionChainId: null,
           obtainableVia: 'wild',
         },
       ])
