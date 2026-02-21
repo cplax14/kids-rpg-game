@@ -14,6 +14,7 @@ import { updatePlayerGold } from '../systems/CharacterSystem'
 import { addItem, removeItem, getItem } from '../systems/InventorySystem'
 import { getEquipment } from '../systems/EquipmentSystem'
 import type { Inventory, Equipment } from '../models/types'
+import { initAudioSystem, playSfx, SFX_KEYS } from '../systems/AudioSystem'
 
 interface ShopSceneData {
   readonly shopId: string
@@ -44,6 +45,7 @@ export class ShopScene extends Phaser.Scene {
     this.mode = (data.mode === 'sell' ? 'sell' : 'buy') as 'buy' | 'sell'
     this.selectedIndex = 0
 
+    initAudioSystem(this)
     this.createBackground()
     this.createHeader()
     this.createItemList()
@@ -80,6 +82,7 @@ export class ShopScene extends Phaser.Scene {
 
     // Mode toggle buttons
     const buyBtn = this.createTabButton(300, 0, 'Buy', this.mode === 'buy', () => {
+      playSfx(SFX_KEYS.MENU_SELECT)
       this.mode = 'buy'
       this.selectedIndex = 0
       this.refreshAll()
@@ -87,6 +90,7 @@ export class ShopScene extends Phaser.Scene {
     container.add(buyBtn)
 
     const sellBtn = this.createTabButton(400, 0, 'Sell', this.mode === 'sell', () => {
+      playSfx(SFX_KEYS.MENU_SELECT)
       this.mode = 'sell'
       this.selectedIndex = 0
       this.refreshAll()
@@ -414,6 +418,7 @@ export class ShopScene extends Phaser.Scene {
     const state = getGameState(this)
 
     if (!canAfford(state.player, price)) {
+      playSfx(SFX_KEYS.ERROR)
       this.showMessage("Not enough gold!", '#ef5350')
       return
     }
@@ -421,6 +426,7 @@ export class ShopScene extends Phaser.Scene {
     if (type === 'item') {
       const newInventory = addItem(state.inventory, itemId, 1)
       if (!newInventory) {
+        playSfx(SFX_KEYS.ERROR)
         this.showMessage("Inventory is full!", '#ef5350')
         return
       }
@@ -439,6 +445,8 @@ export class ShopScene extends Phaser.Scene {
       setGameState(this, { ...state, player: updatedPlayer, inventory: updatedInventory })
     }
 
+    playSfx(SFX_KEYS.SHOP_BUY)
+    playSfx(SFX_KEYS.COIN, 0.6)
     this.goldText.setText(`Gold: ${getGameState(this).player.gold}`)
     this.showMessage("Purchased!", '#66bb6a')
     this.refreshItemList()
@@ -449,6 +457,7 @@ export class ShopScene extends Phaser.Scene {
 
     const newInventory = removeItem(state.inventory, itemId, 1)
     if (!newInventory) {
+      playSfx(SFX_KEYS.ERROR)
       this.showMessage("Cannot sell this item!", '#ef5350')
       return
     }
@@ -456,6 +465,8 @@ export class ShopScene extends Phaser.Scene {
     const updatedPlayer = updatePlayerGold(state.player, price)
     setGameState(this, { ...state, player: updatedPlayer, inventory: newInventory })
 
+    playSfx(SFX_KEYS.SHOP_SELL)
+    playSfx(SFX_KEYS.COIN, 0.6)
     this.goldText.setText(`Gold: ${getGameState(this).player.gold}`)
     this.showMessage("Sold!", '#66bb6a')
     this.refreshItemList()
@@ -470,6 +481,7 @@ export class ShopScene extends Phaser.Scene {
   }
 
   private closeShop(): void {
+    playSfx(SFX_KEYS.MENU_CONFIRM)
     const worldScene = this.scene.get(SCENE_KEYS.WORLD)
     if (worldScene) {
       this.scene.resume(SCENE_KEYS.WORLD)

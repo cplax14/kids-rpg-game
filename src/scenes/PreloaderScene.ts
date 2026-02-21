@@ -383,33 +383,38 @@ export class PreloaderScene extends Phaser.Scene {
   }
 
   private loadAudioAssets(): void {
-    // Audio loading disabled until real audio files are added
-    // The audio system will handle missing audio gracefully
-    // TODO: Enable audio loading when assets/audio/ files are added
-    //
-    // Music tracks to add:
-    // - assets/audio/music/title.ogg
-    // - assets/audio/music/village.ogg
-    // - assets/audio/music/forest.ogg
-    // - assets/audio/music/cave.ogg
-    // - assets/audio/music/battle.ogg
-    // - assets/audio/music/boss.ogg
-    // - assets/audio/music/victory.ogg
-    //
-    // SFX to add:
-    // - assets/audio/sfx/menu-select.ogg
-    // - assets/audio/sfx/menu-confirm.ogg
-    // - assets/audio/sfx/attack-hit.ogg
-    // - assets/audio/sfx/capture-throw.ogg
-    // - assets/audio/sfx/capture-shake.ogg
-    // - assets/audio/sfx/capture-success.ogg
-    // - assets/audio/sfx/capture-fail.ogg
-    // - assets/audio/sfx/level-up.ogg
-    // - assets/audio/sfx/heal.ogg
-    // - assets/audio/sfx/chest-open.ogg
-    // - assets/audio/sfx/quest-accept.ogg
-    // - assets/audio/sfx/quest-progress.ogg
-    // - assets/audio/sfx/quest-complete.ogg
+    // Music tracks
+    this.load.audio('title-theme', 'assets/audio/music/title.ogg')
+    this.load.audio('village-peaceful', 'assets/audio/music/village.ogg')
+    this.load.audio('forest-mystical', 'assets/audio/music/forest.ogg')
+    this.load.audio('cave-ambient', 'assets/audio/music/cave.ogg')
+    this.load.audio('battle-normal', 'assets/audio/music/battle.ogg')
+    this.load.audio('battle-boss', 'assets/audio/music/boss.ogg')
+    this.load.audio('victory-fanfare', 'assets/audio/music/victory.ogg')
+
+    // SFX
+    this.load.audio('menu-select', 'assets/audio/sfx/menu-select.ogg')
+    this.load.audio('menu-confirm', 'assets/audio/sfx/menu-confirm.ogg')
+    this.load.audio('attack-hit', 'assets/audio/sfx/attack-hit.ogg')
+    this.load.audio('capture-throw', 'assets/audio/sfx/capture-throw.ogg')
+    this.load.audio('capture-shake', 'assets/audio/sfx/capture-shake.ogg')
+    this.load.audio('capture-success', 'assets/audio/sfx/capture-success.ogg')
+    this.load.audio('capture-fail', 'assets/audio/sfx/capture-fail.ogg')
+    this.load.audio('level-up', 'assets/audio/sfx/level-up.ogg')
+    this.load.audio('heal', 'assets/audio/sfx/heal.ogg')
+    this.load.audio('chest-open', 'assets/audio/sfx/chest-open.ogg')
+    this.load.audio('quest-accept', 'assets/audio/sfx/quest-accept.ogg')
+    this.load.audio('quest-progress', 'assets/audio/sfx/quest-progress.ogg')
+    this.load.audio('quest-complete', 'assets/audio/sfx/quest-complete.ogg')
+    this.load.audio('shop-buy', 'assets/audio/sfx/shop-buy.ogg')
+    this.load.audio('shop-sell', 'assets/audio/sfx/shop-sell.ogg')
+    this.load.audio('evolution-start', 'assets/audio/sfx/evolution-start.ogg')
+    this.load.audio('evolution-complete', 'assets/audio/sfx/evolution-complete.ogg')
+    this.load.audio('monster-faint', 'assets/audio/sfx/monster-faint.ogg')
+    this.load.audio('error', 'assets/audio/sfx/error.ogg')
+    this.load.audio('door-open', 'assets/audio/sfx/door-open.ogg')
+    this.load.audio('item-pickup', 'assets/audio/sfx/item-pickup.ogg')
+    this.load.audio('coin', 'assets/audio/sfx/coin.ogg')
   }
 
   private createPlayerAnimations(): void {

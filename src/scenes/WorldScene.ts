@@ -1441,6 +1441,8 @@ export class WorldScene extends Phaser.Scene {
 
     this.transitionInProgress = true
 
+    playSfx(SFX_KEYS.DOOR_OPEN)
+
     // Note: Tutorial for first area transition is shown in the new scene's create()
     // Don't show tutorials during transition as the scene is about to be destroyed
 
