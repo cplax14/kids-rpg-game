@@ -1612,6 +1612,7 @@ export class BattleScene extends Phaser.Scene {
     // Check if target KO'd
     const target = this.findCurrentCombatant(targetId)
     if (target && target.stats.currentHp <= 0) {
+      playSfx(SFX_KEYS.MONSTER_FAINT)
       this.time.delayedCall(300, () => {
         this.tweens.add({
           targets: targetSprite,

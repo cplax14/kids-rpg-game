@@ -8,6 +8,7 @@ import { getMonsterIconKey, getMonsterBattleKey } from '../config/spriteMapping'
 import { EventBus } from '../events/EventBus'
 import { GAME_EVENTS } from '../events/GameEvents'
 import type { MonsterInstance, CharacterStats } from '../models/types'
+import { initAudioSystem, playSfx, SFX_KEYS } from '../systems/AudioSystem'
 
 const PANEL_X = 80
 const PANEL_Y = 40
@@ -34,6 +35,7 @@ export class EvolutionScene extends Phaser.Scene {
     this.selectedIndex = 0
     this.isEvolving = false
 
+    initAudioSystem(this)
     this.createBackground()
     this.createHeader()
     this.createMonsterList()
@@ -232,6 +234,7 @@ export class EvolutionScene extends Phaser.Scene {
       hitArea.setAlpha(0.01)
       hitArea.on('pointerdown', () => {
         if (this.isEvolving) return
+        playSfx(SFX_KEYS.MENU_SELECT)
         this.selectedIndex = index
         this.refreshList()
         this.refreshDetail()
@@ -543,6 +546,7 @@ export class EvolutionScene extends Phaser.Scene {
     if (!nextSpecies) return
 
     this.isEvolving = true
+    playSfx(SFX_KEYS.EVOLUTION_START)
     this.messageText.setText('Evolving...')
 
     // Execute evolution logic
@@ -581,6 +585,7 @@ export class EvolutionScene extends Phaser.Scene {
 
     // Play evolution animation
     this.playEvolutionAnimation(monster.speciesId, result.newSpeciesId, result.bonusTrait, () => {
+      playSfx(SFX_KEYS.EVOLUTION_COMPLETE)
       this.isEvolving = false
       this.loadAllMonsters()
       this.stardustText.setText(`Stardust: ${getGameState(this).player.stardust}`)

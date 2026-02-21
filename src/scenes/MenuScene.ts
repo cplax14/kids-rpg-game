@@ -9,6 +9,7 @@ import { SaveLoadPanel } from '../ui/menus/SaveLoadPanel'
 import { QuestLogPanel } from '../ui/menus/QuestLogPanel'
 import { AchievementPanel } from '../ui/menus/AchievementPanel'
 import { PlayerHeader } from '../ui/menus/PlayerHeader'
+import { initAudioSystem, playSfx, SFX_KEYS } from '../systems/AudioSystem'
 
 type MenuTab = 'inventory' | 'equipment' | 'squad' | 'bestiary' | 'quests' | 'badges' | 'settings' | 'save'
 
@@ -41,6 +42,8 @@ export class MenuScene extends Phaser.Scene {
 
   create(): void {
     this.activeTab = 'inventory'
+
+    initAudioSystem(this)
 
     // Overlay background
     const bg = this.add.graphics()
@@ -144,6 +147,7 @@ export class MenuScene extends Phaser.Scene {
       const hitArea = this.add.rectangle(TAB_WIDTH / 2, TAB_HEIGHT / 2, TAB_WIDTH, TAB_HEIGHT)
       hitArea.setInteractive({ useHandCursor: true })
       hitArea.on('pointerdown', () => {
+        playSfx(SFX_KEYS.MENU_SELECT)
         this.activeTab = tabDef.tab
         this.destroyPanels()
         this.showTab(tabDef.tab)
@@ -267,6 +271,7 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private closeMenu(): void {
+    playSfx(SFX_KEYS.MENU_CONFIRM)
     this.destroyPanels()
 
     if (this.playerHeader) {

@@ -254,6 +254,15 @@ export const SFX_KEYS = {
   QUEST_ACCEPT: 'quest-accept',
   QUEST_PROGRESS: 'quest-progress',
   QUEST_COMPLETE: 'quest-complete',
+  SHOP_BUY: 'shop-buy',
+  SHOP_SELL: 'shop-sell',
+  EVOLUTION_START: 'evolution-start',
+  EVOLUTION_COMPLETE: 'evolution-complete',
+  MONSTER_FAINT: 'monster-faint',
+  ERROR: 'error',
+  DOOR_OPEN: 'door-open',
+  ITEM_PICKUP: 'item-pickup',
+  COIN: 'coin',
 } as const
 
 export type MusicKey = typeof MUSIC_KEYS[keyof typeof MUSIC_KEYS]

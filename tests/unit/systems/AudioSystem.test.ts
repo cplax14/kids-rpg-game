@@ -65,6 +65,36 @@ describe('AudioSystem', () => {
       expect(SFX_KEYS.LEVEL_UP).toBe('level-up')
       expect(SFX_KEYS.HEAL).toBe('heal')
       expect(SFX_KEYS.CHEST_OPEN).toBe('chest-open')
+      expect(SFX_KEYS.QUEST_ACCEPT).toBe('quest-accept')
+      expect(SFX_KEYS.QUEST_PROGRESS).toBe('quest-progress')
+      expect(SFX_KEYS.QUEST_COMPLETE).toBe('quest-complete')
+      expect(SFX_KEYS.SHOP_BUY).toBe('shop-buy')
+      expect(SFX_KEYS.SHOP_SELL).toBe('shop-sell')
+      expect(SFX_KEYS.EVOLUTION_START).toBe('evolution-start')
+      expect(SFX_KEYS.EVOLUTION_COMPLETE).toBe('evolution-complete')
+      expect(SFX_KEYS.MONSTER_FAINT).toBe('monster-faint')
+      expect(SFX_KEYS.ERROR).toBe('error')
+      expect(SFX_KEYS.DOOR_OPEN).toBe('door-open')
+      expect(SFX_KEYS.ITEM_PICKUP).toBe('item-pickup')
+      expect(SFX_KEYS.COIN).toBe('coin')
+    })
+
+    it('should have SFX keys matching audio-config.json entries', () => {
+      const allSfxKeys = Object.values(SFX_KEYS)
+      expect(allSfxKeys.length).toBe(22)
+      allSfxKeys.forEach((key) => {
+        expect(typeof key).toBe('string')
+        expect(key.length).toBeGreaterThan(0)
+      })
+    })
+
+    it('should have music keys matching audio-config.json entries', () => {
+      const allMusicKeys = Object.values(MUSIC_KEYS)
+      expect(allMusicKeys.length).toBe(7)
+      allMusicKeys.forEach((key) => {
+        expect(typeof key).toBe('string')
+        expect(key.length).toBeGreaterThan(0)
+      })
     })
   })
 })
