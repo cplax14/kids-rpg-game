@@ -9,6 +9,7 @@ import {
 } from '../../systems/GameStateManager'
 import { getSpecies } from '../../systems/MonsterSystem'
 import { getXpToNextLevel } from '../../systems/CharacterSystem'
+import { getMonsterIconKey, getMonsterBattleKey } from '../../config/spriteMapping'
 import {
   removeFromSquad,
   moveToStorage,
@@ -28,6 +29,7 @@ export class SquadPanel {
   private scene: Phaser.Scene
   private container: Phaser.GameObjects.Container
   private detailContainer: Phaser.GameObjects.Container
+  private spriteShowcaseContainer: Phaser.GameObjects.Container
   private storageContainer: Phaser.GameObjects.Container
   private selectedMonster: MonsterInstance | null = null
   private selectedFromStorage: boolean = false
@@ -41,12 +43,17 @@ export class SquadPanel {
     this.detailContainer = scene.add.container(x + SQUAD_SLOT_WIDTH + 20, y)
     this.detailContainer.setDepth(DEPTH.OVERLAY + 2)
 
-    this.storageContainer = scene.add.container(x + SQUAD_SLOT_WIDTH + DETAIL_WIDTH + 40, y)
+    const spriteShowcaseX = x + SQUAD_SLOT_WIDTH + DETAIL_WIDTH + 30
+    this.spriteShowcaseContainer = scene.add.container(spriteShowcaseX, y)
+    this.spriteShowcaseContainer.setDepth(DEPTH.OVERLAY + 2)
+
+    this.storageContainer = scene.add.container(spriteShowcaseX + 185, y)
     this.storageContainer.setDepth(DEPTH.OVERLAY + 2)
 
     this.createHeaders()
     this.refreshSquadList()
     this.refreshDetail()
+    this.refreshSpriteShowcase()
     this.refreshStorageList()
   }
 
@@ -72,6 +79,7 @@ export class SquadPanel {
   refresh(): void {
     this.refreshSquadList()
     this.refreshDetail()
+    this.refreshSpriteShowcase()
     this.refreshStorageList()
   }
 
@@ -517,6 +525,70 @@ export class SquadPanel {
     this.refresh()
   }
 
+  private refreshSpriteShowcase(): void {
+    this.spriteShowcaseContainer.removeAll(true)
+
+    if (!this.selectedMonster) return
+
+    const monster = this.selectedMonster
+    const species = getSpecies(monster.speciesId)
+    const showcaseWidth = 170
+    const showcaseHeight = 380
+
+    // Background
+    const bg = this.scene.add.graphics()
+    bg.fillStyle(COLORS.PANEL_BG, 0.4)
+    bg.fillRoundedRect(0, 0, showcaseWidth, showcaseHeight, 12)
+    this.spriteShowcaseContainer.add(bg)
+
+    // Element-colored border
+    const elemColor = this.getElementColor(species?.element ?? 'neutral')
+    const border = this.scene.add.graphics()
+    border.lineStyle(2, elemColor, 0.6)
+    border.strokeRoundedRect(0, 0, showcaseWidth, showcaseHeight, 12)
+    this.spriteShowcaseContainer.add(border)
+
+    // Element glow at top half
+    const glow = this.scene.add.graphics()
+    glow.fillStyle(elemColor, 0.1)
+    glow.fillRoundedRect(0, 0, showcaseWidth, showcaseHeight / 2, { tl: 12, tr: 12, bl: 0, br: 0 })
+    this.spriteShowcaseContainer.add(glow)
+
+    // Monster sprite - large
+    const battleKey = getMonsterBattleKey(monster.speciesId)
+    const spriteKey = battleKey && this.scene.textures.exists(battleKey) ? battleKey : getMonsterIconKey(monster.speciesId)
+    if (this.scene.textures.exists(spriteKey)) {
+      const sprite = this.scene.add.image(showcaseWidth / 2, showcaseHeight / 2 - 30, spriteKey)
+      const maxSize = 150
+      const ratio = Math.min(maxSize / sprite.width, maxSize / sprite.height)
+      sprite.setScale(ratio)
+      this.spriteShowcaseContainer.add(sprite)
+    }
+
+    // Monster name
+    const displayName = monster.nickname ?? species?.name ?? 'Unknown'
+    const nameText = this.scene.add.text(showcaseWidth / 2, showcaseHeight - 45, displayName, {
+      ...TEXT_STYLES.BODY,
+      fontSize: '16px',
+    })
+    nameText.setOrigin(0.5)
+    this.spriteShowcaseContainer.add(nameText)
+
+    // Element label
+    const elemText = this.scene.add.text(
+      showcaseWidth / 2,
+      showcaseHeight - 22,
+      (species?.element ?? 'neutral').charAt(0).toUpperCase() + (species?.element ?? 'neutral').slice(1),
+      {
+        ...TEXT_STYLES.SMALL,
+        fontSize: '12px',
+        color: '#' + elemColor.toString(16).padStart(6, '0'),
+      },
+    )
+    elemText.setOrigin(0.5)
+    this.spriteShowcaseContainer.add(elemText)
+  }
+
   private getElementColor(element: string): number {
     const colors: Record<string, number> = {
       fire: 0xef5350,
@@ -533,6 +605,7 @@ export class SquadPanel {
   destroy(): void {
     this.container.destroy()
     this.detailContainer.destroy()
+    this.spriteShowcaseContainer.destroy()
     this.storageContainer.destroy()
   }
 }

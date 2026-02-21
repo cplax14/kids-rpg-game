@@ -8,6 +8,7 @@ import {
   getDiscoveryProgress,
   sortDiscoveredByElement,
 } from '../../systems/BestiarySystem'
+import { getMonsterIconKey, getMonsterBattleKey } from '../../config/spriteMapping'
 
 const GRID_COLS = 5
 const CELL_SIZE = 70
@@ -17,6 +18,7 @@ export class BestiaryPanel {
   private scene: Phaser.Scene
   private container: Phaser.GameObjects.Container
   private detailContainer: Phaser.GameObjects.Container
+  private spriteShowcaseContainer: Phaser.GameObjects.Container
   private selectedSpecies: MonsterSpecies | null = null
   private scrollOffset: number = 0
 
@@ -28,9 +30,14 @@ export class BestiaryPanel {
     this.detailContainer = scene.add.container(x + GRID_COLS * (CELL_SIZE + 8) + 30, y)
     this.detailContainer.setDepth(DEPTH.OVERLAY + 2)
 
+    const spriteShowcaseX = x + GRID_COLS * (CELL_SIZE + 8) + 30 + DETAIL_WIDTH + 20
+    this.spriteShowcaseContainer = scene.add.container(spriteShowcaseX, y)
+    this.spriteShowcaseContainer.setDepth(DEPTH.OVERLAY + 2)
+
     this.createHeader()
     this.refreshGrid()
     this.refreshDetail()
+    this.refreshSpriteShowcase()
   }
 
   private createHeader(): void {
@@ -48,6 +55,7 @@ export class BestiaryPanel {
   refresh(): void {
     this.refreshGrid()
     this.refreshDetail()
+    this.refreshSpriteShowcase()
   }
 
   private refreshGrid(): void {
@@ -205,7 +213,7 @@ export class BestiaryPanel {
     this.detailContainer.add(infoText)
 
     // Description
-    const desc = this.scene.add.text(15, 80, species.description, {
+    const desc = this.scene.add.text(15, 75, species.description, {
       ...TEXT_STYLES.BODY,
       fontSize: '14px',
       wordWrap: { width: DETAIL_WIDTH - 30 },
@@ -214,7 +222,7 @@ export class BestiaryPanel {
     this.detailContainer.add(desc)
 
     // Base Stats section
-    const statsY = 140
+    const statsY = 135
     const statsLabel = this.scene.add.text(15, statsY, 'Base Stats', {
       ...TEXT_STYLES.SMALL,
       fontSize: '14px',
@@ -290,6 +298,67 @@ export class BestiaryPanel {
     }
   }
 
+  private refreshSpriteShowcase(): void {
+    this.spriteShowcaseContainer.removeAll(true)
+
+    if (!this.selectedSpecies) return
+
+    const species = this.selectedSpecies
+    const showcaseWidth = 280
+    const showcaseHeight = 420
+
+    // Background
+    const bg = this.scene.add.graphics()
+    bg.fillStyle(COLORS.PANEL_BG, 0.4)
+    bg.fillRoundedRect(0, 0, showcaseWidth, showcaseHeight, 12)
+    this.spriteShowcaseContainer.add(bg)
+
+    // Element-colored border
+    const border = this.scene.add.graphics()
+    border.lineStyle(2, this.getElementColor(species.element), 0.6)
+    border.strokeRoundedRect(0, 0, showcaseWidth, showcaseHeight, 12)
+    this.spriteShowcaseContainer.add(border)
+
+    // Element glow at top half
+    const glow = this.scene.add.graphics()
+    glow.fillStyle(this.getElementColor(species.element), 0.1)
+    glow.fillRoundedRect(0, 0, showcaseWidth, showcaseHeight / 2, { tl: 12, tr: 12, bl: 0, br: 0 })
+    this.spriteShowcaseContainer.add(glow)
+
+    // Monster sprite - large
+    const battleKey = getMonsterBattleKey(species.speciesId)
+    const spriteKey = battleKey && this.scene.textures.exists(battleKey) ? battleKey : getMonsterIconKey(species.speciesId)
+    if (this.scene.textures.exists(spriteKey)) {
+      const sprite = this.scene.add.image(showcaseWidth / 2, showcaseHeight / 2 - 30, spriteKey)
+      const maxSize = 220
+      const ratio = Math.min(maxSize / sprite.width, maxSize / sprite.height)
+      sprite.setScale(ratio)
+      this.spriteShowcaseContainer.add(sprite)
+    }
+
+    // Monster name
+    const nameText = this.scene.add.text(showcaseWidth / 2, showcaseHeight - 45, species.name, {
+      ...TEXT_STYLES.BODY,
+      fontSize: '18px',
+    })
+    nameText.setOrigin(0.5)
+    this.spriteShowcaseContainer.add(nameText)
+
+    // Element label
+    const elemLabel = this.scene.add.text(
+      showcaseWidth / 2,
+      showcaseHeight - 22,
+      species.element.charAt(0).toUpperCase() + species.element.slice(1),
+      {
+        ...TEXT_STYLES.SMALL,
+        fontSize: '12px',
+        color: '#' + this.getElementColor(species.element).toString(16).padStart(6, '0'),
+      },
+    )
+    elemLabel.setOrigin(0.5)
+    this.spriteShowcaseContainer.add(elemLabel)
+  }
+
   private getElementColor(element: string): number {
     const colors: Record<string, number> = {
       fire: 0xef5350,
@@ -316,5 +385,6 @@ export class BestiaryPanel {
   destroy(): void {
     this.container.destroy()
     this.detailContainer.destroy()
+    this.spriteShowcaseContainer.destroy()
   }
 }
