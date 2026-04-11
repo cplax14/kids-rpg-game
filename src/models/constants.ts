@@ -138,7 +138,7 @@ export const XP_BENCH_PERCENTAGE = 0.1 // 10% XP to bench monsters
 
 // ── Stardust & Evolution Constants ──
 
-export const STARDUST_PER_BATTLE = 3 // Base stardust per regular battle win
+export const STARDUST_PER_BATTLE = 20 // Base stardust per regular battle win
 export const STARDUST_PER_BOSS_MULTIPLIER = 5 // Boss stardust = boss level * multiplier
 export const STARDUST_STARTING = 0 // Player starts with 0
 

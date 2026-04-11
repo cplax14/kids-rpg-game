@@ -921,7 +921,7 @@ export function calculateBattleRewards(battle: Battle): BattleRewards {
   return {
     experience: totalXp,
     gold: totalGold,
-    stardust: STARDUST_PER_BATTLE + randomInt(0, 2),
+    stardust: STARDUST_PER_BATTLE + randomInt(0, 10),
     items: [],
     capturedMonster: null,
   }
