@@ -16,7 +16,7 @@
         "order": 2,
         "evolvesTo": "emberwing",
         "evolvesFrom": "miniflame",
-        "requiredLevel": 8,
+        "requiredLevel": 4,
         "stardustCost": 100
       },
       {
@@ -24,7 +24,7 @@
         "order": 3,
         "evolvesTo": null,
         "evolvesFrom": "blazecheetah",
-        "requiredLevel": 14,
+        "requiredLevel": 12,
         "stardustCost": 250
       }
     ]
@@ -46,7 +46,7 @@
         "order": 2,
         "evolvesTo": "iceboxer",
         "evolvesFrom": "toughchunkice",
-        "requiredLevel": 8,
+        "requiredLevel": 4,
         "stardustCost": 100
       },
       {
@@ -54,7 +54,7 @@
         "order": 3,
         "evolvesTo": null,
         "evolvesFrom": "frostfist",
-        "requiredLevel": 14,
+        "requiredLevel": 12,
         "stardustCost": 250
       }
     ]
@@ -76,7 +76,7 @@
         "order": 2,
         "evolvesTo": null,
         "evolvesFrom": "leafblower",
-        "requiredLevel": 10,
+        "requiredLevel": 5,
         "stardustCost": 125
       }
     ]
@@ -98,7 +98,7 @@
         "order": 2,
         "evolvesTo": null,
         "evolvesFrom": "aquafang",
-        "requiredLevel": 10,
+        "requiredLevel": 5,
         "stardustCost": 125
       }
     ]
@@ -134,7 +134,7 @@
         "order": 2,
         "evolvesTo": "volcanix",
         "evolvesFrom": "flamepup",
-        "requiredLevel": 8,
+        "requiredLevel": 4,
         "stardustCost": 100
       },
       {
@@ -142,7 +142,7 @@
         "order": 3,
         "evolvesTo": null,
         "evolvesFrom": "blazefox",
-        "requiredLevel": 14,
+        "requiredLevel": 12,
         "stardustCost": 250
       }
     ]
@@ -164,7 +164,7 @@
         "order": 2,
         "evolvesTo": "obsidiangolem",
         "evolvesFrom": "magmaslime",
-        "requiredLevel": 8,
+        "requiredLevel": 4,
         "stardustCost": 100
       },
       {
@@ -172,7 +172,7 @@
         "order": 3,
         "evolvesTo": null,
         "evolvesFrom": "emberbun",
-        "requiredLevel": 14,
+        "requiredLevel": 12,
         "stardustCost": 250
       }
     ]
@@ -194,7 +194,7 @@
         "order": 2,
         "evolvesTo": null,
         "evolvesFrom": "fireimp",
-        "requiredLevel": 10,
+        "requiredLevel": 5,
         "stardustCost": 125
       }
     ]
@@ -216,7 +216,7 @@
         "order": 2,
         "evolvesTo": "serpentide",
         "evolvesFrom": "bubblefin",
-        "requiredLevel": 8,
+        "requiredLevel": 4,
         "stardustCost": 100
       },
       {
@@ -224,7 +224,7 @@
         "order": 3,
         "evolvesTo": null,
         "evolvesFrom": "tidecrab",
-        "requiredLevel": 14,
+        "requiredLevel": 12,
         "stardustCost": 250
       }
     ]
@@ -246,7 +246,7 @@
         "order": 2,
         "evolvesTo": "coraldragon",
         "evolvesFrom": "glowjelly",
-        "requiredLevel": 8,
+        "requiredLevel": 4,
         "stardustCost": 100
       },
       {
@@ -254,7 +254,7 @@
         "order": 3,
         "evolvesTo": null,
         "evolvesFrom": "coralshell",
-        "requiredLevel": 14,
+        "requiredLevel": 12,
         "stardustCost": 250
       }
     ]
@@ -276,7 +276,7 @@
         "order": 2,
         "evolvesTo": null,
         "evolvesFrom": "shellwhisper",
-        "requiredLevel": 10,
+        "requiredLevel": 5,
         "stardustCost": 150
       }
     ]
@@ -298,7 +298,7 @@
         "order": 2,
         "evolvesTo": "crystalgolem",
         "evolvesFrom": "pebblit",
-        "requiredLevel": 8,
+        "requiredLevel": 4,
         "stardustCost": 100
       },
       {
@@ -306,7 +306,7 @@
         "order": 3,
         "evolvesTo": null,
         "evolvesFrom": "thornback",
-        "requiredLevel": 14,
+        "requiredLevel": 12,
         "stardustCost": 250
       }
     ]
@@ -328,7 +328,7 @@
         "order": 2,
         "evolvesTo": "tempestdrake",
         "evolvesFrom": "breezling",
-        "requiredLevel": 8,
+        "requiredLevel": 4,
         "stardustCost": 100
       },
       {
@@ -336,7 +336,7 @@
         "order": 3,
         "evolvesTo": null,
         "evolvesFrom": "stormowl",
-        "requiredLevel": 14,
+        "requiredLevel": 12,
         "stardustCost": 250
       }
     ]
@@ -358,7 +358,7 @@
         "order": 2,
         "evolvesTo": "prismbug",
         "evolvesFrom": "glowmoth",
-        "requiredLevel": 8,
+        "requiredLevel": 4,
         "stardustCost": 100
       },
       {
@@ -366,7 +366,7 @@
         "order": 3,
         "evolvesTo": null,
         "evolvesFrom": "sunstag",
-        "requiredLevel": 14,
+        "requiredLevel": 12,
         "stardustCost": 250
       }
     ]
@@ -388,7 +388,7 @@
         "order": 2,
         "evolvesTo": "duskfox",
         "evolvesFrom": "shadowpup",
-        "requiredLevel": 8,
+        "requiredLevel": 4,
         "stardustCost": 100
       },
       {
@@ -396,7 +396,7 @@
         "order": 3,
         "evolvesTo": null,
         "evolvesFrom": "nightstalker",
-        "requiredLevel": 14,
+        "requiredLevel": 12,
         "stardustCost": 250
       }
     ]
@@ -418,7 +418,7 @@
         "order": 2,
         "evolvesTo": "dreadwyrm",
         "evolvesFrom": "bogwitch",
-        "requiredLevel": 8,
+        "requiredLevel": 4,
         "stardustCost": 100
       },
       {
@@ -426,7 +426,7 @@
         "order": 3,
         "evolvesTo": null,
         "evolvesFrom": "mistweaver",
-        "requiredLevel": 14,
+        "requiredLevel": 12,
         "stardustCost": 250
       }
     ]
@@ -448,7 +448,7 @@
         "order": 2,
         "evolvesTo": null,
         "evolvesFrom": "madcheeks",
-        "requiredLevel": 10,
+        "requiredLevel": 5,
         "stardustCost": 125
       }
     ]
