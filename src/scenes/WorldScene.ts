@@ -40,7 +40,7 @@ import {
   type StatChange,
   type PlayerLevelUpResult,
 } from '../systems/CharacterSystem'
-import { randomInt, randomChance, weightedRandom } from '../utils/math'
+import { randomInt } from '../utils/math'
 import { EventBus } from '../events/EventBus'
 import { GAME_EVENTS } from '../events/GameEvents'
 import {
@@ -69,6 +69,15 @@ import { loadDialogData } from '../systems/DialogSystem'
 import { loadTraitData } from '../systems/TraitSystem'
 import { loadEvolutionChains } from '../systems/EvolutionSystem'
 import { NPC } from '../entities/NPC'
+import { RoamingMonster } from '../entities/RoamingMonster'
+import {
+  getWalkablePositions,
+  filterSafeZones,
+  pickSpawnPositions,
+  generateRoamingMonsters,
+  generateRandomAreaEnemy,
+} from '../systems/RoamingMonsterSystem'
+import { MAX_ROAMING_MONSTERS, ROAMING_MULTI_ENEMY_CHANCE } from '../config'
 import { Interactable } from '../entities/Interactable'
 import type { TraitDefinition, EvolutionChain } from '../models/types'
 import {
@@ -76,7 +85,6 @@ import {
   loadBossData,
   getArea,
   getBoss,
-  generateAreaEncounter,
   getUndefeatedBosses,
   createBossEncounter,
 } from '../systems/WorldSystem'
@@ -146,19 +154,19 @@ interface WorldSceneData {
   readonly playTime?: number
 }
 
-const ENCOUNTER_STEP_THRESHOLD = 20
-const ENCOUNTER_CHANCE = 0.15
-
 export class WorldScene extends Phaser.Scene {
   private player!: Player
   private inputSystem!: InputSystem
   private map!: Phaser.Tilemaps.Tilemap | null
   private collisionLayer!: Phaser.Tilemaps.TilemapLayer | null
   private areaNameText!: Phaser.GameObjects.Text
-  private stepCounter: number = 0
   private lastPlayerTileX: number = -1
   private lastPlayerTileY: number = -1
   private inSafeZone: boolean = true
+  private roamingMonsters: RoamingMonster[] = []
+  private collisionBodies: Phaser.GameObjects.Zone[] = []
+  private lastGeneratedMap: import('../utils/mapGenerator').GeneratedMap | null = null
+  private roamingEncounterInProgress: boolean = false
   private npcs: NPC[] = []
   private nearbyNpc: NPC | null = null
   private currentAreaId: string = 'sunlit-village'
@@ -363,8 +371,10 @@ export class WorldScene extends Phaser.Scene {
     // Manual transition zone check as fallback
     this.checkTransitionZones()
 
-    if (this.player.getIsMoving()) {
-      this.checkForEncounter()
+    // Update roaming monsters
+    const playerPos = this.player.getPosition()
+    for (const monster of this.roamingMonsters) {
+      monster.update(playerPos.x, playerPos.y)
     }
 
     // Reset nearby states each frame
@@ -449,6 +459,9 @@ export class WorldScene extends Phaser.Scene {
     // Check for boss encounters
     this.setupBossEncounters(this.currentArea)
 
+    // Spawn roaming monsters (non-safe areas with encounters)
+    this.spawnRoamingMonsters(this.currentArea)
+
     // Track area exploration for quests
     this.trackAreaForQuests(this.currentAreaId)
 
@@ -480,6 +493,12 @@ export class WorldScene extends Phaser.Scene {
     }
     this.npcs = []
 
+    // Destroy roaming monsters
+    for (const monster of this.roamingMonsters) {
+      monster.destroy()
+    }
+    this.roamingMonsters = []
+
     // Destroy interactables
     for (const interactable of this.interactables) {
       interactable.destroy()
@@ -491,6 +510,12 @@ export class WorldScene extends Phaser.Scene {
       zone.destroy()
     }
     this.transitionZones = []
+
+    // Destroy collision bodies
+    for (const body of this.collisionBodies) {
+      body.destroy()
+    }
+    this.collisionBodies = []
 
     // Destroy procedural map graphics
     if (this.proceduralMapGraphics) {
@@ -511,6 +536,8 @@ export class WorldScene extends Phaser.Scene {
     }
 
     this.collisionLayer = null
+    this.lastGeneratedMap = null
+    this.roamingEncounterInProgress = false
   }
 
   private createVillageMap(): void {
@@ -795,6 +822,9 @@ export class WorldScene extends Phaser.Scene {
       exitPoints,
       reservedPositions,
     })
+
+    // Store generated map for roaming monster walkable tile calculation
+    this.lastGeneratedMap = generatedMap
 
     // Render the map using graphics
     this.proceduralMapGraphics = this.add.graphics()
@@ -1262,6 +1292,8 @@ export class WorldScene extends Phaser.Scene {
           if (this.player?.sprite) {
             this.physics.add.collider(this.player.sprite, body)
           }
+
+          this.collisionBodies.push(body)
         }
       }
     }
@@ -2125,41 +2157,51 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
-  private checkForEncounter(): void {
-    const pos = this.player.getPosition()
-    const tileX = Math.floor(pos.x / TILE_SIZE)
-    const tileY = Math.floor(pos.y / TILE_SIZE)
+  private spawnRoamingMonsters(area: GameAreaDefinition): void {
+    // Don't spawn in safe zones or areas without encounters
+    if (area.isSafeZone || area.encounters.length === 0) return
 
-    // Only count when moving to a new tile
-    if (tileX === this.lastPlayerTileX && tileY === this.lastPlayerTileY) return
-    this.lastPlayerTileX = tileX
-    this.lastPlayerTileY = tileY
+    // Need a generated map for walkable positions (procedural maps only)
+    if (!this.lastGeneratedMap) return
 
-    // Check if in safe zone based on current area
-    const hasEncounters = (this.currentArea?.encounters.length ?? 0) > 0
-    this.inSafeZone = this.currentArea?.isSafeZone ?? true
+    const walkable = getWalkablePositions(this.lastGeneratedMap, area.terrainType)
+    const filtered = filterSafeZones(walkable, area.areaId)
+    const spawnPositions = pickSpawnPositions(filtered, MAX_ROAMING_MONSTERS)
+    const spawns = generateRoamingMonsters(area, spawnPositions)
 
-    // For village, center area is safe but grass edges can have encounters
-    if (this.currentAreaId === 'sunlit-village') {
-      const isNearCenter = tileX > 8 && tileX < 22 && tileY > 8 && tileY < 22
-      this.inSafeZone = isNearCenter
-    }
+    for (const spawn of spawns) {
+      const monster = new RoamingMonster(this, spawn)
 
-    // No encounters if: in safe zone OR area has no encounters defined
-    if (this.inSafeZone || !hasEncounters) {
-      this.stepCounter = 0
-      return
-    }
+      // Collide with map obstacles
+      for (const body of this.collisionBodies) {
+        this.physics.add.collider(monster.sprite, body, () => {
+          monster.onCollision()
+        })
+      }
 
-    this.stepCounter++
+      // Collide with other roaming monsters
+      for (const other of this.roamingMonsters) {
+        this.physics.add.collider(monster.sprite, other.sprite)
+      }
 
-    if (this.stepCounter >= ENCOUNTER_STEP_THRESHOLD && randomChance(ENCOUNTER_CHANCE)) {
-      this.stepCounter = 0
-      this.triggerRandomEncounter()
+      // Encounter trigger: player overlaps monster trigger zone
+      this.physics.add.overlap(
+        this.player.sprite,
+        monster.triggerZone,
+        () => this.triggerRoamingEncounter(monster),
+        undefined,
+        this,
+      )
+
+      this.roamingMonsters.push(monster)
     }
   }
 
-  private triggerRandomEncounter(): void {
+  private triggerRoamingEncounter(monster: RoamingMonster): void {
+    // Prevent duplicate triggers
+    if (this.roamingEncounterInProgress || this.transitionInProgress || this.bossEncounterInProgress) return
+    this.roamingEncounterInProgress = true
+
     this.inputSystem.setEnabled(false)
     this.player.update({
       up: false,
@@ -2171,20 +2213,68 @@ export class WorldScene extends Phaser.Scene {
       cancel: false,
     })
 
+    // Remove the contacted monster from the map
+    const monsterIndex = this.roamingMonsters.indexOf(monster)
+    if (monsterIndex !== -1) {
+      this.roamingMonsters.splice(monsterIndex, 1)
+    }
+    monster.destroy()
+
     // Flash effect
     this.cameras.main.flash(300, 255, 255, 255)
 
     this.time.delayedCall(400, () => {
-      // First battle has single enemy for gentler introduction
-      const isFirstBattle = !isTutorialComplete('tutorial-first-battle')
-      const encounter = generateAreaEncounter(this.currentAreaId, { isFirstBattle })
-      if (!encounter) {
+      const gameState = getGameState(this)
+
+      // Create enemy combatant from the roaming monster's species/level
+      const species = getSpecies(monster.speciesId)
+      if (!species) {
         this.inputSystem.setEnabled(true)
+        this.roamingEncounterInProgress = false
         return
       }
 
+      const stats = calculateMonsterStats(species, monster.level)
+      const abilities = getLearnedAbilitiesAtLevel(species, monster.level)
+      const enemyCombatants: BattleCombatant[] = [
+        createCombatantFromEnemy(
+          `${species.name} Lv.${monster.level}`,
+          stats,
+          species.element,
+          abilities,
+          true,
+          monster.speciesId,
+        ),
+      ]
+      const speciesIds: string[] = [monster.speciesId]
+
+      // First battle: single enemy only
+      const isFirstBattle = !isTutorialComplete('tutorial-first-battle')
+
+      // 30% chance of a second random enemy (unless first battle)
+      if (!isFirstBattle && Math.random() < ROAMING_MULTI_ENEMY_CHANCE && this.currentArea) {
+        const secondEnemy = generateRandomAreaEnemy(this.currentArea)
+        if (secondEnemy) {
+          const secondSpecies = getSpecies(secondEnemy.speciesId)
+          if (secondSpecies) {
+            const secondStats = calculateMonsterStats(secondSpecies, secondEnemy.level)
+            const secondAbilities = getLearnedAbilitiesAtLevel(secondSpecies, secondEnemy.level)
+            enemyCombatants.push(
+              createCombatantFromEnemy(
+                `${secondSpecies.name} Lv.${secondEnemy.level}`,
+                secondStats,
+                secondSpecies.element,
+                secondAbilities,
+                true,
+                secondEnemy.speciesId,
+              ),
+            )
+            speciesIds.push(secondEnemy.speciesId)
+          }
+        }
+      }
+
       // Create player combatant
-      const gameState = getGameState(this)
       const playerAbilities = this.getPlayerAbilities()
       const playerCombatant = createCombatantFromPlayer(
         gameState.player.name,
@@ -2198,7 +2288,7 @@ export class WorldScene extends Phaser.Scene {
       // Discover encountered species (add to bestiary on encounter)
       const newDiscovered = discoverMultipleSpecies(
         gameState.discoveredSpecies,
-        encounter.speciesIds,
+        speciesIds,
       )
       if (newDiscovered !== gameState.discoveredSpecies) {
         setGameState(this, updateDiscoveredSpecies(gameState, newDiscovered))
@@ -2208,8 +2298,8 @@ export class WorldScene extends Phaser.Scene {
       this.cameras.main.once('camerafadeoutcomplete', () => {
         this.scene.start(SCENE_KEYS.BATTLE, {
           playerCombatants: [playerCombatant, ...squadCombatants],
-          enemyCombatants: encounter.combatants,
-          enemySpeciesIds: encounter.speciesIds,
+          enemyCombatants,
+          enemySpeciesIds: speciesIds,
           playerPosition: this.player.getPosition(),
           areaId: this.currentAreaId,
         })

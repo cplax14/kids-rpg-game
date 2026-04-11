@@ -83,6 +83,17 @@ export const TEXT_STYLES = {
   },
 } as const
 
+// ── Roaming Monster Constants ──
+
+export const ROAMING_MONSTER_SPEED = 50
+export const ROAMING_ENCOUNTER_RADIUS = 1.5 * TILE_SIZE
+export const ROAMING_NOTICE_RADIUS = 4 * TILE_SIZE
+export const MAX_ROAMING_MONSTERS = 10
+export const ROAMING_DIRECTION_CHANGE_MIN_MS = 2000
+export const ROAMING_DIRECTION_CHANGE_MAX_MS = 4000
+export const ROAMING_MONSTER_SCALE = 1.0
+export const ROAMING_MULTI_ENEMY_CHANCE = 0.3
+
 export const TEXT_SPEED_MS = {
   slow: 80,
   normal: 40,
