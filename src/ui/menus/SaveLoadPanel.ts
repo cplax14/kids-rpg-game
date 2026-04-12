@@ -17,6 +17,7 @@ import { isAuthenticated } from '../../systems/AuthSystem'
 import {
   getAllCloudSaveInfo,
   syncSlot,
+  syncAllSlots,
   uploadSave,
   deleteCloudSave,
   resolveConflict,
@@ -66,13 +67,25 @@ export class SaveLoadPanel {
     this.createSlots()
     this.createCancelButton()
 
-    // Load cloud save info if authenticated
+    // Load cloud save info and sync down any cloud-only saves
     if (CLOUD_SAVE_ENABLED && isAuthenticated()) {
-      this.loadCloudInfo()
+      this.syncCloudSaves()
     }
   }
 
-  private async loadCloudInfo(): Promise<void> {
+  private async syncCloudSaves(): Promise<void> {
+    // Sync all slots - this downloads cloud-only saves to local storage
+    await syncAllSlots()
+
+    // Refresh cloud info for indicators
+    this.cloudSaveInfo = await getAllCloudSaveInfo()
+    this.updateCloudIndicators()
+
+    // Refresh the panel to show newly downloaded saves
+    this.refresh()
+  }
+
+  private async loadCloudInfoOnly(): Promise<void> {
     this.cloudSaveInfo = await getAllCloudSaveInfo()
     this.updateCloudIndicators()
   }
@@ -536,7 +549,7 @@ export class SaveLoadPanel {
 
     // Reload cloud info
     if (CLOUD_SAVE_ENABLED && isAuthenticated()) {
-      this.loadCloudInfo()
+      this.loadCloudInfoOnly()
     }
   }
 
