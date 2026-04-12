@@ -56,7 +56,7 @@ export const MONSTER_ICON_NUMBERS: Readonly<Record<string, number>> = {
 
   // Hand-drawn originals (by the kids!)
   fireimp: 51,          // Fire imp creature
-  aquawing: 52,         // Flying water tiger
+  aquawing: 52,         // Water Fierce Tiger
   madcheeks: 53,        // Chubby angry cheeks creature
   chimeradrake: 54,     // Dragon with horns and tusks
   emberwing: 55,        // Fire creature with wing-like appendages
@@ -65,7 +65,7 @@ export const MONSTER_ICON_NUMBERS: Readonly<Record<string, number>> = {
   iceboxer: 58,         // Chunky ice golem boxer
   plantosaur: 59,       // Mega plant dinosaur
   miniflame: 60,        // Small fire creature
-  tidalfang: 61,        // Fierce water tiger
+  tidalfang: 61,        // Power Water Roar
   leafblower: 62,       // Wind creature blowing leaves
   aquafang: 63,         // Water tiger with fangs
   toughchunkice: 64,    // Tough chunky ice creature (Ice stage 1)

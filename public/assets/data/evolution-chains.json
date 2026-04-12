@@ -260,22 +260,22 @@
     ]
   },
   {
-    "chainId": "water-wing-line",
-    "name": "Water Wing Line",
+    "chainId": "ironshell-shellwhisper-line",
+    "name": "Ironshell Shellwhisper Line",
     "stages": [
       {
-        "speciesId": "shellwhisper",
+        "speciesId": "ironshell",
         "order": 1,
-        "evolvesTo": "aquawing",
+        "evolvesTo": "shellwhisper",
         "evolvesFrom": null,
         "requiredLevel": 1,
         "stardustCost": 0
       },
       {
-        "speciesId": "aquawing",
+        "speciesId": "shellwhisper",
         "order": 2,
         "evolvesTo": null,
-        "evolvesFrom": "shellwhisper",
+        "evolvesFrom": "ironshell",
         "requiredLevel": 5,
         "stardustCost": 150
       }
@@ -432,19 +432,19 @@
     ]
   },
   {
-    "chainId": "neutral-armor-line",
-    "name": "Neutral Armor Line",
+    "chainId": "madcheeks-aquawing-line",
+    "name": "Madcheeks Water Fierce Tiger Line",
     "stages": [
       {
         "speciesId": "madcheeks",
         "order": 1,
-        "evolvesTo": "ironshell",
+        "evolvesTo": "aquawing",
         "evolvesFrom": null,
         "requiredLevel": 1,
         "stardustCost": 0
       },
       {
-        "speciesId": "ironshell",
+        "speciesId": "aquawing",
         "order": 2,
         "evolvesTo": null,
         "evolvesFrom": "madcheeks",

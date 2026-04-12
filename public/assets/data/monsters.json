@@ -912,8 +912,8 @@
     ],
     "captureBaseDifficulty": 0.4,
     "spriteKey": "ironshell",
-    "obtainableVia": "evolution",
-    "evolutionChainId": "neutral-armor-line"
+    "obtainableVia": "wild",
+    "evolutionChainId": "ironshell-shellwhisper-line"
   },
   {
     "speciesId": "emberbun",
@@ -1768,8 +1768,8 @@
     ],
     "captureBaseDifficulty": 0.45,
     "spriteKey": "shellwhisper",
-    "obtainableVia": "wild",
-    "evolutionChainId": "water-wing-line"
+    "obtainableVia": "evolution",
+    "evolutionChainId": "ironshell-shellwhisper-line"
   },
   {
     "speciesId": "coraldragon",
@@ -2259,7 +2259,7 @@
   },
   {
     "speciesId": "aquawing",
-    "name": "Flying Water Tiger",
+    "name": "Water Fierce Tiger",
     "description": "A majestic flying tiger with shimmering water wings. It soars through rainstorms and dives into lakes to hunt, leaving trails of mist.",
     "element": "water",
     "rarity": "rare",
@@ -2309,7 +2309,7 @@
     "captureBaseDifficulty": 0.58,
     "spriteKey": "aquawing",
     "obtainableVia": "evolution",
-    "evolutionChainId": "water-wing-line"
+    "evolutionChainId": "madcheeks-aquawing-line"
   },
   {
     "speciesId": "madcheeks",
@@ -2363,7 +2363,7 @@
     "captureBaseDifficulty": 0.22,
     "spriteKey": "madcheeks",
     "obtainableVia": "wild",
-    "evolutionChainId": "neutral-armor-line"
+    "evolutionChainId": "madcheeks-aquawing-line"
   },
   {
     "speciesId": "chimeradrake",
@@ -2749,7 +2749,7 @@
   },
   {
     "speciesId": "tidalfang",
-    "name": "Water Fierce Tiger",
+    "name": "Power Water Roar",
     "description": "A fierce blue water tiger with massive claws and razor teeth. It commands ocean currents and lunges at foes with terrifying speed.",
     "element": "water",
     "rarity": "uncommon",
